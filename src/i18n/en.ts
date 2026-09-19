@@ -1,0 +1,28 @@
+import type { MessageKey } from './sv.ts';
+
+export const en: Record<MessageKey, string> = {
+  'site.name': 'Norrköping Map',
+  'a11y.skipToContent': 'Skip to content',
+  'nav.label': 'Main menu',
+  'nav.beaches': 'Beaches',
+  'nav.tools': 'Tools',
+  'nav.about': 'About',
+  'map.heading': 'Map of Norrköping Municipality',
+  'map.ariaLabel': 'Interactive map of Norrköping Municipality. Pan with the arrow keys, zoom with plus and minus.',
+  'map.basemap.topo': 'Map',
+  'map.basemap.orto': 'Aerial',
+  'map.basemap.dark': 'Dark',
+  'map.basemap.groupLabel': 'Base map',
+  'map.resetView': 'Reset view',
+  'map.status.fallback': 'The Lantmäteriet base map could not be loaded right now. Showing OpenStreetMap instead.',
+  'dev.noToken':
+    'Development mode: the Lantmäteriet base map is not configured (no .env). Showing OpenStreetMap as fallback.',
+  'intro.heading': 'Sights and beaches in Norrköping',
+  'intro.body':
+    'An open map portal in the making: the ten most notable places in the municipality and every beach with current bathing-water status. The map is built on Lantmäteriet base maps in SWEREF 99 TM.',
+  'footer.curated': 'Curated content and ranking © Aren Mardian.',
+  'footer.sources': 'Data sources and licences',
+  'footer.privacy': 'Privacy',
+  'attribution.lantmateriet': '© Lantmäteriet',
+  'attribution.osm': '© OpenStreetMap contributors',
+};

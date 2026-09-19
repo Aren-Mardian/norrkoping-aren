@@ -1,0 +1,17 @@
+/**
+ * Klientkonfiguration. Allt här är publikt — inga hemligheter (A2, NFK-15).
+ */
+
+/** Sajtens bassökväg, t.ex. "/projekt/norrkoping/". Sätts av Vite från vite.config.ts. */
+export const BASE = import.meta.env.BASE_URL;
+
+/** Edge-funktionerna ligger under samma bas så att hela appen kan proxas som ett block. */
+export const API_BASE = `${BASE}api`;
+
+/**
+ * FK-33: utan `.env` (eller med tom VITE_LM_ENABLED) körs appen i fallback-läge
+ * med OpenStreetMap-bakgrund och en synlig utvecklingsbanner.
+ */
+export const LM_ENABLED = import.meta.env.VITE_LM_ENABLED === 'true';
+
+export const IS_DEV = import.meta.env.DEV;

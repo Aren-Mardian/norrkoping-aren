@@ -1,0 +1,385 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Norrköpingskartan — designsystem med tokens (UX-05).
+   Inga hårdkodade färgvärden utanför :root-blocken. Ljus och mörk palett
+   härleds ur samma tokens. Typsnitt: systemstack tills egna subsettas (NFK-06).
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  color-scheme: light dark;
+
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', Menlo, Consolas, monospace;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  --radius-s: 6px;
+  --radius-m: 10px;
+
+  /* WCAG 2.2 Target Size, medvetet över AA (NFK-10). */
+  --tap: 44px;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.12), 0 2px 8px rgb(0 0 0 / 0.08);
+
+  /* Ljus palett */
+  --c-bg: #f7f6f2;
+  --c-surface: #ffffff;
+  --c-surface-2: #eeece6;
+  --c-text: #1d2126;
+  --c-text-muted: #545c66;
+  --c-border: #d6d2c8;
+  --c-accent: #0b5d8a;
+  --c-accent-contrast: #ffffff;
+  --c-warn-bg: #fff3c4;
+  --c-warn-text: #5c4400;
+  --c-warn-border: #e0b400;
+  --c-map-bg: #e9eef2;
+  --c-map-dark-bg: #1b2229;
+  --c-skeleton-a: #e6e9ec;
+  --c-skeleton-b: #f2f4f6;
+  --c-focus: #ff9f1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #14181d;
+    --c-surface: #1e242b;
+    --c-surface-2: #262d35;
+    --c-text: #eef1f4;
+    --c-text-muted: #aeb7c1;
+    --c-border: #384049;
+    --c-accent: #6cb6e8;
+    --c-accent-contrast: #0d1418;
+    --c-warn-bg: #3a2f00;
+    --c-warn-text: #ffe28a;
+    --c-warn-border: #b38f00;
+    --c-map-bg: #1b2229;
+    --c-skeleton-a: #222a32;
+    --c-skeleton-b: #2b343d;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.4);
+  }
+}
+
+/* ── Grund ─────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--c-accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-2);
+  top: -100px;
+  z-index: 100;
+  padding: var(--space-2) var(--space-3);
+  background: var(--c-accent);
+  color: var(--c-accent-contrast);
+  border-radius: var(--radius-s);
+}
+
+.skip-link:focus {
+  top: var(--space-2);
+}
+
+/* ── Banners (FK-33, NFK-25) ────────────────────────────────────────────────── */
+
+.banner {
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--c-warn-border);
+  background: var(--c-warn-bg);
+  color: var(--c-warn-text);
+}
+
+.banner[hidden] {
+  display: none;
+}
+
+/* ── Topbar ───────────────────────────────────────────────────────────────── */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: var(--tap);
+  padding: var(--space-2) var(--space-4);
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--c-text);
+  letter-spacing: -0.01em;
+}
+
+.topnav {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.topnav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 var(--space-3);
+  text-decoration: none;
+  color: var(--c-text-muted);
+  border-radius: var(--radius-s);
+}
+
+.topnav a:hover {
+  color: var(--c-text);
+  background: var(--c-surface-2);
+}
+
+/* ── Karta (UX-01, UX-04) ──────────────────────────────────────────────────── */
+
+.map-section {
+  position: relative;
+}
+
+.map {
+  position: relative;
+  /* Reserverad höjd → ingen layoutförskjutning. ≥ 50 % av vyporten på mobil. */
+  height: max(60dvh, 320px);
+  background: var(--c-map-bg);
+  overflow: hidden;
+}
+
+.map--dark {
+  background: var(--c-map-dark-bg);
+}
+
+@media (min-width: 768px) {
+  .map {
+    height: max(70dvh, 480px);
+  }
+}
+
+.map-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, var(--c-skeleton-a) 30%, var(--c-skeleton-b) 50%, var(--c-skeleton-a) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.map--ready .map-skeleton {
+  display: none;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-skeleton {
+    animation: none;
+  }
+}
+
+.map-status {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.9rem;
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.map-status[hidden] {
+  display: none;
+}
+
+/* OpenLayers-kontroller: enhandsdrift, nedre tredjedelen (UX-02). */
+.map .ol-control {
+  background: none;
+  padding: 0;
+}
+
+.map .ol-control button {
+  width: var(--tap);
+  height: var(--tap);
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  background: var(--c-surface);
+  color: var(--c-text);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+}
+
+.map .ol-control button:hover,
+.map .ol-control button:focus-visible {
+  background: var(--c-surface-2);
+  color: var(--c-text);
+}
+
+.map .ol-zoom {
+  top: auto;
+  left: auto;
+  right: var(--space-3);
+  bottom: calc(var(--space-3) + 28px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.map .ol-zoom .ol-zoom-in,
+.map .ol-zoom .ol-zoom-out {
+  border-radius: var(--radius-s);
+}
+
+.map .ol-reset-view {
+  top: auto;
+  left: auto;
+  right: var(--space-3);
+  bottom: calc(var(--space-3) + 28px + 2 * var(--tap) + 3 * var(--space-1));
+}
+
+.map .ol-basemap-switcher {
+  top: auto;
+  left: var(--space-3);
+  bottom: calc(var(--space-3) + 28px);
+  display: flex;
+  gap: var(--space-1);
+}
+
+.map .ol-basemap-switcher button {
+  width: auto;
+  padding: 0 var(--space-3);
+  font-size: 0.9rem;
+}
+
+.map .ol-basemap-switcher button[aria-pressed='true'] {
+  background: var(--c-accent);
+  color: var(--c-accent-contrast);
+  border-color: var(--c-accent);
+}
+
+.map .ol-scale-line {
+  left: var(--space-3);
+  bottom: var(--space-1);
+  background: var(--c-surface);
+  border-radius: var(--radius-s);
+  padding: 2px var(--space-1);
+  box-shadow: var(--shadow-1);
+}
+
+.map .ol-scale-line-inner {
+  color: var(--c-text);
+  border-color: var(--c-text);
+  font-size: 0.75rem;
+}
+
+/* Attribution är alltid synlig och kan inte fällas ihop (JK-02). */
+.map .ol-attribution {
+  right: 0;
+  bottom: 0;
+  left: auto;
+  max-width: calc(100% - 140px);
+  font-size: 0.75rem;
+  background: var(--c-surface);
+  color: var(--c-text-muted);
+  border-radius: var(--radius-s) 0 0 0;
+  padding: 2px var(--space-2);
+}
+
+.map .ol-attribution ul {
+  color: var(--c-text-muted);
+  text-shadow: none;
+  font-size: inherit;
+}
+
+.map .ol-attribution a {
+  color: var(--c-accent);
+}
+
+/* ── Innehåll ─────────────────────────────────────────────────────────────── */
+
+.intro {
+  max-width: 68ch;
+  padding: var(--space-6) var(--space-4);
+}
+
+.intro h2 {
+  margin-top: 0;
+}
+
+.footer {
+  margin-top: auto;
+  padding: var(--space-4);
+  border-top: 1px solid var(--c-border);
+  font-size: 0.85rem;
+  color: var(--c-text-muted);
+  background: var(--c-surface);
+}
+
+.footer p {
+  margin: 0 0 var(--space-2);
+}
+
+.footer__disclaimer span {
+  display: block;
+}
+
+.footer__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

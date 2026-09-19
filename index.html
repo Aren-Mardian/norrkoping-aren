@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Norrköpingskartan — sevärdheter och badplatser i Norrköpings kommun</title>
+    <meta
+      name="description"
+      content="Öppen, snabb och tillgänglig karta över Norrköpings kommun: de mest sevärda platserna och badplatser med aktuell badvattenstatus. Ett oberoende projekt av Aren Mardian."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14181d" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#content" data-i18n="a11y.skipToContent">Hoppa till innehåll</a>
+
+    <div id="dev-banner" class="banner banner--dev" role="status" hidden></div>
+
+    <header class="topbar">
+      <a class="brand" href="./" data-i18n="site.name">Norrköpingskartan</a>
+      <nav class="topnav" aria-label="Huvudmeny" data-i18n-aria="nav.label">
+        <a href="./bad" data-i18n="nav.beaches">Badplatser</a>
+        <a href="./verktyg" data-i18n="nav.tools">Verktyg</a>
+        <a href="./om" data-i18n="nav.about">Om</a>
+      </nav>
+    </header>
+
+    <main id="content">
+      <section class="map-section" aria-labelledby="map-heading">
+        <h1 id="map-heading" class="visually-hidden" data-i18n="map.heading">Karta över Norrköpings kommun</h1>
+        <div
+          id="map"
+          class="map"
+          role="application"
+          tabindex="0"
+          aria-label="Interaktiv karta över Norrköpings kommun. Panorera med piltangenterna, zooma med plus och minus."
+          data-i18n-aria="map.ariaLabel"
+        >
+          <div class="map-skeleton" aria-hidden="true"></div>
+        </div>
+        <p id="map-status" class="map-status" role="status" aria-live="polite" hidden></p>
+      </section>
+
+      <section class="intro">
+        <h2 data-i18n="intro.heading">Sevärdheter och badplatser i Norrköping</h2>
+        <p data-i18n="intro.body">
+          Här växer en öppen kartportal fram: de tio mest sevärda platserna i kommunen och alla badplatser med
+          aktuell badvattenstatus. Kartan bygger på Lantmäteriets bakgrundskartor i SWEREF 99 TM.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p class="footer__disclaimer">
+        <span lang="sv">Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.</span>
+        <span lang="en">An independent project by Aren Mardian. Not an official service of Norrköping Municipality.</span>
+      </p>
+      <p class="footer__meta">
+        <span data-i18n="footer.curated">Kuraterat innehåll och rankning © Aren Mardian.</span>
+        <a href="./kallor" data-i18n="footer.sources">Datakällor och licenser</a>
+        <a href="./integritet" data-i18n="footer.privacy">Integritet</a>
+      </p>
+    </footer>
+  </body>
+</html>

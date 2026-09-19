@@ -1,0 +1,34 @@
+{
+  "name": "norrkopingskartan",
+  "version": "0.1.0",
+  "description": "Norrköpingskartan — öppen, snabb och tillgänglig kartportal för Norrköpings kommun (KRAV-NKPG-001)",
+  "private": true,
+  "type": "module",
+  "author": "Aren Mardian",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:netlify": "netlify dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p netlify/tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:budget": "node scripts/check-budget.mjs",
+    "check": "npm run typecheck && npm run test && npm run build && npm run check:budget"
+  },
+  "dependencies": {
+    "ol": "^10.10.0",
+    "proj4": "^2.22.0"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^6.0.0",
+    "@types/node": "^22.19.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.3.0",
+    "vitest": "^5.0.1"
+  }
+}

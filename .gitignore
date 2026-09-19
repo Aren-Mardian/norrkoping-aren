@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.netlify/
+.env
+.env.*
+!.env.example
+*.local
+coverage/
+.DS_Store
+Thumbs.db
+# scratch geodata downloads (raw uttag from OSM/LM are large; derived files are checked in)
+data/raw/
