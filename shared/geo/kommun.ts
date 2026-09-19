@@ -1,23 +1,32 @@
 /**
  * Norrköpings kommun — identitet och utbredning.
  *
- * Bounding box enligt kravspec Bilaga B.3. Den är ungefärlig och ska verifieras
- * mot faktisk kommungränsgeometri innan den låser panorering (FK-04) och
- * datavalidering (DK-01). SWEREF 99 TM- och Web Mercator-hörnen är beräknade
- * med PROJ (pyproj 3.6) från WGS 84-hörnen.
+ * Utbredningen är beräknad 2026-09-19 från kommungränsen i data/derived/kommungrans.geojson
+ * (OpenStreetMap-relation 935447, ODbL; ersätts av Lantmäteriets polygon när STAC-åtkomst finns)
+ * med PROJ via pyproj. Kravspecens Bilaga B.3 angav en uppskattad bbox som var ~12 km för hög
+ * N–S och saknade havsområdet öster om skärgården — den är nu ersatt.
  */
 
 /** Kommunkod enligt SCB. Nyckel mot HaV:s och SCB:s data (Bilaga B.3). */
 export const KOMMUN_KOD = '0581';
 
-/** [minLon, minLat, maxLon, maxLat] i EPSG:4326. Även gräns för DK-02-validering. */
-export const KOMMUN_BBOX_4326 = [15.55, 58.28, 17.05, 58.92] as const;
+/**
+ * Hela kommunens bbox inkl. havsområde, [minLon, minLat, maxLon, maxLat] i EPSG:4326.
+ * Gräns för datavalidering (DK-01, DK-02): allt kuraterat innehåll ska ligga här inom.
+ */
+export const KOMMUN_BBOX_4326 = [15.6175, 58.399, 17.5693, 58.8539] as const;
 
-/** [minE, minN, maxE, maxN] i EPSG:3006 (SWEREF 99 TM). */
-export const KOMMUN_BBOX_3006 = [532256, 6460016, 618039, 6532953] as const;
+/** Samma bbox i EPSG:3006 (SWEREF 99 TM), [minE, minN, maxE, maxN]. Bas för proxyns bbox-spärr. */
+export const KOMMUN_BBOX_3006 = [535844, 6475456, 650152, 6524384] as const;
+
+/**
+ * Startvyns utbredning (FK-03): land och skärgård, utan det öppna havet öster om Arkösund.
+ * Östgränsen 620 000 är vald så att Arkösund/Sköldvik/Badholmarna ryms med marginal.
+ */
+export const KOMMUN_VIEW_BBOX_3006 = [535844, 6475456, 620000, 6524384] as const;
 
 /** [minX, minY, maxX, maxY] i EPSG:3857. Används bara för fallback-lagrets bbox-spärr. */
-export const KOMMUN_BBOX_3857 = [1731018, 8026368, 1897998, 8163116] as const;
+export const KOMMUN_BBOX_3857 = [1738532, 8051606, 1955806, 8148876] as const;
 
 /** Panoreringsbuffert runt kommunen (FK-04): 25 km. */
 export const PAN_BUFFER_M = 25_000;

@@ -20,6 +20,12 @@
   to = "/projekt/norrkoping/"
   status = 301
 
+# Saknad datafil ska ge 404, inte index.html (annars försöker PMTiles-läsaren tolka HTML).
+[[redirects]]
+  from = "/projekt/norrkoping/data/*"
+  to = "/projekt/norrkoping/data/:splat"
+  status = 404
+
 # SPA-fallback tills per-objekt-sidor förrenderas (NFK-32). Funktioner under /api
 # definierar sina egna sökvägar och matchas före denna regel.
 [[redirects]]
@@ -33,6 +39,14 @@
   for = "/projekt/norrkoping/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Härledda geodatafiler (PMTiles, GeoJSON — ADR-09/ADR-10). PMTiles läses med Range-requests;
+# ETag avslöjar ny version.
+[[headers]]
+  for = "/projekt/norrkoping/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+    Accept-Ranges = "bytes"
 
 # Dokument valideras alltid mot ETag.
 [[headers]]

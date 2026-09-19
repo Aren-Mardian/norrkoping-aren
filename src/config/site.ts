@@ -15,3 +15,9 @@ export const API_BASE = `${BASE}api`;
 export const LM_ENABLED = import.meta.env.VITE_LM_ENABLED === 'true';
 
 export const IS_DEV = import.meta.env.DEV;
+
+/**
+ * Edge-funktionerna (/api/*) finns i alla byggda miljöer (Netlify prod/preview) och under
+ * `npm run dev:netlify`. Bara ren `npm run dev` saknar dem.
+ */
+export const PROXY_AVAILABLE = !IS_DEV || LM_ENABLED;

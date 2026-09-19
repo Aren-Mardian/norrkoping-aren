@@ -10,3 +10,6 @@ coverage/
 Thumbs.db
 # scratch geodata downloads (raw uttag from OSM/LM are large; derived files are checked in)
 data/raw/
+tools/.venv/
+# Stora härledda kartfiler publiceras som release-artefakter, inte i git (GitHub-gräns 100 MB/fil)
+data/derived/*.pmtiles

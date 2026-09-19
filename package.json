@@ -12,16 +12,18 @@
   "scripts": {
     "dev": "vite",
     "dev:netlify": "netlify dev",
-    "build": "vite build",
+    "build": "node scripts/fetch-tiles.mjs && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p netlify/tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "check:budget": "node scripts/check-budget.mjs",
-    "check": "npm run typecheck && npm run test && npm run build && npm run check:budget"
+    "check": "npm run typecheck && npm run test && npm run build && npm run check:budget",
+    "fetch:tiles": "node scripts/fetch-tiles.mjs"
   },
   "dependencies": {
     "ol": "^10.10.0",
+    "pmtiles": "^4.5.0",
     "proj4": "^2.22.0"
   },
   "devDependencies": {

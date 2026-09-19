@@ -4,7 +4,7 @@
  */
 import 'ol/ol.css';
 import './style.css';
-import { LM_ENABLED } from './config/site.ts';
+import { IS_DEV, LM_ENABLED } from './config/site.ts';
 import { initI18n, t } from './i18n/index.ts';
 import { createMap } from './map/createMap.ts';
 import { showDevBanner, showMapStatus } from './ui/notices.ts';
@@ -16,8 +16,14 @@ if (!target) throw new Error('Kartcontainern #map saknas i dokumentet');
 
 const app = createMap(target);
 
-if (!LM_ENABLED) {
+// FK-33: utvecklingsbanner bara lokalt. I produktion är saknat appkonto ingen nyhet för
+// besökaren — flygbildsknappen är avstängd, inget mer.
+if (IS_DEV && !LM_ENABLED) {
   showDevBanner(t('dev.noToken'));
 }
 
-app.basemaps.onLmFailure(() => showMapStatus(t('map.status.fallback')));
+// NFK-25: saknas den självhostade bakgrundskartan (eller slutar den svara) visas OSM med notis.
+app.basemaps.onTopoFailure((reason) => {
+  if (IS_DEV && reason === 'missing') showDevBanner(t('dev.noTiles'));
+  showMapStatus(t('map.status.fallback'));
+});

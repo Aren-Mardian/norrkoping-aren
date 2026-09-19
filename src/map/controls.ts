@@ -3,6 +3,7 @@
  * skärmens nedre tredjedel på mobil (UX-02) — placeringen styrs i style.css.
  */
 import Control from 'ol/control/Control';
+import type BaseLayer from 'ol/layer/Base';
 import { t } from '../i18n/index.ts';
 import type { BasemapId, Basemaps } from './basemaps.ts';
 
@@ -58,7 +59,21 @@ export class BasemapSwitcherControl extends Control {
       }
     };
     basemaps.onChange(sync);
-    basemaps.onLmFailure(sync);
+    basemaps.onTopoFailure(sync);
     sync();
+  }
+}
+
+/** FK-05: tänd/släck ett enskilt lager, t.ex. kommungränsen. */
+export class LayerToggleControl extends Control {
+  constructor(layer: BaseLayer, label: string) {
+    const element = document.createElement('div');
+    element.className = 'ol-layer-toggle ol-unselectable ol-control';
+    const b = button(label, () => layer.setVisible(!layer.getVisible()));
+    const sync = (): void => b.setAttribute('aria-pressed', String(layer.getVisible()));
+    layer.on('change:visible', sync);
+    sync();
+    element.appendChild(b);
+    super({ element });
   }
 }

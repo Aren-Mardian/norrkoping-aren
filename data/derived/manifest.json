@@ -1,0 +1,13 @@
+{
+  "$comment": "Stora härledda filer som inte får plats i git. Hämtas av scripts/fetch-tiles.mjs vid bygge och verifieras mot SHA-256. Se ADR-10.",
+  "files": [
+    {
+      "name": "topowebb-farg.pmtiles",
+      "description": "Topografisk webbkarta (Lantmäteriet, CC BY 4.0), utsnitt Norrköpings kommun, LM-matris 3006, PMTiles-offset +2",
+      "url": "https://github.com/Aren-Mardian/norrkoping-aren/releases/download/data-2026-09-19/topowebb-farg.pmtiles",
+      "sha256": "d8aa951fc905bb21d4fc5211231deeb5e5edd3f784cd7b3f21e22d8178bc0c8a",
+      "bytes": 263094348,
+      "generated": "2026-09-19"
+    }
+  ]
+}

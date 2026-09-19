@@ -14,10 +14,13 @@ export const sv = {
   'map.basemap.dark': 'Mörk',
   'map.basemap.groupLabel': 'Bakgrundskarta',
   'map.resetView': 'Återställ vy',
+  'map.layer.kommungrans': 'Kommungräns',
   'map.status.fallback':
     'Lantmäteriets bakgrundskarta kunde inte hämtas just nu. Visar OpenStreetMap i stället.',
   'dev.noToken':
-    'Utvecklingsläge: Lantmäteriets bakgrundskarta är inte konfigurerad (ingen .env). Visar OpenStreetMap som fallback.',
+    'Utvecklingsläge: Lantmäteriets tjänster är inte konfigurerade (ingen .env) — flygbild saknas.',
+  'dev.noTiles':
+    'Utvecklingsläge: bakgrundskartan (data/derived/topowebb-farg.pmtiles) saknas — kör tools/extract_topowebb.py. Visar OpenStreetMap som fallback.',
   'intro.heading': 'Sevärdheter och badplatser i Norrköping',
   'intro.body':
     'Här växer en öppen kartportal fram: de tio mest sevärda platserna i kommunen och alla badplatser med aktuell badvattenstatus. Kartan bygger på Lantmäteriets bakgrundskartor i SWEREF 99 TM.',

@@ -10,11 +10,13 @@ import View from 'ol/View';
 import Attribution from 'ol/control/Attribution';
 import ScaleLine from 'ol/control/ScaleLine';
 import Zoom from 'ol/control/Zoom';
-import { KOMMUN_BBOX_3006, PAN_LIMIT_3006 } from '../../shared/geo/kommun.ts';
+import { KOMMUN_VIEW_BBOX_3006, PAN_LIMIT_3006 } from '../../shared/geo/kommun.ts';
 import { LM_3006_RESOLUTIONS } from '../../shared/geo/lmTileGrid.ts';
 import { EPSG_3006, registerOlProjections } from '../geo/olProjections.ts';
+import { t } from '../i18n/index.ts';
 import { createBasemaps, type Basemaps } from './basemaps.ts';
-import { BasemapSwitcherControl, ResetViewControl } from './controls.ts';
+import { BasemapSwitcherControl, LayerToggleControl, ResetViewControl } from './controls.ts';
+import { createKommungransLayer } from './kommungrans.ts';
 
 export interface AppMap {
   readonly map: Map;
@@ -42,13 +44,14 @@ export function createMap(target: HTMLElement): AppMap {
     showFullExtent: true,
     smoothExtentConstraint: true,
     center: [
-      (KOMMUN_BBOX_3006[0] + KOMMUN_BBOX_3006[2]) / 2,
-      (KOMMUN_BBOX_3006[1] + KOMMUN_BBOX_3006[3]) / 2,
+      (KOMMUN_VIEW_BBOX_3006[0] + KOMMUN_VIEW_BBOX_3006[2]) / 2,
+      (KOMMUN_VIEW_BBOX_3006[1] + KOMMUN_VIEW_BBOX_3006[3]) / 2,
     ],
     zoom: 4,
   });
 
   const basemaps = createBasemaps();
+  const kommungrans = createKommungransLayer();
 
   /** Marginal i pixlar utifrån kartans nuvarande storlek. */
   const startPadding = (): [number, number, number, number] => {
@@ -59,7 +62,7 @@ export function createMap(target: HTMLElement): AppMap {
 
   const resetView = (): void => {
     if (!map.getSize()) return;
-    view.fit([...KOMMUN_BBOX_3006], {
+    view.fit([...KOMMUN_VIEW_BBOX_3006], {
       padding: startPadding(),
       duration: prefersReducedMotion() ? 0 : 300,
     });
@@ -68,19 +71,20 @@ export function createMap(target: HTMLElement): AppMap {
   const map = new Map({
     target,
     view,
-    layers: [...basemaps.layers],
+    layers: [...basemaps.layers, kommungrans],
     controls: [
       new Zoom(),
       new ScaleLine({ units: 'metric', minWidth: 64 }),
       new Attribution({ collapsible: false }),
       new ResetViewControl(resetView),
       new BasemapSwitcherControl(basemaps),
+      new LayerToggleControl(kommungrans, t('map.layer.kommungrans')),
     ],
   });
 
   // Startvy (FK-03). Storleken sätts synkront i konstruktorn när containern redan
   // har CSS-höjd; annars väntar vi på första change:size.
-  const fitStart = (): void => view.fit([...KOMMUN_BBOX_3006], { padding: startPadding(), duration: 0 });
+  const fitStart = (): void => view.fit([...KOMMUN_VIEW_BBOX_3006], { padding: startPadding(), duration: 0 });
   if (map.getSize()) fitStart();
   else map.once('change:size', fitStart);
 

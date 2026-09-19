@@ -43,6 +43,8 @@
   --c-skeleton-a: #e6e9ec;
   --c-skeleton-b: #f2f4f6;
   --c-focus: #ff9f1c;
+  --c-boundary: #7b2cbf;
+  --c-boundary-halo: rgba(255, 255, 255, 0.75);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -61,6 +63,8 @@
     --c-map-bg: #1b2229;
     --c-skeleton-a: #222a32;
     --c-skeleton-b: #2b343d;
+    --c-boundary: #c77dff;
+    --c-boundary-halo: rgba(0, 0, 0, 0.6);
     --shadow-1: 0 1px 2px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.4);
   }
 }
@@ -306,10 +310,23 @@ a {
   font-size: 0.9rem;
 }
 
-.map .ol-basemap-switcher button[aria-pressed='true'] {
+.map .ol-basemap-switcher button[aria-pressed='true'],
+.map .ol-layer-toggle button[aria-pressed='true'] {
   background: var(--c-accent);
   color: var(--c-accent-contrast);
   border-color: var(--c-accent);
+}
+
+.map .ol-layer-toggle {
+  top: auto;
+  left: var(--space-3);
+  bottom: calc(var(--space-3) + 28px + var(--tap) + var(--space-2));
+}
+
+.map .ol-layer-toggle button {
+  width: auto;
+  padding: 0 var(--space-3);
+  font-size: 0.9rem;
 }
 
 .map .ol-scale-line {

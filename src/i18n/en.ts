@@ -14,9 +14,11 @@ export const en: Record<MessageKey, string> = {
   'map.basemap.dark': 'Dark',
   'map.basemap.groupLabel': 'Base map',
   'map.resetView': 'Reset view',
+  'map.layer.kommungrans': 'Municipal boundary',
   'map.status.fallback': 'The Lantmäteriet base map could not be loaded right now. Showing OpenStreetMap instead.',
-  'dev.noToken':
-    'Development mode: the Lantmäteriet base map is not configured (no .env). Showing OpenStreetMap as fallback.',
+  'dev.noToken': 'Development mode: Lantmäteriet services are not configured (no .env) — no aerial imagery.',
+  'dev.noTiles':
+    'Development mode: the base map (data/derived/topowebb-farg.pmtiles) is missing — run tools/extract_topowebb.py. Showing OpenStreetMap as fallback.',
   'intro.heading': 'Sights and beaches in Norrköping',
   'intro.body':
     'An open map portal in the making: the ten most notable places in the municipality and every beach with current bathing-water status. The map is built on Lantmäteriet base maps in SWEREF 99 TM.',
