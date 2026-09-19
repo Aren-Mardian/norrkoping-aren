@@ -28,6 +28,18 @@ månad — för lite för byggen som drar filen varje gång. Betald lagring (S3,
 6. Saknad datafil ger **404**, inte SPA-fallbackens `index.html` (annars läser PMTiles-klienten HTML
    och felar på ett obegripligt sätt).
 
+## Privat eller publikt repo
+
+Release-filer i ett **privat** repo kan inte hämtas anonymt (GitHub svarar 404). `fetch-tiles.mjs`
+använder därför GitHub API:et med `GITHUB_TOKEN` när variabeln finns:
+
+- **GitHub Actions:** `GITHUB_TOKEN` skickas in i byggsteget i `ci.yml` (läsrättighet räcker).
+- **Netlify:** en fine-grained personal access token med *Contents: Read-only* för enbart detta repo,
+  satt som miljövariabeln `GITHUB_TOKEN` (scope: Builds). Aldrig i klienten — den används bara av
+  byggscriptet.
+
+Blir repot publikt (FV-04) behövs ingen token alls; den publika länken fungerar direkt.
+
 ## Arbetsflöde vid ny datarelease
 
 ```bash

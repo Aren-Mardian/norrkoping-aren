@@ -21,7 +21,10 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      # Kartdata hämtas från en GitHub Release (ADR-10); token krävs så länge repot är privat.
       - run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run check:budget
 
   # TK-06 / NFK-15: hemlighetsskanning på hela historiken.

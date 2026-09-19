@@ -37,9 +37,34 @@ async function verify(file, entry) {
   return (await sha256(file)) === entry.sha256;
 }
 
+/**
+ * Release-filer i ett privat GitHub-repo kan inte hämtas anonymt via den vanliga
+ * releases/download-länken (404). Finns en token (GitHub Actions: GITHUB_TOKEN; Netlify: en
+ * fine-grained PAT med "Contents: read" satt som miljövariabel) slås filen upp via API:et och
+ * hämtas med Authorization-header. Utan token används den publika länken — fungerar för publika repon.
+ */
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+const RELEASE_URL = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/releases\/download\/([^/]+)\/([^/]+)$/;
+
+async function resolveSource(entry) {
+  const match = RELEASE_URL.exec(entry.url);
+  if (!GITHUB_TOKEN || !match) return { url: entry.url, headers: {} };
+  const [, owner, repo, tag, name] = match;
+  const api = `https://api.github.com/repos/${owner}/${repo}/releases/tags/${encodeURIComponent(tag)}`;
+  const res = await fetch(api, {
+    headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status} från GitHub API vid uppslag av release ${tag}`);
+  const asset = (await res.json()).assets?.find((a) => a.name === name);
+  if (!asset) throw new Error(`Release ${tag} saknar filen ${name}`);
+  // API:et svarar med redirect till en signerad URL; Node skickar inte Authorization vidare dit.
+  return { url: asset.url, headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: 'application/octet-stream' } };
+}
+
 async function download(entry, file) {
-  const res = await fetch(entry.url, { redirect: 'follow' });
-  if (!res.ok || !res.body) throw new Error(`HTTP ${res.status} från ${entry.url}`);
+  const source = await resolveSource(entry);
+  const res = await fetch(source.url, { redirect: 'follow', headers: source.headers });
+  if (!res.ok || !res.body) throw new Error(`HTTP ${res.status} från ${source.url.split('?')[0]}`);
   mkdirSync(dirname(file), { recursive: true });
   const tmp = `${file}.part`;
   await pipeline(res.body, createWriteStream(tmp));
@@ -70,7 +95,7 @@ for (const entry of manifest.files) {
   }
   try {
     const t0 = Date.now();
-    console.log(`fetch-tiles: hämtar ${entry.name} (${mb} MB) från ${entry.url}`);
+    console.log(`fetch-tiles: hämtar ${entry.name} (${mb} MB) från ${entry.url}${GITHUB_TOKEN ? ' (autentiserat via GitHub API)' : ''}`);
     await download(entry, file);
     console.log(`fetch-tiles: ${entry.name} klar på ${((Date.now() - t0) / 1000).toFixed(0)} s, SHA-256 OK`);
   } catch (err) {

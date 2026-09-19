@@ -28,6 +28,8 @@ npm run dev
 webbkarta som självhostad PMTiles-fil (`data/derived/topowebb-farg.pmtiles`, CC BY 4.0). Den ligger
 inte i git: `npm run build` (eller `npm run fetch:tiles`) hämtar den från GitHub Releases enligt
 `data/derived/manifest.json` och verifierar SHA-256 ([ADR-10](docs/adr/ADR-10-leverans-av-stora-datafiler.md)).
+Så länge repot är privat behöver bygget en `GITHUB_TOKEN` (läsrättighet) för att nå release-filen —
+i GitHub Actions automatiskt, på Netlify som miljövariabel (se ADR-10).
 Hur den skapas från Lantmäteriets 163-GB-fil står i [ADR-09](docs/adr/ADR-09-sjalvhostad-bakgrundskarta.md)
 och [tools/README.md](tools/README.md). Saknas filen faller appen tillbaka på OpenStreetMap
 (reprojicerad till SWEREF 99 TM) med en synlig utvecklingsbanner (FK-33). Utan `.env` saknas dessutom
