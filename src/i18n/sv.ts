@@ -27,6 +27,11 @@ export const sv = {
   'footer.curated': 'Kuraterat innehåll och rankning © Aren Mardian.',
   'footer.sources': 'Datakällor och licenser',
   'footer.privacy': 'Integritet',
+  'a11y.skipToMap': 'Hoppa till kartan',
+  'verktyg.backToMap': 'Till kartan',
+  'verktyg.ariaLabel': 'Verktygsläge: mät, rita, läs koordinater, skriv ut och dela kartan över Norrköpings kommun.',
+  'verktyg.status.loadFailed': 'Verktygsläget kunde inte laddas. Kontrollera anslutningen och ladda om sidan.',
+  'verktyg.status.noBasemap': 'Bakgrundskartan kunde inte hämtas. Verktygen fungerar, men kartan är tom.',
   'attribution.lantmateriet': '© Lantmäteriet',
   'attribution.osm': '© OpenStreetMap-bidragsgivare',
 } as const;

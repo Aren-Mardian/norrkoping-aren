@@ -7,7 +7,7 @@
  *
  * Verifiera mot GetCapabilities i Geotorgets tekniska beskrivning (JK-07).
  */
-import { EXTENT_3006 } from './projDefs.ts';
+import { EXTENT_3006 } from './crs.ts';
 import type { Extent } from './kommun.ts';
 
 export const LM_TILE_SIZE = 256;

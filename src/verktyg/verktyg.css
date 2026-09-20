@@ -1,0 +1,61 @@
+/* Verktygsläget: sidans ram runt Origo. Origos egen CSS (vendor/origo-<version>/css/style.css) styr allt
+   inuti #app-wrapper; här sätter vi bara layouten så att Origo fyller ytan mellan topbar och sidfot. */
+
+.verktyg {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.verktyg #app-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  position: relative;
+  background: var(--c-map-bg);
+}
+
+/* Skelett tills Origo har ritat sin första ram (UX-04). */
+.verktyg #app-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, var(--c-skeleton-a) 30%, var(--c-skeleton-b) 50%, var(--c-skeleton-a) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.verktyg #app-wrapper.is-ready::before {
+  display: none;
+}
+
+.verktyg .topbar {
+  flex: 0 0 auto;
+}
+
+.verktyg .footer {
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.8rem;
+}
+
+.verktyg .footer p {
+  margin: 0;
+}
+
+.verktyg .map-status {
+  flex: 0 0 auto;
+}
+
+/* Origos paneler är ljusa oavsett systemtema; låt inte vår mörka textfärg ärvas in (kontrast, NFK-10). */
+.verktyg #app-wrapper {
+  color-scheme: light;
+  color: #1d2126;
+}
+
+/* Utskriftslogotypen är vår favicon, inte Origos. */
+.o-print-logo {
+  height: 32px;
+  width: 32px;
+}

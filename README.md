@@ -12,8 +12,9 @@ Målplattform: `https://arenm.se/projekt/norrkoping`
 | Sprint | Milstolpe | Läge |
 |---|---|---|
 | 0 | Grund — repo, Vite+TS, CI, tile-proxy, CSP/headers, dev-läge utan token | **Klar lokalt** — väntar på Netlify-sajt (användaren) |
-| 1 | Karta står — LM-bakgrund, växlare, kommungräns, startextent, skalstock | **Nästan klar** — Lantmäteriets topografiska karta självhostad som PMTiles (ADR-09/10), kommungräns (OSM tills LM:s finns), växlare, startextent, skalstock. Återstår: flygbild (historiska ortofoton, kräver appkonto) |
-| 2–7 | Se kravspec §12 | Ej påbörjad |
+| 1 | Karta står — LM-bakgrund, växlare, kommungräns, startextent, skalstock | **Nästan klar** — Lantmäteriets topografiska karta självhostad som PMTiles (ADR-09/10), kommungräns (OSM tills LM:s finns), växlare inkl. mörkt läge, startextent, skalstock. Återstår: flygbild (historiska ortofoton, kräver appkonto) |
+| 4 | Verktygsläge — Origo på egen route: mät, rita, koordinater, dela, utskrift, lager | **Klar lokalt** (ADR-11) — `/verktyg/`, Origo 2.10.0 vendorerad, PMTiles-bakgrund, CSP-verifierad. Återstår: höjdmätning (Markhöjd Direkt, kräver appkonto) |
+| 2, 3, 5–7 | Se kravspec §12 | Ej påbörjad |
 
 ## Kom igång (under 10 minuter)
 
@@ -45,6 +46,14 @@ flygbilden, som går via edge-proxyn.
 Tile-proxyn är den enda platsen där Lantmäteriets uppgifter finns. Klientbundlen innehåller aldrig
 en hemlighet — variabler med prefix `VITE_` är publika.
 
+### Verktygsläget (Origo)
+
+<http://localhost:5173/projekt/norrkoping/verktyg/> — en egen sida som laddar
+[Origo](https://github.com/origo-map/origo) 2.10.0 (BSD 2-clause) från `public/vendor/origo-2.10.0/`.
+Origo finns inte på npm; bundlen byggs reproducerbart med `node tools/build-origo.mjs` och checkas in
+(2,7 MB, med `VERSION.json`). Landningsvyn laddar aldrig Origo — `npm run check:budget` bevakar det
+(TK-05). Detaljer i [ADR-11](docs/adr/ADR-11-origo-verktygslage.md).
+
 ## Kommandon
 
 | Kommando | Vad |
@@ -62,14 +71,17 @@ en hemlighet — variabler med prefix `VITE_` är publika.
 
 ```
 index.html              Landningsvyns skal (UX-01, JK-04)
+verktyg/index.html      Verktygslägets sida (FK-22) — egen Vite-entry, laddar Origo
 src/                    Klient (Vite + TypeScript, vanilla)
   config/site.ts        BASE, API_BASE, LM_ENABLED — allt publikt
   geo/olProjections.ts  Registrerar EPSG:3006/3010 i OpenLayers
   i18n/                 sv/en-kataloger utan runtime-bibliotek (FK-34)
-  map/                  Kartkärna, bakgrundskartor med fallback, PMTiles-källa, egna kontroller
+  map/                  Kartkärna, bakgrundskartor med fallback, PMTiles-läsare/-källa, egna kontroller
+  verktyg/              Origo-konfiguration och bootstrap för verktygsläget (ADR-11)
   ui/                   Banners och statusrader
 shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
-  geo/projDefs.ts       proj4-definitioner (Bilaga B.5)
+  geo/crs.ts            EPSG-koder, proj4-strängar, utbredning (ren data, inga beroenden)
+  geo/projDefs.ts       proj4-registrering och transformationer (Bilaga B.5)
   geo/lmTileGrid.ts     Lantmäteriets 3006-matris
   geo/measure.ts        Längdmätning: 3006/3010/geodetiskt, aldrig 3857 (NFK-12)
   geo/kommun.ts         Kommunkod, bbox, panoreringsbuffert
@@ -78,9 +90,10 @@ netlify/functions/      Edge-funktioner (Netlify Functions 2.0)
   tiles.mts             IK-01 tile-proxy
 netlify/lib/            Testbar logik för funktionerna
 data/                   Kuraterad geodata (GeoJSON, EPSG:4326), SOURCES.md, derived/ (PMTiles, ej i git)
-docs/                   Kravspec, referenssystem, ADR:er
-scripts/                Byggkontroller
-tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval
+public/vendor/          Vendorerade bibliotek (Origo, versionerad sökväg)
+docs/                   Kravspec, referenssystem, villkor, ADR:er
+scripts/                Byggkontroller, hämtning av kartdata
+tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval; Origo-bygge
 ```
 
 ## Arkitektur i korthet
@@ -88,8 +101,9 @@ tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FT
 Statisk sajt + edge-funktioner (ADR-01). Kartan renderas av OpenLayers i **EPSG:3006** (ADR-03).
 Bakgrundskartan är ett självhostat PMTiles-utsnitt av Lantmäteriets topografiska webbkarta (ADR-09) —
 inga anrop till Lantmäteriet från besökaren. Flygbild och live-tjänster går via en tile-proxy med
-Origin-lås, zoom- och bbox-spärr (ADR-04, NFK-18). Verktygsläget (Origo) blir en egen lazy route under `/verktyg` (ADR-02) och får
-aldrig hamna i landningsvyns kritiska väg — `npm run check:budget` bevakar det (TK-05).
+Origin-lås, zoom- och bbox-spärr (ADR-04, NFK-18). Verktygsläget (Origo) är en egen sida under
+`/verktyg/` (ADR-02, ADR-11) och hamnar aldrig i landningsvyns kritiska väg — `npm run check:budget`
+bevakar det (TK-05).
 
 Se [docs/referenssystem.md](docs/referenssystem.md) för geodetiken och
 [data/SOURCES.md](data/SOURCES.md) för datakällor, licenser och villkor.

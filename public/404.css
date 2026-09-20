@@ -1,0 +1,37 @@
+/* Extern stilfil: CSP:n tillåter inte inline <style> (NFK-16). */
+:root {
+  color-scheme: light dark;
+}
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #f7f6f2;
+  color: #1d2126;
+}
+main {
+  max-width: 40rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+a {
+  color: #0b5d8a;
+}
+.small {
+  font-size: 0.85rem;
+  color: #545c66;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #14181d;
+    color: #eef1f4;
+  }
+  a {
+    color: #6cb6e8;
+  }
+  .small {
+    color: #aeb7c1;
+  }
+}

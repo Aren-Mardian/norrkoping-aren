@@ -113,6 +113,15 @@ Två källor under övergångsperioden:
 - **retrieved:** live; direkt i dev-läge, via proxy i produktion (CSP och integritet)
 - **terms:** OSMF:s Tile Usage Policy kräver tydlig User-Agent och attribution och avråder från tung användning. Lagret används enbart som fallback när Lantmäteriet inte är tillgängligt. Ska på sikt ersättas av självhostade vektortiles (PMTiles, ADR-06) från ett Geofabrik-uttag.
 
+## Programvara med attributionskrav
+
+| Komponent | Version | Licens | Var | Attribution |
+|---|---|---|---|---|
+| OpenLayers | 10.x | BSD 2-clause | npm-beroende, bundlas | — (ingen synlig attribution krävs; nämns på `/om`) |
+| Origo | 2.10.0 (commit 6f313a9) | BSD 2-clause | `public/vendor/origo-2.10.0/` med `LICENSE.txt` och `VERSION.json` | "Om verktygen" i verktygsläget; `/om` |
+| PMTiles (protomaps) | 4.x | BSD 3-clause | npm-beroende, bundlas | `/om` |
+| proj4js | 2.x | MIT | npm-beroende, bundlas | `/om` |
+
 ## Havs- och vattenmyndigheten — Badplatsen API (DS-5)
 
 Verifierat 2026-09-19, inga nycklar:

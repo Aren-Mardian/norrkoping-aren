@@ -182,6 +182,15 @@ a {
   background: var(--c-surface-2);
 }
 
+.topnav__current {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 var(--space-3);
+  color: var(--c-text);
+  font-weight: 600;
+}
+
 /* ── Karta (UX-01, UX-04) ──────────────────────────────────────────────────── */
 
 .map-section {
@@ -198,6 +207,18 @@ a {
 
 .map--dark {
   background: var(--c-map-dark-bg);
+}
+
+/* Mörkt läge (FK-02, FK-36): kartrutorna inverteras och dämpas på GPU:n — inga extra rutor.
+   hue-rotate(180deg) efter invert ger vatten blått igen och skog dämpat grönt. */
+.map--dark .ol-layer-topo {
+  filter: invert(0.92) hue-rotate(180deg) saturate(0.55) brightness(0.88) contrast(0.95);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ol-layer-topo {
+    transition: filter 200ms ease;
+  }
 }
 
 @media (min-width: 768px) {

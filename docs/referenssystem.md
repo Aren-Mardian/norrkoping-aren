@@ -59,6 +59,18 @@ slutar i 16,20309351° Ö, 58,58733885° N. Så här lång blir den beräknad p�
 Testet `shared/geo/measure.test.ts` verifierar alla fyra raderna, inklusive att implementationen kastar
 vid försök att mäta i 3857.
 
+## Mätning i verktygsläget (Origo)
+
+Origos mätkontroll använder `ol/sphere` (`getLength`/`getArea` med kartans projektion): koordinaterna
+transformeras från EPSG:3006 till lon/lat och avståndet beräknas geodetiskt på en sfär med
+R = 6 371 008,8 m — aldrig planärt i Web Mercator (NFK-12). Skillnaden mot GRS80-ellipsoiden är på
+Norrköpings latitud som störst ≈ 0,35 % (öst–västliga sträckor; krökningsradien i primvertikalen är
+≈ 6 393 km) och ≈ 0,12 % för nord–sydliga. Det ligger inom TK-03:s krav (1 000 ± 5 m), men vår egen
+`shared/geo/measure.ts` (Vincenty på GRS80) är referensen om skillnaden någon gång blir avgörande.
+
+Koordinatavläsningen i Origo (position-kontrollen) använder Origos egen proj4 med samma definitioner
+som ovan; kontrollerat 2026-09-19 mot PROJ: avvikelse < 0,3 m i SWEREF 99 16 30, exakt i WGS 84 → 3006.
+
 ## Lantmäteriets tile-matris "3006"
 
 Antaganden i `shared/geo/lmTileGrid.ts`, att verifiera mot GetCapabilities när Geotorget-behörigheten

@@ -1,5 +1,6 @@
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 
 /**
@@ -14,7 +15,8 @@ export const BASE = '/projekt/norrkoping/';
  * Små filer (GeoJSON) är incheckade; stora (PMTiles) är git-ignorerade och hämtas av
  * scripts/fetch-tiles.mjs vid bygge (ADR-10).
  */
-const DERIVED_DIR = resolve(__dirname, 'data/derived');
+const ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)));
+const DERIVED_DIR = resolve(ROOT, 'data/derived');
 const DATA_PREFIX = `${BASE}data/`;
 const SERVED = /^[\w.-]+\.(pmtiles|geojson|json)$/;
 const CONTENT_TYPES: Record<string, string> = {
@@ -103,6 +105,11 @@ export default defineConfig({
     // Bara moderna webbläsare stöds; polyfillen för modulepreload är dött vikt.
     modulePreload: { polyfill: false },
     rollupOptions: {
+      // Två sidor: landningsvyn och verktygsläget. Origo laddas bara av den senare (TK-05, ADR-02).
+      input: {
+        main: resolve(ROOT, 'index.html'),
+        verktyg: resolve(ROOT, 'verktyg/index.html'),
+      },
       output: {
         // Kartkärnan i egna chunkar: byts sällan → cachas länge (NFK-04).
         manualChunks(id) {

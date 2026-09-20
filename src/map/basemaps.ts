@@ -7,13 +7,15 @@
  *  - fallback: OpenStreetMap i EPSG:3857, reprojicerad av OpenLayers. Används bara om
  *              PMTiles-filen saknas (t.ex. lokalt innan tools/extract_topowebb.py körts)
  *              eller slutar svara.
- *  - dark:     ingen bakgrund, mörk yta — för egna lager med hög kontrast.
+ *  - dark:     samma topografiska karta, inverterad och dämpad med ett CSS-filter på
+ *              lagrets canvas (GPU-kompositerat, inga extra rutor eller anrop). Ger en
+ *              mörk, neutral bakgrund där egna lager får hög kontrast (FK-02, FK-36).
  */
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import TileGrid from 'ol/tilegrid/TileGrid';
 import { LM_3006_EXTENT, LM_3006_ORIGIN, LM_3006_RESOLUTIONS, LM_TILE_SIZE } from '../../shared/geo/lmTileGrid.ts';
-import { API_BASE, BASE, LM_ENABLED, PROXY_AVAILABLE } from '../config/site.ts';
+import { API_BASE, LM_ENABLED, PROXY_AVAILABLE, TOPO_PMTILES_URL } from '../config/site.ts';
 import { EPSG_3006 } from '../geo/olProjections.ts';
 import { t } from '../i18n/index.ts';
 import { createPmtilesBasemap } from './pmtilesSource.ts';
@@ -35,9 +37,6 @@ export interface Basemaps {
   onTopoFailure(cb: (reason: TopoFailure) => void): void;
   onChange(cb: (id: BasemapId) => void): void;
 }
-
-/** Självhostad PMTiles-fil; serveras av Vite-pluginen lokalt och som statisk fil i produktion. */
-export const TOPO_PMTILES_URL = `${BASE}data/topowebb-farg.pmtiles`;
 
 /** Efter så många misslyckade rutor utan en enda lyckad byter vi till fallback. */
 const FAILURES_BEFORE_FALLBACK = 4;
@@ -66,6 +65,7 @@ function proxyLayer(layer: 'topowebb' | 'ortofoto'): TileLayer<XYZ> {
 }
 
 function fallbackLayer(): TileLayer<XYZ> {
+  // Samma klass som topo så att mörkt läge fungerar även på fallbacken.
   // Edge-proxyn finns alltid i produktion/preview, och den behöver inget appkonto för OSM.
   // Bara `npm run dev` (ingen proxy) går direkt mot OSM — CSP:n gäller inte där.
   // I produktion skulle en direkt-URL blockeras av CSP (img-src 'self') → tom karta.
@@ -74,6 +74,7 @@ function fallbackLayer(): TileLayer<XYZ> {
     : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
   return new TileLayer({
     visible: false,
+    className: 'ol-layer ol-layer-topo',
     source: new XYZ({
       url,
       attributions: t('attribution.osm'),
@@ -85,7 +86,8 @@ function fallbackLayer(): TileLayer<XYZ> {
 
 export function createBasemaps(): Basemaps {
   const pmtiles = createPmtilesBasemap(TOPO_PMTILES_URL, t('attribution.lantmateriet'));
-  const topo = new TileLayer({ visible: false, source: pmtiles.source });
+  // Egen klass på lagrets element så att mörkt läge kan filtrera just den här canvasen.
+  const topo = new TileLayer({ visible: false, source: pmtiles.source, className: 'ol-layer ol-layer-topo' });
   const orto = proxyLayer('ortofoto');
   const fallback = fallbackLayer();
 
@@ -96,9 +98,10 @@ export function createBasemaps(): Basemaps {
   const changeListeners: Array<(id: BasemapId) => void> = [];
 
   function apply(): void {
-    topo.setVisible(active === 'topo' && topoAvailable);
+    const wantsTopo = active === 'topo' || active === 'dark';
+    topo.setVisible(wantsTopo && topoAvailable);
     orto.setVisible(active === 'orto' && lmAvailable);
-    fallback.setVisible((active === 'topo' && !topoAvailable) || (active === 'orto' && !lmAvailable));
+    fallback.setVisible((wantsTopo && !topoAvailable) || (active === 'orto' && !lmAvailable));
   }
 
   function failTopo(reason: TopoFailure): void {

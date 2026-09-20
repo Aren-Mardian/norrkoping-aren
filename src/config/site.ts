@@ -21,3 +21,6 @@ export const IS_DEV = import.meta.env.DEV;
  * `npm run dev:netlify`. Bara ren `npm run dev` saknar dem.
  */
 export const PROXY_AVAILABLE = !IS_DEV || LM_ENABLED;
+
+/** Självhostad bakgrundskarta (PMTiles, ADR-09); serveras av Vite-pluginen lokalt och som statisk fil i produktion. */
+export const TOPO_PMTILES_URL = `${BASE}data/topowebb-farg.pmtiles`;

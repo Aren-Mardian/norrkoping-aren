@@ -25,6 +25,11 @@ export const en: Record<MessageKey, string> = {
   'footer.curated': 'Curated content and ranking © Aren Mardian.',
   'footer.sources': 'Data sources and licences',
   'footer.privacy': 'Privacy',
+  'a11y.skipToMap': 'Skip to the map',
+  'verktyg.backToMap': 'Back to the map',
+  'verktyg.ariaLabel': 'Tool mode: measure, draw, read coordinates, print and share the map of Norrköping Municipality.',
+  'verktyg.status.loadFailed': 'The tool mode could not be loaded. Check your connection and reload the page.',
+  'verktyg.status.noBasemap': 'The base map could not be loaded. The tools work, but the map is empty.',
   'attribution.lantmateriet': '© Lantmäteriet',
   'attribution.osm': '© OpenStreetMap contributors',
 };

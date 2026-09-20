@@ -1,0 +1,29 @@
+{
+  "name": "origo",
+  "version": "2.10.0",
+  "tag": "v2.10.0",
+  "commit": "6f313a9bbe7e466c3d062e048681118767c85221",
+  "repository": "https://github.com/origo-map/origo.git",
+  "license": "BSD-2-Clause",
+  "openlayers": "^10.6.0",
+  "built": "2026-09-19",
+  "builtWith": "node v22.13.1",
+  "files": [
+    "js/origo.min.js",
+    "css/style.css",
+    "css/svg/fa-icons.svg",
+    "css/svg/material-icons.svg",
+    "css/svg/miscellaneous.svg",
+    "css/svg/origo-icons.svg",
+    "css/svg/custom.svg",
+    "css/png/north_arrow_print.png",
+    "LICENSE.txt"
+  ],
+  "pageFiles": [
+    "public/verktyg/img/geolocation_marker.png",
+    "public/verktyg/img/geolocation_marker_heading.png",
+    "public/verktyg/img/loading.gif",
+    "public/verktyg/img/png/drop_blue.png",
+    "public/verktyg/img/png/farg.png"
+  ]
+}
