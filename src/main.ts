@@ -1,13 +1,21 @@
 /**
  * Landningsvyns entry. Håll den här vägen lätt (A4, NFK-02):
  * inga tunga bibliotek utöver OpenLayers-kärnan och proj4.
+ *
+ * Ordning: karta först (LCP), sedan badplatsernas grunddata (statisk, 2 kB gzip), sedan
+ * status från edge (IK-02). Väder hämtas först när en badplats öppnas (FK-18).
  */
 import 'ol/ol.css';
 import './style.css';
+import './panel.css';
+import { createBadLayer } from './bad/layer.ts';
+import { loadBadplatser, loadStatus, merge } from './bad/model.ts';
+import { createPanel } from './bad/panel.ts';
 import { BASE, IS_DEV, LM_ENABLED } from './config/site.ts';
 import { initI18n, t } from './i18n/index.ts';
 import { createMap } from './map/createMap.ts';
 import { showDevBanner, showMapStatus } from './ui/notices.ts';
+import { createSheet } from './ui/sheet.ts';
 
 initI18n();
 
@@ -15,6 +23,8 @@ const target = document.getElementById('map');
 if (!target) throw new Error('Kartcontainern #map saknas i dokumentet');
 
 const app = createMap(target);
+// Felsökningshandtag lokalt — aldrig i produktion.
+if (IS_DEV) (window as unknown as { __app?: unknown }).__app = app;
 
 // FK-33: utvecklingsbanner bara lokalt. I produktion är saknat appkonto ingen nyhet för
 // besökaren — flygbildsknappen är avstängd, inget mer.
@@ -27,6 +37,60 @@ app.basemaps.onTopoFailure((reason) => {
   if (IS_DEV && reason === 'missing') showDevBanner(t('dev.noTiles'));
   showMapStatus(t('map.status.fallback'));
 });
+
+// ── Badplatser (Kärnfunktion B) ───────────────────────────────────────────────
+const panelEl = document.getElementById('panel');
+const handleEl = document.getElementById('panel-handle');
+if (panelEl && handleEl instanceof HTMLButtonElement) {
+  handleEl.dataset['labelExpand'] = t('panel.handleExpand');
+  handleEl.dataset['labelCollapse'] = t('panel.handleCollapse');
+  const sheet = createSheet(panelEl, handleEl);
+  const badLayer = createBadLayer(app.map);
+  app.map.addLayer(badLayer.layer);
+
+  let selectedId: string | null = null;
+  const panel = createPanel(panelEl, {
+    onSelect: (id) => select(id, true),
+    onHover: (id) => badLayer.setHover(id),
+  });
+
+  function select(id: string | null, fromList: boolean): void {
+    selectedId = id;
+    badLayer.setSelected(id);
+    panel.setSelected(id);
+    const feature = id ? badLayer.getFeature(id) : undefined;
+    if (feature) {
+      const geom = feature.getGeometry();
+      if (geom) app.zoomTo(geom.getCoordinates(), 11);
+      if (!fromList) sheet.reveal();
+    }
+  }
+
+  badLayer.onSelect((id) => select(id, false));
+  badLayer.onHover((id) => panel.setHover(id));
+
+  // Escape stänger detaljvyn (UX-03).
+  panelEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && selectedId) select(null, true);
+  });
+
+  void (async () => {
+    try {
+      const collection = await loadBadplatser();
+      const data = merge(collection, null);
+      badLayer.setSites(data.sites);
+      panel.render(data);
+      // Status i ett andra steg: listan syns direkt, statusen fylls på (A4).
+      const status = await loadStatus();
+      const withStatus = merge(collection, status);
+      badLayer.setSites(withStatus.sites);
+      panel.render(withStatus);
+      if (selectedId) select(selectedId, true);
+    } catch {
+      showMapStatus(t('bad.status.unavailable'));
+    }
+  })();
+}
 
 // Origo (verktygsläget) är ~590 kB brotli och laddas aldrig här (TK-05). Men när användaren
 // visar avsikt att gå dit förhämtar vi scriptet, så att /verktyg känns omedelbar (A4).

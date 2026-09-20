@@ -14,7 +14,6 @@ export const LM_TILE_SIZE = 256;
 export const LM_3006_EXTENT: Extent = EXTENT_3006;
 export const LM_3006_ORIGIN = [EXTENT_3006[0], EXTENT_3006[3]] as const;
 export const LM_3006_RESOLUTIONS: readonly number[] = Array.from({ length: 16 }, (_, z) => 4096 / 2 ** z);
-export const LM_3006_MATRIX_IDS: readonly string[] = LM_3006_RESOLUTIONS.map((_, z) => String(z));
 
 function resolutionAt(z: number): number {
   const res = LM_3006_RESOLUTIONS[z];

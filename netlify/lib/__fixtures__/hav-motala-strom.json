@@ -1,0 +1,160 @@
+{
+ "algalText": "Blomning",
+ "algalValue": 3,
+ "classification": 6,
+ "classificationText": "Ny badplats",
+ "classificationYear": 2025,
+ "dissuasion": [
+  {
+   "description": "Viss algblomning i bassäng",
+   "dissuasionTypeText": "Algblomning",
+   "startdate": 1784560380000,
+   "type": 2
+  }
+ ],
+ "euType": false,
+ "locationArea": "Norrköping",
+ "locationName": "Inre hamn/ Motala ström",
+ "nutsCode": "SE0230581000006660",
+ "qualityRating": [
+  {
+   "qualityRating": 6,
+   "qualityRatingText": "Ny badplats",
+   "ratingYear": 2025
+  },
+  {
+   "qualityRating": 6,
+   "qualityRatingText": "Ny badplats",
+   "ratingYear": 2024
+  },
+  {
+   "qualityRating": 6,
+   "qualityRatingText": "Ny badplats",
+   "ratingYear": 2023
+  },
+  {
+   "qualityRating": 0,
+   "qualityRatingText": "Ej klassificerad",
+   "ratingYear": 2022
+  }
+ ],
+ "sampleDate": 1786312800000,
+ "sampleTemperature": "19",
+ "sampleValue": 1,
+ "testResult": [
+  {
+   "algalText": "Blomning",
+   "algalValue": 3,
+   "ecoliClass": 1,
+   "ecoliClassText": "Tjänligt",
+   "ecoliPrefix": "=",
+   "ecoliValue": 56,
+   "enteroClass": 1,
+   "enteroClassText": "Tjänligt",
+   "enteroPrefix": "=",
+   "enteroValue": 10,
+   "prtKomplett": true,
+   "sampleDate": 1786312800000,
+   "sampleText": "Tjänligt",
+   "sampleValue": 1,
+   "tempValue": "19",
+   "weatherText": "Mulet",
+   "weatherValue": 3
+  },
+  {
+   "algalText": "Ingen uppgift",
+   "algalValue": 5,
+   "ecoliClass": 1,
+   "ecoliClassText": "Tjänligt",
+   "ecoliPrefix": "=",
+   "ecoliValue": 86,
+   "enteroClass": 1,
+   "enteroClassText": "Tjänligt",
+   "enteroPrefix": "=",
+   "enteroValue": 20,
+   "prtKomplett": true,
+   "sampleDate": 1785448800000,
+   "sampleText": "Tjänligt",
+   "sampleValue": 1,
+   "tempValue": null,
+   "weatherText": "Viss molnighet",
+   "weatherValue": 2
+  },
+  {
+   "algalText": "Blomning",
+   "algalValue": 3,
+   "ecoliClass": 2,
+   "ecoliClassText": "Tjänligt med anmärkning",
+   "ecoliPrefix": "=",
+   "ecoliValue": 517,
+   "enteroClass": 1,
+   "enteroClassText": "Tjänligt",
+   "enteroPrefix": "=",
+   "enteroValue": 60,
+   "prtKomplett": true,
+   "sampleDate": 1785103200000,
+   "sampleText": "Tjänligt m. Anm.",
+   "sampleValue": 2,
+   "tempValue": "19",
+   "weatherText": "Viss molnighet",
+   "weatherValue": 2
+  },
+  {
+   "algalText": "Blomning",
+   "algalValue": 3,
+   "ecoliClass": 2,
+   "ecoliClassText": "Tjänligt med anmärkning",
+   "ecoliPrefix": "=",
+   "ecoliValue": 387,
+   "enteroClass": 2,
+   "enteroClassText": "Tjänligt med anmärkning",
+   "enteroPrefix": "=",
+   "enteroValue": 190,
+   "prtKomplett": true,
+   "sampleDate": 1784757600000,
+   "sampleText": "Tjänligt m. Anm.",
+   "sampleValue": 2,
+   "tempValue": "18",
+   "weatherText": "Viss molnighet",
+   "weatherValue": 2
+  },
+  {
+   "algalText": "Blomning",
+   "algalValue": 3,
+   "ecoliClass": 0,
+   "ecoliClassText": "Uppgift saknas",
+   "ecoliPrefix": null,
+   "ecoliValue": null,
+   "enteroClass": 0,
+   "enteroClassText": "Uppgift saknas",
+   "enteroPrefix": null,
+   "enteroValue": null,
+   "prtKomplett": false,
+   "sampleDate": 1784560304000,
+   "sampleText": "Uppgift saknas",
+   "sampleValue": 4,
+   "tempValue": "20",
+   "weatherText": "Mulet",
+   "weatherValue": 3
+  },
+  {
+   "algalText": "Blomning",
+   "algalValue": 3,
+   "ecoliClass": 2,
+   "ecoliClassText": "Tjänligt med anmärkning",
+   "ecoliPrefix": "=",
+   "ecoliValue": 980,
+   "enteroClass": 2,
+   "enteroClassText": "Tjänligt med anmärkning",
+   "enteroPrefix": "=",
+   "enteroValue": 200,
+   "prtKomplett": true,
+   "sampleDate": 1784498400000,
+   "sampleText": "Tjänligt m. Anm.",
+   "sampleValue": 2,
+   "tempValue": "22",
+   "weatherText": "Mulet",
+   "weatherValue": 3
+  }
+ ]
+}

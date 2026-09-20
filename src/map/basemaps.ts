@@ -3,7 +3,7 @@
  *
  *  - topo:     Lantmäteriets topografiska webbkarta som självhostad PMTiles i EPSG:3006
  *              (utsnitt av "Topografisk webbkarta Nedladdning, raster", ADR-09). Ingen token.
- *  - orto:     Lantmäteriets flygbild via tile-proxyn (kräver appkonto på edge, IK-01).
+ *  - orto:     Lantmäteriets historiska ortofoton (CC0) via tile-proxyn (kräver appkonto på edge, IK-01).
  *  - fallback: OpenStreetMap i EPSG:3857, reprojicerad av OpenLayers. Används bara om
  *              PMTiles-filen saknas (t.ex. lokalt innan tools/extract_topowebb.py körts)
  *              eller slutar svara.
@@ -50,15 +50,16 @@ function lmTileGrid(): TileGrid {
   });
 }
 
-function proxyLayer(layer: 'topowebb' | 'ortofoto'): TileLayer<XYZ> {
+/** Flygbild: Lantmäteriets historiska ortofoton (CC0) via proxyn, som gör WMS GetMap per ruta. */
+function ortoLayer(): TileLayer<XYZ> {
   return new TileLayer({
     visible: false,
     source: new XYZ({
-      url: `${API_BASE}/tiles/${layer}/{z}/{y}/{x}.png`,
+      url: `${API_BASE}/tiles/histortho/{z}/{y}/{x}.jpg`,
       projection: EPSG_3006,
       tileGrid: lmTileGrid(),
-      attributions: t('attribution.lantmateriet'),
-      maxZoom: 14,
+      attributions: t('attribution.lantmateriet.orto'),
+      maxZoom: 13,
       transition: 0,
     }),
   });
@@ -88,7 +89,7 @@ export function createBasemaps(): Basemaps {
   const pmtiles = createPmtilesBasemap(TOPO_PMTILES_URL, t('attribution.lantmateriet'));
   // Egen klass på lagrets element så att mörkt läge kan filtrera just den här canvasen.
   const topo = new TileLayer({ visible: false, source: pmtiles.source, className: 'ol-layer ol-layer-topo' });
-  const orto = proxyLayer('ortofoto');
+  const orto = ortoLayer();
   const fallback = fallbackLayer();
 
   let active: BasemapId = 'topo';

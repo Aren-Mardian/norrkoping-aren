@@ -1,3 +1,4 @@
+fiona==1.10.1
 numpy==2.5.3
 pillow==12.3.0
 pmtiles==3.8.1

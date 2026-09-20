@@ -45,26 +45,25 @@
   status = 200
 
 # ── Headers ──────────────────────────────────────────────────────────────────
-# Netlify: när flera regler matchar samma sökväg vinner den SISTA regeln för ett givet
-# header-namn. Därför ligger de generella reglerna först och de specifika efter.
+# Netlify: när flera regler sätter samma header för en sökväg är resultatet inte
+# förutsägbart (verifierat 2026-09-20: en generell Cache-Control-regel slog ut de specifika
+# oavsett ordning). Därför sätter bara EN regel per header och sökväg Cache-Control.
+# HTML-dokument får Netlifys standard "public, max-age=0, must-revalidate" + ETag (NFK-04).
 
-# Säkerhet (NFK-16, NFK-17) — gäller allt.
+# Säkerhet (NFK-16, NFK-17) — gäller allt. Själva CSP:n ligger som <meta http-equiv> i varje
+# HTML-sida (strikt på landningsvyn, relaxad style-src/base-uri bara på /verktyg/), eftersom Netlify
+# inte tillåter olika värden per sökväg på ett förutsägbart sätt. Headern bär bara det som meta
+# inte kan uttrycka: frame-ancestors.
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data: blob:; connect-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+    Content-Security-Policy = "frame-ancestors 'none'"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(self), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()"
     X-Frame-Options = "DENY"
     Cross-Origin-Opener-Policy = "same-origin"
-
-# Dokument valideras alltid mot ETag (NFK-04).
-[[headers]]
-  for = "/projekt/norrkoping/*"
-  [headers.values]
-    Cache-Control = "no-cache"
 
 # Vite ger innehållshashade filnamn under /assets/ → kan cachas för alltid.
 [[headers]]
@@ -78,18 +77,11 @@
   [headers.values]
     Cache-Control = "public, max-age=2592000, immutable"
 
-# Härledda geodatafiler (PMTiles, GeoJSON — ADR-09/ADR-10). PMTiles läses med Range-requests;
-# ETag avslöjar ny version.
+# Geodata (PMTiles, GeoJSON — ADR-09/ADR-10). PMTiles läses med Range-requests; ETag avslöjar ny
+# version. Badplatsernas grunddata ligger också här; den dynamiska statusen går via /api.
 [[headers]]
   for = "/projekt/norrkoping/data/*"
   [headers.values]
     Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
     Accept-Ranges = "bytes"
 
-# Verktygsläget (ADR-11): Origo bygger sina paneler med style-attribut (kräver 'unsafe-inline'
-# för style-src) och sätter alltid ett <base>-element (kräver base-uri 'self'). Bara på den här
-# sidan; script-src förblir strikt.
-[[headers]]
-  for = "/projekt/norrkoping/verktyg/*"
-  [headers.values]
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data: blob:; connect-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"

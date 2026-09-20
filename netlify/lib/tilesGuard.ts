@@ -4,43 +4,43 @@
  * Ingen I/O här — handlern i functions/tiles.mts gör anropet.
  */
 import { PAN_LIMIT_3006, PAN_LIMIT_3857, extentsIntersect } from '../../shared/geo/kommun.ts';
-import { lmMatrixSize, lmTileExtent, webMercatorTileExtent } from '../../shared/geo/lmTileGrid.ts';
+import { LM_TILE_SIZE, lmMatrixSize, lmTileExtent, webMercatorTileExtent } from '../../shared/geo/lmTileGrid.ts';
 
-export type LayerId = 'topowebb' | 'ortofoto' | 'osm';
+export type LayerId = 'histortho' | 'osm';
 
 export interface LayerSpec {
   /** Tile-matrisens referenssystem: LM:s 3006-matris eller standard Web Mercator. */
   grid: '3006' | '3857';
-  /** Miljövariabel som kan överstyra URL-mallen ({z}, {x}, {y} ersätts). */
+  /** 'xyz': URL-mall med {z}/{x}/{y}. 'wms': GetMap med rutans bbox i EPSG:3006 (256×256). */
+  kind: 'xyz' | 'wms';
+  /** Miljövariabel som kan överstyra URL-mallen (xyz) respektive tjänstens bas-URL (wms). */
   templateEnv: string;
   defaultTemplate: string;
+  /** WMS: miljövariabel för lagernamn och standardvärde. */
+  wmsLayerEnv?: string;
+  defaultWmsLayer?: string;
   /** Om anropet ska signeras med Lantmäteriets appkonto. */
   requiresLmAuth: boolean;
-  /** Största zoomnivå som finns i matrisen. */
+  /** Största zoomnivå som får begäras. */
   maxZoom: number;
   /** Identifierar appen mot uppströmstjänsten (OSM:s tile-policy kräver en tydlig User-Agent). */
   userAgent: string;
 }
 
-const UA = 'Norrkopingskartan/0.1 (+https://arenm.se/projekt/norrkoping)';
+const UA = 'Norrkopingskartan/0.1 (+https://norrkoping.netlify.app)';
 
 export const LAYERS: Readonly<Record<LayerId, LayerSpec>> = {
-  topowebb: {
+  // Lantmäteriets "Ortofoto historiska Visning" (CC0, WMS 1.1.1, kräver appkonto). Flygbild 1949–2005.
+  // Lagernamnet verifieras mot GetCapabilities med appkontot; överstyrs via LM_HISTORTHO_LAYER.
+  histortho: {
     grid: '3006',
-    templateEnv: 'LM_TOPOWEBB_TEMPLATE',
-    defaultTemplate:
-      'https://maps.lantmateriet.se/topowebb/v1.1/wmts/1.0.0/topowebb/default/3006/{z}/{y}/{x}.png',
+    kind: 'wms',
+    templateEnv: 'LM_HISTORTHO_WMS',
+    defaultTemplate: 'https://maps.lantmateriet.se/historiska-ortofoton/wms/v1',
+    wmsLayerEnv: 'LM_HISTORTHO_LAYER',
+    defaultWmsLayer: 'OI.Histortho_60',
     requiresLmAuth: true,
-    maxZoom: 15,
-    userAgent: UA,
-  },
-  ortofoto: {
-    grid: '3006',
-    templateEnv: 'LM_ORTOFOTO_TEMPLATE',
-    defaultTemplate:
-      'https://maps.lantmateriet.se/ortofoto/v1.1/wmts/1.0.0/Ortofoto_0.5/default/3006/{z}/{y}/{x}.png',
-    requiresLmAuth: true,
-    maxZoom: 15,
+    maxZoom: 13,
     userAgent: UA,
   },
   // Fallback-bakgrund (NFK-25). Proxas för att CSP:n bara tillåter egen origin (NFK-16)
@@ -48,6 +48,7 @@ export const LAYERS: Readonly<Record<LayerId, LayerSpec>> = {
   // bara när Lantmäteriet inte svarar. Ska på sikt ersättas av självhostade PMTiles (ADR-06).
   osm: {
     grid: '3857',
+    kind: 'xyz',
     templateEnv: 'OSM_TEMPLATE',
     defaultTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     requiresLmAuth: false,
@@ -120,6 +121,23 @@ export function tileWithinKommun(tile: TileRequest): boolean {
 export function buildUpstreamUrl(tile: TileRequest, env: Readonly<Record<string, string | undefined>>): string {
   const spec = LAYERS[tile.layer];
   const template = env[spec.templateEnv] || spec.defaultTemplate;
+  if (spec.kind === 'wms') {
+    const [minx, miny, maxx, maxy] = lmTileExtent(tile.z, tile.x, tile.y);
+    const params = new URLSearchParams({
+      SERVICE: 'WMS',
+      VERSION: '1.1.1',
+      REQUEST: 'GetMap',
+      LAYERS: env[spec.wmsLayerEnv ?? ''] || spec.defaultWmsLayer || '',
+      STYLES: '',
+      SRS: 'EPSG:3006',
+      BBOX: [minx, miny, maxx, maxy].map((v) => v.toFixed(3)).join(','),
+      WIDTH: String(LM_TILE_SIZE),
+      HEIGHT: String(LM_TILE_SIZE),
+      FORMAT: tile.ext === 'png' ? 'image/png' : 'image/jpeg',
+      TRANSPARENT: 'FALSE',
+    });
+    return `${template}?${params.toString()}`;
+  }
   return template.replace('{z}', String(tile.z)).replace('{y}', String(tile.y)).replace('{x}', String(tile.x));
 }
 

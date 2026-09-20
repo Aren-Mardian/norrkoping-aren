@@ -16,8 +16,8 @@ Senast uppdaterad 2026-09-19 efter genomgång av Geotorgets produktlista och bes
 | DS-3 | Lantmäteriet, höjddata | Beställd: *Markhöjdmodell Nedladdning* (1 m, COG via STAC) och *grid 50+* (CC0). | Appkonto för STAC-API |
 | DS-4 | Lantmäteriet, ortnamn | Beställd: *Ortnamn Nedladdning, vektor* (GeoPackage via STAC). | Appkonto för STAC-API |
 | — | Lantmäteriet, kommungräns | Beställd: *Kommun, Län och Rike Nedladdning* (GeoPackage via STAC). Ersätter den uppskattade bbox:en (FK-04, FK-05, DK-01). | Appkonto för STAC-API |
-| DS-5 | HaV, Badplatsen API | **Verifierad.** Fungerar utan nyckel. 19 badplatser i kommunen (kommunkod 0581). | Inget konto. Användarvillkor ska läsas och sammanfattas här (JK-01). |
-| DS-6 | SMHI, meteorologisk prognos | **Verifierad.** `pmp3g` är avvecklat (2026-03-31); `snow1g` v1 svarar utan nyckel. | Inget konto |
+| DS-5 | HaV, Badplatsen API | **I drift.** `/api/bad/status` normaliserar 19 badplatser (kommunkod 0581); grunddata i `data/bad/badplatser.geojson`. API:et svarar intermittent 500 → omförsök + stale-cache. | Inget konto. |
+| DS-6 | SMHI, meteorologisk prognos | **I drift.** `/api/vader` mot `snow1g` v1 (ersatte `pmp3g` 2026-03-31). | Inget konto |
 | DS-7 | OpenStreetMap | Fallback-bakgrund (raster tiles). | Inget konto |
 | DS-8–DS-12 | Wikidata, RAÄ, kommunen, SCB, egen kuratering | Ej påbörjade (sprint 2+). | — |
 
@@ -30,8 +30,8 @@ ska sparas i `docs/villkor/` när de är hämtade från Geotorget (JK-01, JK-07)
 |---|---|---|---|---|---|
 | Topografisk webbkarta Nedladdning, raster | **CC BY 4.0** — [villkor](../docs/villkor/topografisk-webbkarta-nedladdning-raster.md) | FTP, öppen | GeoPackage (tile-pyramid) | `ftp://download-opendata.lantmateriet.se/Topografisk_webbkarta_raster/` | Bakgrundskarta (FK-01, FK-02) |
 | Topografisk webbkarta Visning, översiktlig | utgår 2026-12-31 | WMTS | PNG | via Geotorget (URL verifieras) | Live-bakgrund via proxy fram till årsskiftet; test av IK-01 |
-| Kommun, Län och Rike Nedladdning | Användningsvillkor för värdefulla datamängder | STAC-API | GeoPackage | `https://api.lantmateriet.se/stac-vektor/v1` | Kommungräns (FK-05), panoreringsspärr (FK-04), validering (DK-01) |
-| Ortnamn Nedladdning, vektor | Användningsvillkor för värdefulla datamängder | STAC-API | GeoPackage | `https://api.lantmateriet.se/stac-vektor/v1` | Ortnamnssök (FK-32) |
+| Kommun, Län och Rike Nedladdning | CC BY 4.0 (STAC-katalogen anger licensen) | STAC-API (katalog öppen; nedladdning kräver appkonto, Basic) | GeoPackage i zip, item `aktuell` (6 MB) | `https://api.lantmateriet.se/stac-vektor/v1/collections/kommun-lan-rike` | Kommungräns (FK-05), panoreringsspärr (FK-04), validering (DK-01) — `tools/lm_stac.py kommun` |
+| Ortnamn Nedladdning, vektor | CC BY 4.0 | STAC-API (som ovan) | GeoPackage i zip, item `ortnamn_se` (58 MB) | `https://api.lantmateriet.se/stac-vektor/v1/collections/ortnamn` | Ortnamnssök (FK-32) — `tools/lm_stac.py ortnamn` |
 | Ortofoto historiska Visning | **CC0** | WMS 1.1.1 | JPEG/PNG | `https://maps.lantmateriet.se/historiska-ortofoton/wms/v1?request=GetCapabilities&version=1.1.1&service=WMS` | Flygbild (FK-02), tidsresa (FK-38) |
 | Markhöjdmodell Nedladdning | Användningsvillkor för värdefulla datamängder | STAC-API | COG (1 m) | `https://api.lantmateriet.se/stac-hojd/v1` | Hillshade (FK-39), höjd RH 2000 (NFK-14) |
 | Markhöjdmodell Nedladdning, grid 50+ | **CC0** | Filnedladdning i Geotorget / API Geotorget Nedladdning | ASCII-grid | Rutor **64_5, 64_6, 65_5, 65_6** täcker kommunen | Grov terrängmodell, reserv |
@@ -140,7 +140,17 @@ Camping, Böksjön Böksjöbadet, Lilla Älgsjön, Lillsjöbadet, Bolen Bolenbad
 Gransjönäsbadet, Ågelsjön, Arkösund Badholmarna, Arkösund Sköldvik, Dalbystrand, Inre hamn/Motala ström,
 Inre hamnen plaskdammen. (Kravspec DK-06 nämner "ett tjugotal" — stämmer.)
 
-**Att göra (JK-01):** läs och sammanfatta HaV:s användarvillkor för API:et här innan `/api/bad/status` går i produktion.
+**Villkor (JK-01):** HaV:s badplatsdata är öppna data (myndighetens API-sida: "API Badplatser och
+badvatten", fritt att använda). Vi visar alltid källan ("Källa: Havs- och vattenmyndigheten", Bilaga C),
+vidarebefordrar aldrig besökarens IP (proxy, NFK-23), anropar högst en gång i timmen (cache) och
+visar statusens ålder (DK-04). Ingen personuppgift förekommer i datat. Kontaktuppgifterna
+(`contactMail/Phone`) i API:et är myndighetsfunktioner, inte personer; vi publicerar bara URL:en.
+
+**Kodvärden (verifierade 2026-09-20):** classification/qualityRating 1 utmärkt, 2 bra,
+3 tillfredsställande, 4 dålig, 0 ej klassificerad, 6 ny badplats · sampleValue 1 tjänligt,
+2 tjänligt med anmärkning, 3 otjänligt, 4 uppgift saknas · algalValue 3 blomning, 4 ingen,
+5 uppgift saknas · dissuasion.type 1 otjänligt prov, 2 algblomning. **Ingen av kommunens 19
+badplatser är EU-klassificerad** — klassificeringsdelen i Topp 3-viktningen är därför neutral (50).
 
 ## SMHI — meteorologisk prognos (DS-6)
 
@@ -148,8 +158,9 @@ Inre hamnen plaskdammen. (Kravspec DK-06 nämner "ett tjugotal" — stämmer.)
 - Ersättare: `snow1g` v1, t.ex.
   `https://opendata-download-metfcst.smhi.se/api/category/snow1g/version/1/geotype/point/lon/16.19/lat/58.59/data.json`
   (verifierad 2026-09-19, HTTP 200, ingen nyckel). Dokumentation: <https://opendata.smhi.se/metfcst/snow1gv1>.
-- **license:** SMHI öppna data (CC BY 4.0 enligt SMHI:s villkor — verifiera och länka).
-- **attribution:** `Källa: SMHI`
+- **license:** SMHI:s öppna data, Creative Commons Erkännande 4.0 (CC BY 4.0) — <https://www.smhi.se/data/om-smhis-data/villkor-for-anvandning-av-smhis-oppna-data>
+- **attribution:** `Källa: SMHI` + prognosens utgivningstid, visas i vädermodulen (FK-18)
+- **retrieved:** live via `/api/vader` (30 min cache; koordinater avrundade till 2 decimaler, IK-03)
 
 ## Google Maps Platform — används inte (JK-05)
 

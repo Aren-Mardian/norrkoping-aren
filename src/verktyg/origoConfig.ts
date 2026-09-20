@@ -9,13 +9,12 @@
 import { KOMMUN_VIEW_BBOX_3006, PAN_LIMIT_3006 } from '../../shared/geo/kommun.ts';
 import { LM_3006_EXTENT, LM_3006_ORIGIN, LM_3006_RESOLUTIONS, LM_TILE_SIZE } from '../../shared/geo/lmTileGrid.ts';
 import { DEF_3006, DEF_3010, EXTENT_3006 } from '../../shared/geo/crs.ts';
-import { BASE } from '../config/site.ts';
+import { BASE, KOMMUNGRANS_URL } from '../config/site.ts';
 import type { Lang } from '../i18n/index.ts';
 
 export const ORIGO_VERSION = '2.10.0';
 export const ORIGO_DIR = `${BASE}vendor/origo-${ORIGO_VERSION}/`;
 export const ORIGO_SCRIPT = `${ORIGO_DIR}js/origo.min.js`;
-export const ORIGO_CSS = `${ORIGO_DIR}css/style.css`;
 
 /** Lagernamnet i Origo vars källa byts ut mot PMTiles-läsaren efter init. */
 export const TOPO_LAYER_NAME = 'topowebb';
@@ -193,7 +192,7 @@ export function buildOrigoConfig(lang: Lang): Record<string, unknown> {
         title: t.boundaryTitle,
         group: 'root',
         type: 'GEOJSON',
-        source: `${BASE}data/kommungrans.geojson`,
+        source: KOMMUNGRANS_URL,
         projection: 'EPSG:4326',
         style: 'kommungrans',
         attribution: '© OpenStreetMap-bidragsgivare (ODbL)',

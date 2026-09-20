@@ -1,0 +1,160 @@
+{
+ "algalText": "Ingen blomning",
+ "algalValue": 4,
+ "classification": 0,
+ "classificationText": "Ej klassificerad",
+ "classificationYear": 2025,
+ "dissuasion": [
+  {
+   "description": "E.coli 1300 MPN/100 ml",
+   "dissuasionTypeText": "Otjänligt badvattenprov",
+   "startdate": 1781154510000,
+   "type": 1
+  }
+ ],
+ "euType": false,
+ "locationArea": "Norrköping",
+ "locationName": "Inre hamnen, plaskdammen",
+ "nutsCode": "SE0230581000007560",
+ "qualityRating": [
+  {
+   "qualityRating": 0,
+   "qualityRatingText": "Ej klassificerad",
+   "ratingYear": 2025
+  },
+  {
+   "qualityRating": 0,
+   "qualityRatingText": "Ej klassificerad",
+   "ratingYear": 2024
+  },
+  {
+   "qualityRating": 0,
+   "qualityRatingText": "Ej klassificerad",
+   "ratingYear": 2023
+  },
+  {
+   "qualityRating": 0,
+   "qualityRatingText": "Ej klassificerad",
+   "ratingYear": 2022
+  }
+ ],
+ "sampleDate": 1783288800000,
+ "sampleTemperature": "22",
+ "sampleValue": 3,
+ "testResult": [
+  {
+   "algalText": "Ingen blomning",
+   "algalValue": 4,
+   "ecoliClass": 2,
+   "ecoliClassText": "Tjänligt med anmärkning",
+   "ecoliPrefix": "=",
+   "ecoliValue": 687,
+   "enteroClass": 3,
+   "enteroClassText": "Otjänligt",
+   "enteroPrefix": "=",
+   "enteroValue": 580,
+   "prtKomplett": true,
+   "sampleDate": 1783288800000,
+   "sampleText": "Otjänligt",
+   "sampleValue": 3,
+   "tempValue": "22",
+   "weatherText": "Klart",
+   "weatherValue": 1
+  },
+  {
+   "algalText": "Ingen blomning",
+   "algalValue": 4,
+   "ecoliClass": 3,
+   "ecoliClassText": "Otjänligt",
+   "ecoliPrefix": ">",
+   "ecoliValue": 2400,
+   "enteroClass": 3,
+   "enteroClassText": "Otjänligt",
+   "enteroPrefix": "=",
+   "enteroValue": 650,
+   "prtKomplett": true,
+   "sampleDate": 1782943200000,
+   "sampleText": "Otjänligt",
+   "sampleValue": 3,
+   "tempValue": "20",
+   "weatherText": "Viss molnighet",
+   "weatherValue": 2
+  },
+  {
+   "algalText": "Ingen blomning",
+   "algalValue": 4,
+   "ecoliClass": 2,
+   "ecoliClassText": "Tjänligt med anmärkning",
+   "ecoliPrefix": "=",
+   "ecoliValue": 816,
+   "enteroClass": 2,
+   "enteroClassText": "Tjänligt med anmärkning",
+   "enteroPrefix": "=",
+   "enteroValue": 120,
+   "prtKomplett": true,
+   "sampleDate": 1782770400000,
+   "sampleText": "Tjänligt m. Anm.",
+   "sampleValue": 2,
+   "tempValue": "23",
+   "weatherText": "Klart",
+   "weatherValue": 1
+  },
+  {
+   "algalText": "Ingen blomning",
+   "algalValue": 4,
+   "ecoliClass": 3,
+   "ecoliClassText": "Otjänligt",
+   "ecoliPrefix": ">",
+   "ecoliValue": 2400,
+   "enteroClass": 3,
+   "enteroClassText": "Otjänligt",
+   "enteroPrefix": "=",
+   "enteroValue": 500,
+   "prtKomplett": true,
+   "sampleDate": 1782338400000,
+   "sampleText": "Otjänligt",
+   "sampleValue": 3,
+   "tempValue": "24",
+   "weatherText": "Klart",
+   "weatherValue": 1
+  },
+  {
+   "algalText": "Ingen blomning",
+   "algalValue": 4,
+   "ecoliClass": 2,
+   "ecoliClassText": "Tjänligt med anmärkning",
+   "ecoliPrefix": "=",
+   "ecoliValue": 727,
+   "enteroClass": 3,
+   "enteroClassText": "Otjänligt",
+   "enteroPrefix": "=",
+   "enteroValue": 490,
+   "prtKomplett": true,
+   "sampleDate": 1781733600000,
+   "sampleText": "Otjänligt",
+   "sampleValue": 3,
+   "tempValue": "19",
+   "weatherText": "Viss molnighet",
+   "weatherValue": 2
+  },
+  {
+   "algalText": "Ingen blomning",
+   "algalValue": 4,
+   "ecoliClass": 1,
+   "ecoliClassText": "Tjänligt",
+   "ecoliPrefix": "=",
+   "ecoliValue": 86,
+   "enteroClass": 3,
+   "enteroClassText": "Otjänligt",
+   "enteroPrefix": "=",
+   "enteroValue": 650,
+   "prtKomplett": true,
+   "sampleDate": 1781128800000,
+   "sampleText": "Otjänligt",
+   "sampleValue": 3,
+   "tempValue": "18",
+   "weatherText": "Klart",
+   "weatherValue": 1
+  }
+ ]
+}

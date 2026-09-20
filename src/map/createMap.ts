@@ -22,6 +22,8 @@ export interface AppMap {
   readonly map: Map;
   readonly basemaps: Basemaps;
   resetView(): void;
+  /** Flyger till en punkt (EPSG:3006) på given LM-nivå — respekterar prefers-reduced-motion. */
+  zoomTo(center: number[], zoom: number): void;
 }
 
 /** Startextent = kommunens bbox med 5 % marginal (FK-03). */
@@ -82,11 +84,24 @@ export function createMap(target: HTMLElement): AppMap {
     ],
   });
 
-  // Startvy (FK-03). Storleken sätts synkront i konstruktorn när containern redan
-  // har CSS-höjd; annars väntar vi på första change:size.
-  const fitStart = (): void => view.fit([...KOMMUN_VIEW_BBOX_3006], { padding: startPadding(), duration: 0 });
-  if (map.getSize()) fitStart();
-  else map.once('change:size', fitStart);
+  // Startvy (FK-03). Layouten kan ändra kartans storlek flera gånger under de första
+  // ramarna (CSS laddas, panelen renderas, grid räknas om). Passa in startextent vid varje
+  // storleksändring tills användaren rört kartan — då är vyn användarens.
+  const fitStart = (): void => {
+    const [w = 0, h = 0] = map.getSize() ?? [];
+    if (w > 0 && h > 0) view.fit([...KOMMUN_VIEW_BBOX_3006], { padding: startPadding(), duration: 0 });
+  };
+  let userHasInteracted = false;
+  const stopAutoFit = (): void => {
+    userHasInteracted = true;
+  };
+  for (const type of ['pointerdown', 'wheel', 'keydown', 'touchstart'] as const) {
+    target.addEventListener(type, stopAutoFit, { once: true, passive: true });
+  }
+  map.on('change:size', () => {
+    if (!userHasInteracted) fitStart();
+  });
+  fitStart();
 
   // UX-04: skelettet ersätts när första ramen med data är ritad — eller senast efter 3 s.
   const ready = (): void => target.classList.add('map--ready');
@@ -95,5 +110,18 @@ export function createMap(target: HTMLElement): AppMap {
 
   basemaps.onChange((id) => target.classList.toggle('map--dark', id === 'dark'));
 
-  return { map, basemaps, resetView };
+  const zoomTo = (center: number[], zoom: number): void => {
+    // På mobil täcker panelen nedre delen av kartan — lägg punkten i övre halvan.
+    const size = map.getSize();
+    const desktop = window.matchMedia('(min-width: 900px)').matches;
+    const offsetY = !desktop && size ? Math.round((size[1] ?? 0) * 0.18) : 0;
+    const res = LM_3006_RESOLUTIONS[zoom] ?? view.getResolution() ?? 1;
+    view.animate({
+      center: [center[0] ?? 0, (center[1] ?? 0) - offsetY * res],
+      zoom,
+      duration: prefersReducedMotion() ? 0 : 400,
+    });
+  };
+
+  return { map, basemaps, resetView, zoomTo };
 }

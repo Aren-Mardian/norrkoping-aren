@@ -42,9 +42,11 @@ planärt i Web Mercator — förenligt med NFK-12.
    (`src/map/pmtilesLoader.ts`, ramverksoberoende — samma kod som landningsvyn) och en omritning
    triggas per laddad ruta. Utan `transition: 0` fastnar rutorna i intoningen när
    `requestAnimationFrame` är strypt.
-6. **CSP relaxas enbart för `/projekt/norrkoping/verktyg/*`**: `style-src 'self' 'unsafe-inline'` och
-   `base-uri 'self'`. `script-src 'self'` förblir strikt överallt — Origos `eval` finns bara i
-   stilfilter vi inte använder, och webpacks `new Function` faller tillbaka på `window`.
+6. **CSP relaxas enbart för verktygssidan**: `style-src 'self' 'unsafe-inline'` och `base-uri 'self'`.
+   `script-src 'self'` förblir strikt överallt — Origos `eval` finns bara i stilfilter vi inte
+   använder, och webpacks `new Function` faller tillbaka på `window`. *Hur* policyn levereras per sida
+   ändrades i ADR-12 (meta i stället för Netlify-header, eftersom Netlify inte tillämpar
+   sökvägsspecifika headers förutsägbart).
 7. **Kontroller enligt kravspec:** measure (längd, area, buffert, delsträckor, snappning — FK-23/24/25),
    position (3006, 3010, WGS 84 decimalgrader och DMS — FK-26), draw med nedladdning som GeoJSON i
    WGS 84 (FK-27), sharemap (FK-28), print med skalstock/norrpil/titel/attribution (FK-29), legend med

@@ -35,9 +35,9 @@ function lmTileFor(lonLat: readonly [number, number], z: number): { x: number; y
 
 describe('parseTileParams', () => {
   it('accepterar giltig ruta med och utan filändelse', () => {
-    const a = parseTileParams({ layer: 'topowebb', z: '8', y: '120', x: '95.png' }, ZOOM);
-    expect(a).toEqual({ ok: true, tile: { layer: 'topowebb', z: 8, x: 95, y: 120, ext: 'png' } });
-    const b = parseTileParams({ layer: 'ortofoto', z: '8', y: '120', x: '95' }, ZOOM);
+    const a = parseTileParams({ layer: 'histortho', z: '8', y: '120', x: '95.png' }, ZOOM);
+    expect(a).toEqual({ ok: true, tile: { layer: 'histortho', z: 8, x: 95, y: 120, ext: 'png' } });
+    const b = parseTileParams({ layer: 'histortho', z: '8', y: '120', x: '95' }, ZOOM);
     expect(b.ok).toBe(true);
   });
 
@@ -49,37 +49,37 @@ describe('parseTileParams', () => {
   });
 
   it('avvisar zoom utanför intervallet', () => {
-    expect(parseTileParams({ layer: 'topowebb', z: '15', y: '1', x: '1' }, ZOOM).ok).toBe(false);
-    expect(parseTileParams({ layer: 'topowebb', z: '-1', y: '1', x: '1' }, ZOOM).ok).toBe(false);
+    expect(parseTileParams({ layer: 'histortho', z: '14', y: '1', x: '1' }, ZOOM).ok).toBe(false);
+    expect(parseTileParams({ layer: 'histortho', z: '-1', y: '1', x: '1' }, ZOOM).ok).toBe(false);
   });
 
   it('avvisar index utanför matrisen och skräp i sökvägen', () => {
-    expect(parseTileParams({ layer: 'topowebb', z: '0', y: '4', x: '0' }, ZOOM).ok).toBe(false);
-    expect(parseTileParams({ layer: 'topowebb', z: '8', y: '1', x: '../../etc' }, ZOOM).ok).toBe(false);
-    expect(parseTileParams({ layer: 'topowebb', z: '8', y: '1', x: '1.svg' }, ZOOM).ok).toBe(false);
+    expect(parseTileParams({ layer: 'histortho', z: '0', y: '4', x: '0' }, ZOOM).ok).toBe(false);
+    expect(parseTileParams({ layer: 'histortho', z: '8', y: '1', x: '../../etc' }, ZOOM).ok).toBe(false);
+    expect(parseTileParams({ layer: 'histortho', z: '8', y: '1', x: '1.svg' }, ZOOM).ok).toBe(false);
   });
 });
 
 describe('tileWithinKommun (bbox-spärr)', () => {
   it('släpper igenom rutan över Norrköping centrum på nivå 10', () => {
     const { x, y } = lmTileFor([16.1859, 58.58734], 10);
-    const tile: TileRequest = { layer: 'topowebb', z: 10, x, y, ext: 'png' };
+    const tile: TileRequest = { layer: 'histortho', z: 10, x, y, ext: 'png' };
     expect(tileWithinKommun(tile)).toBe(true);
   });
 
   it('avvisar rutan över Stockholm på nivå 10', () => {
     const { x, y } = lmTileFor([18.0686, 59.3293], 10);
-    expect(tileWithinKommun({ layer: 'topowebb', z: 10, x, y, ext: 'png' })).toBe(false);
+    expect(tileWithinKommun({ layer: 'histortho', z: 10, x, y, ext: 'png' })).toBe(false);
   });
 
   it('avvisar rutan över Göteborg på nivå 8', () => {
     const { x, y } = lmTileFor([11.9746, 57.7089], 8);
-    expect(tileWithinKommun({ layer: 'topowebb', z: 8, x, y, ext: 'png' })).toBe(false);
+    expect(tileWithinKommun({ layer: 'histortho', z: 8, x, y, ext: 'png' })).toBe(false);
   });
 
   it('släpper igenom en översiktsruta som täcker kommunen', () => {
     const { x, y } = lmTileFor([16.1859, 58.58734], 2);
-    expect(tileWithinKommun({ layer: 'topowebb', z: 2, x, y, ext: 'png' })).toBe(true);
+    expect(tileWithinKommun({ layer: 'histortho', z: 2, x, y, ext: 'png' })).toBe(true);
   });
 
   it('fallback-lagret (3857) spärras på samma sätt', () => {
@@ -139,11 +139,22 @@ describe('miljöläsning', () => {
     expect(zoomRangeFromEnv({ TILES_ZOOM_MIN: '3', TILES_ZOOM_MAX: '12' })).toEqual({ min: 3, max: 12 });
   });
 
-  it('URL-mallen kan överstyras från miljön', () => {
-    const tile: TileRequest = { layer: 'topowebb', z: 5, x: 7, y: 9, ext: 'png' };
-    expect(buildUpstreamUrl(tile, {})).toBe(
-      'https://maps.lantmateriet.se/topowebb/v1.1/wmts/1.0.0/topowebb/default/3006/5/9/7.png',
-    );
-    expect(buildUpstreamUrl(tile, { LM_TOPOWEBB_TEMPLATE: 'https://x.test/{z}/{x}/{y}' })).toBe('https://x.test/5/7/9');
+  it('WMS-lagret får GetMap med rutans bbox i EPSG:3006', () => {
+    const tile: TileRequest = { layer: 'histortho', z: 5, x: 7, y: 9, ext: 'jpg' };
+    const url = new URL(buildUpstreamUrl(tile, {}));
+    expect(url.origin + url.pathname).toBe('https://maps.lantmateriet.se/historiska-ortofoton/wms/v1');
+    expect(url.searchParams.get('REQUEST')).toBe('GetMap');
+    expect(url.searchParams.get('SRS')).toBe('EPSG:3006');
+    expect(url.searchParams.get('LAYERS')).toBe('OI.Histortho_60');
+    expect(url.searchParams.get('FORMAT')).toBe('image/jpeg');
+    // z5: 128 m/px × 256 = 32 768 m per ruta; x=7 → minx = −1 200 000 + 7·32 768; y=9 → maxy = 8 500 000 − 9·32 768
+    expect(url.searchParams.get('BBOX')).toBe('-970624.000,8172320.000,-937856.000,8205088.000');
+    expect(buildUpstreamUrl(tile, { LM_HISTORTHO_LAYER: 'OI.Histortho_75' })).toContain('LAYERS=OI.Histortho_75');
+  });
+
+  it('XYZ-mallen kan överstyras från miljön', () => {
+    const tile: TileRequest = { layer: 'osm', z: 5, x: 7, y: 9, ext: 'png' };
+    expect(buildUpstreamUrl(tile, {})).toBe('https://tile.openstreetmap.org/5/7/9.png');
+    expect(buildUpstreamUrl(tile, { OSM_TEMPLATE: 'https://x.test/{z}/{x}/{y}' })).toBe('https://x.test/5/7/9');
   });
 });

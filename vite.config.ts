@@ -1,7 +1,8 @@
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
+import { devFunctions } from './vite/devFunctions.ts';
 
 /**
  * Sajten lever under en underkatalog på arenm.se (kravspec §3.1, §9.1).
@@ -11,22 +12,37 @@ import { defineConfig, type Plugin } from 'vite';
 export const BASE = '/projekt/norrkoping/';
 
 /**
- * Härledda geodatafiler ligger här — skapade av tools/, kopieras in i bygget under /data/.
- * Små filer (GeoJSON) är incheckade; stora (PMTiles) är git-ignorerade och hämtas av
- * scripts/fetch-tiles.mjs vid bygge (ADR-10).
+ * Geodata under data/ (kuraterade filer i data/bad, data/poi …; härledda i data/derived) serveras
+ * under /projekt/norrkoping/data/<samma sökväg> och kopieras in i bygget. Små filer (GeoJSON) är
+ * incheckade; stora (PMTiles) är git-ignorerade och hämtas av scripts/fetch-tiles.mjs vid bygge
+ * (ADR-10). data/raw/ (råuttag) och dokumentation följer aldrig med.
  */
 const ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)));
-const DERIVED_DIR = resolve(ROOT, 'data/derived');
+const DATA_DIR = resolve(ROOT, 'data');
 const DATA_PREFIX = `${BASE}data/`;
-const SERVED = /^[\w.-]+\.(pmtiles|geojson|json)$/;
+const SERVED = /^(?!raw\/)(?:[\w-]+\/)*[\w.-]+\.(pmtiles|geojson|json)$/;
+const EXCLUDED = new Set(['derived/manifest.json']);
 const CONTENT_TYPES: Record<string, string> = {
   pmtiles: 'application/octet-stream',
   geojson: 'application/geo+json; charset=utf-8',
   json: 'application/json; charset=utf-8',
 };
 
+function listDataFiles(dir = DATA_DIR): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...listDataFiles(full));
+    else {
+      const rel = relative(DATA_DIR, full).split(sep).join('/');
+      if (SERVED.test(rel) && !EXCLUDED.has(rel)) out.push(rel);
+    }
+  }
+  return out;
+}
+
 /**
- * Serverar data/derived/* under /projekt/norrkoping/data/ i dev-servern med stöd för HTTP Range
+ * Serverar data/** under /projekt/norrkoping/data/ i dev-servern med stöd för HTTP Range
  * (PMTiles läser filen i små bitar), och kopierar filerna till dist/ vid bygge.
  * I produktion serverar CDN:et dem som vanliga statiska filer (ADR-06).
  */
@@ -41,9 +57,9 @@ function derivedData(): Plugin {
       server.middlewares.use((req, res, next) => {
         const url = (req.url ?? '').split('?')[0] ?? '';
         if (!url.startsWith(DATA_PREFIX)) return next();
-        const name = basename(url);
-        if (!SERVED.test(name)) return next();
-        const file = join(DERIVED_DIR, name);
+        const rel = decodeURIComponent(url.slice(DATA_PREFIX.length));
+        if (!SERVED.test(rel) || EXCLUDED.has(rel)) return next();
+        const file = join(DATA_DIR, rel);
         if (!existsSync(file)) {
           res.statusCode = 404;
           res.end();
@@ -51,7 +67,7 @@ function derivedData(): Plugin {
         }
         const size = statSync(file).size;
         res.setHeader('Accept-Ranges', 'bytes');
-        res.setHeader('Content-Type', CONTENT_TYPES[name.split('.').pop() ?? ''] ?? 'application/octet-stream');
+        res.setHeader('Content-Type', CONTENT_TYPES[rel.split('.').pop() ?? ''] ?? 'application/octet-stream');
         res.setHeader('Cache-Control', 'no-cache');
 
         const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range ?? '');
@@ -78,12 +94,11 @@ function derivedData(): Plugin {
       });
     },
     closeBundle() {
-      if (!existsSync(DERIVED_DIR)) return;
-      const target = join(outDir, 'data');
-      for (const name of readdirSync(DERIVED_DIR).filter((n) => SERVED.test(n) && n !== 'manifest.json')) {
-        mkdirSync(target, { recursive: true });
-        const src = join(DERIVED_DIR, name);
-        const dst = join(target, name);
+      if (!existsSync(DATA_DIR)) return;
+      for (const rel of listDataFiles()) {
+        const src = join(DATA_DIR, rel);
+        const dst = join(outDir, 'data', rel);
+        mkdirSync(join(dst, '..'), { recursive: true });
         // Hoppa över kopiering om filen redan ligger där oförändrad (PMTiles-filen är stor).
         if (existsSync(dst) && statSync(dst).size === statSync(src).size && statSync(dst).mtimeMs >= statSync(src).mtimeMs) continue;
         copyFileSync(src, dst);
@@ -92,9 +107,33 @@ function derivedData(): Plugin {
   };
 }
 
+/**
+ * CSP per sida (NFK-16). Netlify tillåter inte olika headervärden per sökväg på ett förutsägbart
+ * sätt (den generella regeln vinner), så policyn injiceras som <meta http-equiv> i varje byggd
+ * HTML-sida. Bara vid bygge: i dev injicerar Vite egna <style>-element för HMR som annars blockeras.
+ * frame-ancestors kan inte uttryckas i meta och sätts som header i netlify.toml.
+ */
+const CSP_STRICT =
+  "default-src 'self'; img-src 'self' data: blob:; connect-src 'self'; script-src 'self'; style-src 'self'; " +
+  "font-src 'self'; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; " +
+  "form-action 'self'; upgrade-insecure-requests";
+/** Verktygsläget (ADR-11): Origo bygger paneler med style-attribut och sätter <base>. script-src förblir strikt. */
+const CSP_TOOLS = CSP_STRICT.replace("style-src 'self'", "style-src 'self' 'unsafe-inline'").replace("base-uri 'none'", "base-uri 'self'");
+
+function cspMeta(): Plugin {
+  return {
+    name: 'norrkoping-csp-meta',
+    apply: 'build',
+    transformIndexHtml(_html, ctx) {
+      const content = ctx.path.startsWith('/verktyg/') ? CSP_TOOLS : CSP_STRICT;
+      return [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content }, injectTo: 'head-prepend' }];
+    },
+  };
+}
+
 export default defineConfig({
   base: BASE,
-  plugins: [derivedData()],
+  plugins: [derivedData(), cspMeta(), devFunctions({ root: ROOT, apiPrefix: `${BASE}api/` })],
   build: {
     // Bygg rakt in i den sökväg som Netlify publicerar, så att `dist/` kan
     // publiceras som den är och sajten hamnar under /projekt/norrkoping/.

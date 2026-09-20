@@ -6,7 +6,7 @@
     <title>Norrköpingskartan — sevärdheter och badplatser i Norrköpings kommun</title>
     <meta
       name="description"
-      content="Öppen, snabb och tillgänglig karta över Norrköpings kommun: de mest sevärda platserna och badplatser med aktuell badvattenstatus. Ett oberoende projekt av Aren Mardian."
+      content="Öppen, snabb och tillgänglig karta över Norrköpings kommun: badplatser med aktuell badvattenstatus från Havs- och vattenmyndigheten, väder från SMHI och Lantmäteriets karta i SWEREF 99 TM. Ett oberoende projekt av Aren Mardian."
     />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
@@ -15,20 +15,28 @@
     <script type="module" src="/src/main.ts"></script>
   </head>
   <body>
-    <a class="skip-link" href="#content" data-i18n="a11y.skipToContent">Hoppa till innehåll</a>
+    <a class="skip-link" href="#panel" data-i18n="a11y.skipToContent">Hoppa till innehåll</a>
 
     <div id="dev-banner" class="banner banner--dev" role="status" hidden></div>
 
     <header class="topbar">
-      <a class="brand" href="%BASE_URL%" data-i18n="site.name">Norrköpingskartan</a>
+      <a class="brand" href="%BASE_URL%">
+        <svg class="brand__mark" width="24" height="24" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <rect width="64" height="64" rx="14" fill="currentColor" opacity="0.12" />
+          <path d="M8 38c6-6 10-6 16 0s10 6 16 0 10-6 16 0" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" />
+          <path d="M8 48c6-6 10-6 16 0s10 6 16 0 10-6 16 0" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" opacity="0.55" />
+          <circle cx="32" cy="20" r="8" fill="currentColor" />
+        </svg>
+        <span data-i18n="site.name">Norrköpingskartan</span>
+      </a>
       <nav class="topnav" aria-label="Huvudmeny" data-i18n-aria="nav.label">
-        <a href="%BASE_URL%bad" data-i18n="nav.beaches">Badplatser</a>
+        <a href="%BASE_URL%" aria-current="page" data-i18n="nav.beaches">Badplatser</a>
         <a href="%BASE_URL%verktyg/" id="nav-verktyg" data-i18n="nav.tools">Verktyg</a>
         <a href="%BASE_URL%om" data-i18n="nav.about">Om</a>
       </nav>
     </header>
 
-    <main id="content">
+    <main id="content" class="layout">
       <section class="map-section" aria-labelledby="map-heading">
         <h1 id="map-heading" class="visually-hidden" data-i18n="map.heading">Karta över Norrköpings kommun</h1>
         <div
@@ -44,13 +52,33 @@
         <p id="map-status" class="map-status" role="status" aria-live="polite" hidden></p>
       </section>
 
-      <section class="intro">
-        <h2 data-i18n="intro.heading">Sevärdheter och badplatser i Norrköping</h2>
-        <p data-i18n="intro.body">
-          Här växer en öppen kartportal fram: de tio mest sevärda platserna i kommunen och alla badplatser med
-          aktuell badvattenstatus. Kartan bygger på Lantmäteriets bakgrundskartor i SWEREF 99 TM.
-        </p>
-      </section>
+      <aside id="panel" class="panel" data-sheet="peek" aria-labelledby="panel-title">
+        <button
+          id="panel-handle"
+          class="panel__handle"
+          type="button"
+          aria-controls="panel-body"
+          aria-expanded="false"
+          data-label-expand="Visa badplatser"
+          data-label-collapse="Fäll ihop panelen"
+          data-i18n-aria="panel.handleExpand"
+        >
+          <span class="panel__grip" aria-hidden="true"></span>
+        </button>
+        <div class="panel__head">
+          <div class="panel__titles">
+            <h2 id="panel-title" data-i18n="panel.title">Badplatser</h2>
+            <span id="bad-count" class="panel__count"></span>
+          </div>
+          <p id="bad-meta" class="panel__meta"></p>
+          <div id="bad-filter" class="chips" role="group" aria-label="Filtrera badplatser" data-i18n-aria="bad.filter.label"></div>
+        </div>
+        <div id="panel-body" class="panel__body">
+          <section id="bad-top3" class="top3" aria-live="polite"></section>
+          <ol id="bad-list" class="beach-list"></ol>
+          <section id="bad-detail" class="detail" hidden></section>
+        </div>
+      </aside>
     </main>
 
     <footer class="footer">

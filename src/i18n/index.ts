@@ -39,8 +39,10 @@ export function getLang(): Lang {
   return current;
 }
 
-export function t(key: MessageKey): string {
-  return CATALOGS[current][key];
+/** Dynamiska nycklar (t.ex. `bad.level.${level}`) tillåts; saknad nyckel faller tillbaka på svenska, sist på nyckeln själv. */
+export function t(key: MessageKey | (string & {})): string {
+  const k = key as MessageKey;
+  return CATALOGS[current][k] ?? CATALOGS.sv[k] ?? key;
 }
 
 /** Byter ut all text märkt med data-i18n / data-i18n-aria och sätter <html lang>. */

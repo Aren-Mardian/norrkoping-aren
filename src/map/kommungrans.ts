@@ -10,11 +10,9 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
-import { BASE } from '../config/site.ts';
+import { KOMMUNGRANS_URL } from '../config/site.ts';
 import { EPSG_3006 } from '../geo/olProjections.ts';
 import { t } from '../i18n/index.ts';
-
-export const KOMMUNGRANS_URL = `${BASE}data/kommungrans.geojson`;
 
 function token(name: string, fallback: string): string {
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();

@@ -1,0 +1,543 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Layout: karta + badplatspanel. Desktop (≥ 900 px): två kolumner, panelen som scrollbar
+   sidopanel. Mobil: kartan överst, panelen som bottom sheet med tre lägen (UX-03).
+   Alla färger via tokens (UX-05); status kodas med färg OCH tecken (UX-06).
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --c-status-ok: #1f8a5b;
+  --c-status-ok-contrast: #ffffff;
+  --c-status-warn: #c77700;
+  --c-status-warn-contrast: #ffffff;
+  --c-status-bad: #c62828;
+  --c-status-bad-contrast: #ffffff;
+  --c-status-unknown: #6b7480;
+  --c-status-unknown-contrast: #ffffff;
+  --c-top3: #e9b949;
+  --c-top3-soft: #fff4d6;
+  --c-advisory-bg: #fdecec;
+  --c-advisory-border: #c62828;
+  --panel-w: 400px;
+  --topbar-h: 56px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-status-ok: #3fbf86;
+    --c-status-ok-contrast: #0b1a12;
+    --c-status-warn: #f0a33f;
+    --c-status-warn-contrast: #1f1400;
+    --c-status-bad: #ff6b6b;
+    --c-status-bad-contrast: #2a0a0a;
+    --c-status-unknown: #8b96a3;
+    --c-status-unknown-contrast: #0f1418;
+    --c-top3: #f3c65a;
+    --c-top3-soft: #3a2f10;
+    --c-advisory-bg: #3a1414;
+    --c-advisory-border: #ff6b6b;
+  }
+}
+
+.layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Mobil: sheeten ligger fast över nederkanten — ge dokumentet plats så att sidfoten kan scrollas fram. */
+@media (max-width: 899px) {
+  body {
+    padding-bottom: 176px;
+  }
+
+  .topnav {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .topnav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .topnav a {
+    flex: 0 0 auto;
+    padding: 0 var(--space-2);
+  }
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.brand__mark {
+  color: var(--c-accent);
+}
+
+.topnav a[aria-current='page'] {
+  color: var(--c-text);
+  font-weight: 600;
+}
+
+/* ── Panel (bottom sheet på mobil) ────────────────────────────────────────── */
+
+.panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  max-height: 90dvh;
+  background: var(--c-surface);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -6px 24px rgb(0 0 0 / 0.18);
+  transition: height 220ms ease;
+}
+
+.panel[data-sheet='peek'] {
+  height: 168px;
+}
+
+.panel[data-sheet='half'] {
+  height: 52dvh;
+}
+
+.panel[data-sheet='full'] {
+  height: 90dvh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    transition: none;
+  }
+}
+
+.panel__handle {
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: var(--tap);
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none;
+}
+
+.panel__grip {
+  display: block;
+  width: 44px;
+  height: 5px;
+  margin: 0 auto;
+  border-radius: 3px;
+  background: var(--c-border);
+}
+
+.panel__head {
+  flex: 0 0 auto;
+  padding: 0 var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--c-border);
+}
+
+.panel__titles {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.panel__titles h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.panel__count {
+  font-size: 0.85rem;
+  color: var(--c-text-muted);
+}
+
+.panel__meta {
+  margin: var(--space-1) 0 var(--space-2);
+  font-size: 0.8rem;
+  color: var(--c-text-muted);
+}
+
+.meta--warn {
+  color: var(--c-warn-text);
+  background: var(--c-warn-bg);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-s);
+}
+
+.panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-3) var(--space-4) var(--space-6);
+}
+
+/* Desktop: sidopanel i egen kolumn, kartan fyller resten (UX-01). */
+@media (min-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) var(--panel-w);
+    height: calc(100dvh - var(--topbar-h));
+  }
+
+  .map-section .map {
+    height: 100%;
+  }
+
+  .map-section {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .panel,
+  .panel[data-sheet] {
+    position: relative;
+    height: auto;
+    min-height: 0; /* grid-item: låt inte innehållet tänja raden — panelkroppen scrollar i stället */
+    max-height: none;
+    overflow: hidden;
+    border-radius: 0;
+    border-left: 1px solid var(--c-border);
+    box-shadow: none;
+    transition: none;
+  }
+
+  .panel__handle {
+    display: none;
+  }
+
+  .panel__head {
+    padding-top: var(--space-4);
+  }
+}
+
+/* ── Chips (filter) ───────────────────────────────────────────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  background: var(--c-surface);
+  color: var(--c-text);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: var(--c-accent-contrast);
+}
+
+/* ── Topp 3 ───────────────────────────────────────────────────────────────── */
+
+.top3[hidden] {
+  display: none;
+}
+
+.top3__title {
+  margin: 0 0 var(--space-2);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+}
+
+.top3__grid {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.top3__method {
+  display: inline-block;
+  margin: var(--space-2) 0 var(--space-4);
+  font-size: 0.8rem;
+}
+
+.top3--offseason .top3__title {
+  color: var(--c-text-muted);
+}
+
+/* ── Badplatskort ─────────────────────────────────────────────────────────── */
+
+.beach-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.beach-list[hidden],
+.detail[hidden] {
+  display: none;
+}
+
+.beach__btn {
+  display: block;
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  background: var(--c-surface);
+  color: var(--c-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.beach__btn:hover,
+.beach.is-hover .beach__btn {
+  border-color: var(--c-accent);
+}
+
+.beach.is-selected .beach__btn {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 2px var(--c-accent);
+}
+
+.beach--top3 .beach__btn {
+  background: var(--c-top3-soft);
+}
+
+.beach__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.beach__rank {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--c-top3);
+  color: #1d2126;
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+.beach__names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.beach__name {
+  font-weight: 650;
+  font-size: 1rem;
+}
+
+.beach__water {
+  font-size: 0.8rem;
+  color: var(--c-text-muted);
+}
+
+.beach__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.beach__temp {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  color: var(--c-text-muted);
+}
+
+.beach__advisory {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2);
+  border-left: 3px solid var(--c-advisory-border);
+  background: var(--c-advisory-bg);
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  font-size: 0.85rem;
+}
+
+/* ── Statuspiller: färg + tecken + text (UX-06) ───────────────────────────── */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px 2px 4px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--c-surface-2);
+  color: var(--c-text);
+}
+
+.pill__glyph {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  color: var(--c-status-unknown-contrast);
+  background: var(--c-status-unknown);
+}
+
+.pill--ok .pill__glyph {
+  background: var(--c-status-ok);
+  color: var(--c-status-ok-contrast);
+}
+
+.pill--warn .pill__glyph {
+  background: var(--c-status-warn);
+  color: var(--c-status-warn-contrast);
+}
+
+.pill--bad .pill__glyph {
+  background: var(--c-status-bad);
+  color: var(--c-status-bad-contrast);
+}
+
+/* ── Detaljvy ─────────────────────────────────────────────────────────────── */
+
+.detail__back {
+  min-height: var(--tap);
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  color: var(--c-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.detail__title {
+  margin: var(--space-2) 0 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+}
+
+.detail__sub {
+  margin: 2px 0 var(--space-3);
+  color: var(--c-text-muted);
+  font-size: 0.9rem;
+}
+
+.advisory {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--c-advisory-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-s);
+  background: var(--c-advisory-bg);
+}
+
+.advisory p {
+  margin: var(--space-1) 0 0;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0 0 var(--space-3);
+  font-size: 0.9rem;
+}
+
+.facts dt {
+  color: var(--c-text-muted);
+}
+
+.facts dd {
+  margin: 0;
+}
+
+.detail__rationale {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-s);
+  background: var(--c-top3-soft);
+  font-size: 0.85rem;
+}
+
+.weather {
+  margin: var(--space-4) 0 var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+}
+
+.weather__title {
+  margin: 0 0 var(--space-1);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+}
+
+.weather__body {
+  margin: 0;
+}
+
+.weather__now {
+  font-weight: 600;
+}
+
+.weather__hours {
+  display: flex;
+  gap: var(--space-2);
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  overflow-x: auto;
+}
+
+.weather__hours li {
+  flex: 0 0 auto;
+  display: grid;
+  gap: 2px;
+  min-width: 52px;
+  padding: var(--space-2);
+  border-radius: var(--radius-s);
+  background: var(--c-surface-2);
+  text-align: center;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather__t {
+  font-weight: 700;
+}
+
+.weather__p {
+  color: var(--c-text-muted);
+}
+
+.weather__meta,
+.detail__source {
+  margin: var(--space-2) 0 0;
+  font-size: 0.75rem;
+  color: var(--c-text-muted);
+}
+
+.detail__link {
+  display: inline-block;
+  margin-top: var(--space-2);
+  font-size: 0.85rem;
+}

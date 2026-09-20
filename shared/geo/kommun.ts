@@ -7,7 +7,7 @@
  * N–S och saknade havsområdet öster om skärgården — den är nu ersatt.
  */
 
-/** Kommunkod enligt SCB. Nyckel mot HaV:s och SCB:s data (Bilaga B.3). */
+/** Kommunkod enligt SCB. Nyckel mot HaV (NUTSKOD SE023 + 0581), Lantmäteriet och SCB (Bilaga B.3). Används av tools/. */
 export const KOMMUN_KOD = '0581';
 
 /**
@@ -30,9 +30,6 @@ export const KOMMUN_BBOX_3857 = [1738532, 8051606, 1955806, 8148876] as const;
 
 /** Panoreringsbuffert runt kommunen (FK-04): 25 km. */
 export const PAN_BUFFER_M = 25_000;
-
-/** Referenspunkt Norrköping centrum (Bilaga B.2), [lon, lat]. */
-export const CENTRUM_4326 = [16.1859, 58.58734] as const;
 
 export type Extent = readonly [number, number, number, number];
 

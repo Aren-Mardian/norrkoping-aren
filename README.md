@@ -13,8 +13,9 @@ Målplattform: `https://arenm.se/projekt/norrkoping`
 |---|---|---|
 | 0 | Grund — repo, Vite+TS, CI, tile-proxy, CSP/headers, dev-läge utan token | **Klar lokalt** — väntar på Netlify-sajt (användaren) |
 | 1 | Karta står — LM-bakgrund, växlare, kommungräns, startextent, skalstock | **Nästan klar** — Lantmäteriets topografiska karta självhostad som PMTiles (ADR-09/10), kommungräns (OSM tills LM:s finns), växlare inkl. mörkt läge, startextent, skalstock. Återstår: flygbild (historiska ortofoton, kräver appkonto) |
-| 4 | Verktygsläge — Origo på egen route: mät, rita, koordinater, dela, utskrift, lager | **Klar lokalt** (ADR-11) — `/verktyg/`, Origo 2.10.0 vendorerad, PMTiles-bakgrund, CSP-verifierad. Återstår: höjdmätning (Markhöjd Direkt, kräver appkonto) |
-| 2, 3, 5–7 | Se kravspec §12 | Ej påbörjad |
+| 3 | Badplatser — HaV-integration, status, Topp 3, varningar, filter, SMHI | **Klar (första version)** — 19 badplatser, `/api/bad/status` (IK-02) med stale-cache, `/api/vader` (IK-03, SMHI snow1g), Topp 3 med publicerad viktning, avrådan som inte kan filtreras bort (DK-07), panel/bottom sheet (UX-03). Återstår: faciliteter (kuratering), badindex (FK-19), tillgänglighetsfilter (FK-20), `/metod`-sidan |
+| 4 | Verktygsläge — Origo på egen route: mät, rita, koordinater, dela, utskrift, lager | **Klar** (ADR-11/12) — `/verktyg/`, Origo 2.10.0 vendorerad, PMTiles-bakgrund, CSP per sida. Återstår: höjdmätning (Markhöjd Direkt) |
+| 2, 5–7 | Se kravspec §12 | Ej påbörjad |
 
 ## Kom igång (under 10 minuter)
 
@@ -29,22 +30,38 @@ npm run dev
 webbkarta som självhostad PMTiles-fil (`data/derived/topowebb-farg.pmtiles`, CC BY 4.0). Den ligger
 inte i git: `npm run build` (eller `npm run fetch:tiles`) hämtar den från GitHub Releases enligt
 `data/derived/manifest.json` och verifierar SHA-256 ([ADR-10](docs/adr/ADR-10-leverans-av-stora-datafiler.md)).
-Så länge repot är privat behöver bygget en `GITHUB_TOKEN` (läsrättighet) för att nå release-filen —
-i GitHub Actions automatiskt, på Netlify som miljövariabel (se ADR-10).
+Repot är publikt, så release-filen hämtas utan token (privat repo: se ADR-10).
 Hur den skapas från Lantmäteriets 163-GB-fil står i [ADR-09](docs/adr/ADR-09-sjalvhostad-bakgrundskarta.md)
 och [tools/README.md](tools/README.md). Saknas filen faller appen tillbaka på OpenStreetMap
 (reprojicerad till SWEREF 99 TM) med en synlig utvecklingsbanner (FK-33). Utan `.env` saknas dessutom
 flygbilden, som går via edge-proxyn.
 
-### Med Lantmäteriets bakgrundskartor
+### Edge-funktionerna lokalt
+
+`npm run dev` kör även `netlify/functions/*.mts` (tile-proxy, badvattenstatus, väder) direkt i
+Vites dev-server via [vite/devFunctions.ts](vite/devFunctions.ts) — ingen `netlify-cli` behövs
+(ADR-12). `.env` läses in i `process.env` precis som på Netlify.
+
+### Med Lantmäteriets appkonto (flygbild, kommungräns, ortnamn)
 
 1. Kopiera `.env.example` till `.env` och fyll i `LM_USER`/`LM_PASSWORD` (appkonto från Geotorget)
-   samt `VITE_LM_ENABLED=true`. `.env` är git-ignorerad och får aldrig checkas in.
-2. Kör `npm run dev:netlify` (kräver `npm i -g netlify-cli`). Netlify Dev kör edge-funktionerna
-   lokalt så att `/api/tiles/...` fungerar.
+   samt `VITE_LM_ENABLED=true`. `.env` är git-ignorerad och får aldrig checkas in. Samma värden läggs
+   som miljövariabler i Netlify (Site configuration → Environment variables).
+2. Flygbild = Lantmäteriets *Ortofoto historiska* (WMS, CC0) via proxyn `/api/tiles/histortho/…`.
+   Lagernamnet (`LM_HISTORTHO_LAYER`) verifieras mot GetCapabilities, se `.env.example`.
+3. `tools/.venv/Scripts/python tools/lm_stac.py` hämtar Lantmäteriets kommungräns och ortnamn via
+   STAC-API:et och skriver `data/derived/kommungrans.geojson` (ersätter OSM) och `ortnamn.geojson`.
 
-Tile-proxyn är den enda platsen där Lantmäteriets uppgifter finns. Klientbundlen innehåller aldrig
+Proxyn är den enda platsen där Lantmäteriets uppgifter finns. Klientbundlen innehåller aldrig
 en hemlighet — variabler med prefix `VITE_` är publika.
+
+### Badplatser
+
+Grunddata: `data/bad/badplatser.geojson`, genererad av `tools/badplatser_hav.py` från HaV:s
+Badplatsen-API (19 badplatser, kommunkod 0581) med Topp 3 enligt kravspecens viktning (DK-05) —
+reproducerbart och dokumenterat i filens `top3Method`. Dynamisk status: `/api/bad/status`
+(normaliserad i `netlify/lib/hav.ts`, cachad 1 h, stale-svar vid uppströmsfel). Väder:
+`/api/vader?lat&lon` (SMHI snow1g, koordinater avrundade till 2 decimaler).
 
 ### Verktygsläget (Origo)
 
@@ -58,8 +75,7 @@ Origo finns inte på npm; bundlen byggs reproducerbart med `node tools/build-ori
 
 | Kommando | Vad |
 |---|---|
-| `npm run dev` | Vite dev-server (fallback-läge) |
-| `npm run dev:netlify` | Vite + edge-funktioner via Netlify Dev |
+| `npm run dev` | Vite dev-server inkl. edge-funktionerna (ADR-12) |
 | `npm run build` | Hämtar kartdata enligt manifestet, sedan produktionsbygge till `dist/projekt/norrkoping/` |
 | `npm run fetch:tiles` | Bara nedladdning/verifiering av kartdata (ADR-10) |
 | `npm run typecheck` | `tsc --noEmit` i strikt läge för klient och funktioner (NFK-29) |
@@ -86,7 +102,9 @@ src/                    Klient (Vite + TypeScript, vanilla)
   config/site.ts        BASE, API_BASE, LM_ENABLED — allt publikt
   geo/olProjections.ts  Registrerar EPSG:3006/3010 i OpenLayers
   i18n/                 sv/en-kataloger utan runtime-bibliotek (FK-34)
+  bad/                  Badplatser: datamodell, kartlager, panel (Kärnfunktion B)
   map/                  Kartkärna, bakgrundskartor med fallback, PMTiles-läsare/-källa, egna kontroller
+  net/                  fetch med timeout/omförsök (IK-06, IK-07)
   verktyg/              Origo-konfiguration och bootstrap för verktygsläget (ADR-11)
   ui/                   Banners och statusrader
 shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
@@ -97,11 +115,14 @@ shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
   geo/kommun.ts         Kommunkod, bbox, panoreringsbuffert
   api/errors.ts         Enhetlig felmodell (IK-04)
 netlify/functions/      Edge-funktioner (Netlify Functions 2.0)
-  tiles.mts             IK-01 tile-proxy
-netlify/lib/            Testbar logik för funktionerna
+  tiles.mts             IK-01 tile-proxy (flygbild via WMS, OSM-fallback)
+  bad-status.mts        IK-02 badvattenstatus (HaV)
+  vader.mts             IK-03 väder (SMHI)
+netlify/lib/            Testbar logik för funktionerna (hav.ts, smhi.ts, tilesGuard.ts, upstream.ts)
+vite/                   Vite-plugin som kör edge-funktionerna i dev
 data/                   Kuraterad geodata (GeoJSON, EPSG:4326), SOURCES.md, derived/ (PMTiles, ej i git)
 public/vendor/          Vendorerade bibliotek (Origo, versionerad sökväg)
-docs/                   Kravspec, referenssystem, villkor, ADR:er
+docs/                   Kravspec, referenssystem, villkor, ADR:er, deploy/ (IIS-mall)
 scripts/                Byggkontroller, hämtning av kartdata
 tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval; Origo-bygge
 ```

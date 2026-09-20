@@ -23,4 +23,14 @@ export const IS_DEV = import.meta.env.DEV;
 export const PROXY_AVAILABLE = !IS_DEV || LM_ENABLED;
 
 /** Självhostad bakgrundskarta (PMTiles, ADR-09); serveras av Vite-pluginen lokalt och som statisk fil i produktion. */
-export const TOPO_PMTILES_URL = `${BASE}data/topowebb-farg.pmtiles`;
+export const TOPO_PMTILES_URL = `${BASE}data/derived/topowebb-farg.pmtiles`;
+
+/** Kommungräns (GeoJSON, EPSG:4326). */
+export const KOMMUNGRANS_URL = `${BASE}data/derived/kommungrans.geojson`;
+
+/** Badplatser, statisk grunddata (kravspec §6.3). */
+export const BADPLATSER_URL = `${BASE}data/bad/badplatser.geojson`;
+
+/** Dynamisk badvattenstatus (IK-02) och väder (IK-03). */
+export const BAD_STATUS_URL = `${API_BASE}/bad/status`;
+export const VADER_URL = `${API_BASE}/vader`;
