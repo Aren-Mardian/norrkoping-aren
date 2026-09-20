@@ -1,0 +1,25 @@
+# Hemlighetsskanning (TK-06, NFK-15). Körs i CI på hela git-historiken vid varje push och,
+# i byggjobbet, på byggutdatan i dist/ (npm run scan:secrets).
+#
+# Utgår från gitleaks standardregler. Undantagen nedan är enbart kompilerad/minifierad kod:
+#  - Vendorerade bundlar under vendor/ (Origo, med OpenLayers inbakat). OpenLayers egen kod
+#    ("strokeKey_", "textKey_", "fillKey_" i TextBuilder) matchar regeln generic-api-key på ren
+#    slump — minifierade identifierare har hög entropi. Bundlarna kommer från en taggad release och
+#    är spårbara via public/vendor/*/VERSION.json (commit-hash).
+#  - Vites innehållshashade chunkar under assets/ (vår egen kompilerade OpenLayers/proj4-kod).
+#  - Lokala kataloger som aldrig ligger i git (node_modules, Python-venv).
+# All egen källkod, konfiguration, data och dokumentation skannas fullt ut.
+
+title = "Norrköpingskartan"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Kompilerad/minifierad tredjepartskod och lokala icke-git-kataloger"
+paths = [
+  '''(^|/)vendor/[^/]+/js/[^/]+\.min\.js$''',
+  '''(^|/)assets/[^/]+-[A-Za-z0-9_-]{8}\.js$''',
+  '''^node_modules/''',
+  '''^tools/\.venv/''',
+]

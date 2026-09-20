@@ -65,7 +65,17 @@ Origo finns inte på npm; bundlen byggs reproducerbart med `node tools/build-ori
 | `npm run typecheck` | `tsc --noEmit` i strikt läge för klient och funktioner (NFK-29) |
 | `npm test` | Vitest: geodetiska tester (TK-02, TK-03) och proxyns spärrar (NFK-18) |
 | `npm run check:budget` | Bundlebudget (NFK-02) och Origo-isolering (TK-05) mot `dist/` |
+| `npm run scan:secrets` | gitleaks på git-historiken och på `dist/` (TK-06); kräver `gitleaks` i PATH. Regler i `.gitleaks.toml` |
 | `npm run check` | Allt ovan i följd — samma som CI |
+
+## Säkerhet i CI
+
+Två jobb på varje push (`.github/workflows/ci.yml`): typkontroll → tester → bygge → bundlebudget →
+gitleaks på byggutdatan, samt gitleaks på hela git-historiken. Reglerna i [.gitleaks.toml](.gitleaks.toml)
+är gitleaks standard plus undantag för kompilerad/minifierad kod (vendorerad Origo/OpenLayers och Vites
+hashade chunkar) — där matchar OpenLayers interna cache-nycklar (`textKey_` …) regeln `generic-api-key`
+av en slump. Egen kod, konfiguration, data och dokumentation skannas fullt ut. Hemligheter finns aldrig i
+repot: `.env` är git-ignorerad, appkonton ligger bara i Netlifys miljövariabler och når enbart edge-funktionerna.
 
 ## Struktur
 

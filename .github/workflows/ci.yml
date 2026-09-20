@@ -8,13 +8,16 @@ on:
 permissions:
   contents: read
 
+env:
+  GITLEAKS_VERSION: 8.24.3
+
 jobs:
   # NFK-29/30: typkontroll, tester, bygge och bundlebudget (NFK-02) på varje push.
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -26,14 +29,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run check:budget
+      # TK-06: hemlighetsskanning även av byggartefakterna (samma regler som .gitleaks.toml).
+      - name: Hämta gitleaks
+        run: |
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
+          ./gitleaks version
+      - name: Skanna byggutdata (dist/)
+        run: ./gitleaks detect --config .gitleaks.toml --no-git --source dist --redact --exit-code 1
 
-  # TK-06 / NFK-15: hemlighetsskanning på hela historiken.
+  # TK-06 / NFK-15: hemlighetsskanning på hela git-historiken.
   secrets:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml

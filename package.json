@@ -19,7 +19,8 @@
     "test:watch": "vitest",
     "check:budget": "node scripts/check-budget.mjs",
     "check": "npm run typecheck && npm run test && npm run build && npm run check:budget",
-    "fetch:tiles": "node scripts/fetch-tiles.mjs"
+    "fetch:tiles": "node scripts/fetch-tiles.mjs",
+    "scan:secrets": "gitleaks detect --config .gitleaks.toml --redact --exit-code 1 && gitleaks detect --config .gitleaks.toml --no-git --source dist --redact --exit-code 1"
   },
   "dependencies": {
     "ol": "^10.10.0",
