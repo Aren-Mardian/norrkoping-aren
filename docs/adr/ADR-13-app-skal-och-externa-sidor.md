@@ -44,7 +44,7 @@ gjorde att de tyst visade landningsvyn under fel adress.
    statusens ålder visas i panelen; prognosens utgivningstid i vädermodulen). Plus en rad om
    integritet: inga kakor, ingen spårning, IP-adressen skickas inte vidare (NFK-23).
 5. **Om projektet, Källor och licenser, Integritet länkar till arenm.se** (portfolion), på
-   uttrycklig begäran. Sajten har inga egna sidor utöver `/` och `/verktyg/`; Topp 3-metoden
+   uttrycklig begäran. Sajten har inga egna sidor utöver `/` och `/origo/`; Topp 3-metoden
    förklaras på plats i ett `<details>` i stället för på `/metod`.
 6. **Riktiga 404.** SPA-fallbacken är borttagen. `/sv/*` och `/en/*` leder fortfarande till
    landningsvyn (språkprefix, FK-34); allt annat okänt ger `404.html` med status 404.

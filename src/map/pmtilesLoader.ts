@@ -1,7 +1,7 @@
 /**
  * Ramverksoberoende laddning av kartrutor ur en självhostad raster-PMTiles i Lantmäteriets
  * 3006-matris (ADR-06, ADR-09). Används både av landningsvyns OpenLayers (pmtilesSource.ts)
- * och av Origos inbäddade OpenLayers på /verktyg (ADR-11) — därför inga `ol`-importer här.
+ * och av Origos inbäddade OpenLayers på /origo/ (ADR-11) — därför inga `ol`-importer här.
  *
  * PMTiles kräver att nivå 0 är en enda ruta medan LM:s nivå 0 är 4×4, så filen lagrar
  * LM-nivå z som PMTiles-nivå z + offset (offset läses ur metadata).

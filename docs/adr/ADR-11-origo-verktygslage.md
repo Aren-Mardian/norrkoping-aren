@@ -22,18 +22,20 @@ planärt i Web Mercator — förenligt med NFK-12.
 ## Beslut
 
 1. **Origo vendoreras som färdigbyggd artefakt** i `public/vendor/origo-<version>/` (2,7 MB: `origo.min.js`,
-   CSS, SVG-sprites, norrpil) plus sidrelativa bilder i `public/verktyg/img/`. Bygget är reproducerbart
+   CSS, SVG-sprites, norrpil) plus sidrelativa bilder i `public/origo/img/`. Bygget är reproducerbart
    med `tools/build-origo.mjs` (klonar taggen, `npm ci`, `npm run build`, kopierar exakt de filer bundlen
    refererar) och dokumenterat i `VERSION.json` (version, commit, licens, byggdatum). Versionen ligger i
    sökvägen → filerna kan cachas i 30 dagar som `immutable`. BSD 2-clause-licensen följer med.
-2. **Verktygsläget är en egen HTML-sida** (`verktyg/index.html` → `/projekt/norrkoping/verktyg/`) med egen
+2. **Verktygsläget är en egen HTML-sida** (`origo/index.html` → `/projekt/norrkoping/origo/`; hette
+   `/verktyg/` t.o.m. 2026-09-20, 301-redirect finns kvar — sidan heter "Origo" i menyn så att det
+   är tydligt vad den är) med egen
    Vite-entry. Landningsvyn importerar inget härifrån; `npm run check:budget` verifierar att `index.html`
    inte refererar Origo (TK-05) och att verktygssidans kritiska väg håller 900 kB (mätt: 778 kB gzip,
    varav Origo 764; Netlify skickar brotli ≈ 590 kB).
 3. **Origo laddas som klassiskt script** (`window.Origo`) från egen origin, med `<link rel="preload">`
    så att hämtningen startar parallellt med vår modulkod. Landningsvyn **förhämtar** scriptet först när
    användaren visar avsikt (pointerenter/focus/touchstart på "Verktyg"-länken) — aldrig annars (NFK-34).
-4. **Konfigurationen är ett TypeScript-objekt** (`src/verktyg/origoConfig.ts`) byggt från samma
+4. **Konfigurationen är ett TypeScript-objekt** (`src/origo/origoConfig.ts`) byggt från samma
    konstanter som landningsvyn: EPSG:3006 med proj4-definitioner för 3006/3010 (`shared/geo/crs.ts`),
    Lantmäteriets upplösningar och tile-matris, kommunens utbredning och panoreringsspärr.
    `defaultControls: []` — annars dubblerar Origo sina standardkontroller.
@@ -59,7 +61,7 @@ planärt i Web Mercator — förenligt med NFK-12.
 - **Prestanda:** landningsvyn oförändrad (150 kB gzip). Verktygssidan 778 kB gzip, laddas bara på
   begäran; ett besök drar dessutom bara de kartrutor som syns (Range-requests mot samma fil).
 - **Underhåll:** ny Origo-version = kör `tools/build-origo.mjs vX.Y.Z`, uppdatera `ORIGO_VERSION` i
-  `origoConfig.ts` och sökvägen i `verktyg/index.html`, verifiera CSP med den lokala testservern.
+  `origoConfig.ts` och sökvägen i `origo/index.html`, verifiera CSP med den lokala testservern.
 - **Geodesi:** Origos mätning använder sfärisk geodesi (R = 6 371 008,8 m). På Norrköpings latitud
   avviker det ≤ 0,35 % från GRS80-ellipsoiden — inom TK-03 (0,5 %). Se docs/referenssystem.md.
 - **Noll konsolfel** under produktions-CSP på båda sidorna (verifierat med `scripts`-fri lokal server

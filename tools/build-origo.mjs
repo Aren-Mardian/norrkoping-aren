@@ -5,7 +5,7 @@
  *
  * Origo finns inte på npm och GitHub-releaserna innehåller bara källkod, så bygget görs här en
  * gång, reproducerbart, och resultatet checkas in (~2,7 MB). Webbappen laddar det lazy på
- * /verktyg — aldrig på landningsvyn (TK-05).
+ * /origo/ — aldrig på landningsvyn (TK-05).
  *
  *   node tools/build-origo.mjs            # bygger ORIGO_VERSION nedan
  *   node tools/build-origo.mjs v2.11.0    # annan tagg
@@ -24,7 +24,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const VERSION_DIR = `origo-${ORIGO_VERSION.replace(/^v/, '')}`;
 const TARGET = join(ROOT, 'public', 'vendor', VERSION_DIR);
 /** Origo refererar vissa bilder sidrelativt ("img/…") — de måste ligga under verktygssidans URL. */
-const PAGE_DIR = join(ROOT, 'public', 'verktyg');
+const PAGE_DIR = join(ROOT, 'public', 'origo');
 
 /** Exakt de filer bundlen refererar (grep "img/|css/" i origo.min.js) plus sprites enligt svgSprites. */
 const FILES = [
@@ -86,7 +86,7 @@ try {
         built: new Date().toISOString().slice(0, 10),
         builtWith: `node ${process.version}`,
         files: FILES.map(([, to]) => to),
-        pageFiles: PAGE_FILES.map(([, to]) => `public/verktyg/${to}`),
+        pageFiles: PAGE_FILES.map(([, to]) => `public/origo/${to}`),
       },
       null,
       2,

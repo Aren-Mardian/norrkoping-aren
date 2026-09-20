@@ -20,10 +20,21 @@
   to = "/projekt/norrkoping/"
   status = 301
 
-# Verktygssidan använder relativa sökvägar (../vendor, ../data) och kräver avslutande snedstreck.
+# Origo-sidan använder relativa sökvägar (../vendor, ../data) och kräver avslutande snedstreck.
+[[redirects]]
+  from = "/projekt/norrkoping/origo"
+  to = "/projekt/norrkoping/origo/"
+  status = 301
+
+# Sidan hette /verktyg/ till 2026-09-20 (ADR-11) — gamla länkar och bokmärken ska fortsätta fungera.
 [[redirects]]
   from = "/projekt/norrkoping/verktyg"
-  to = "/projekt/norrkoping/verktyg/"
+  to = "/projekt/norrkoping/origo/"
+  status = 301
+
+[[redirects]]
+  from = "/projekt/norrkoping/verktyg/*"
+  to = "/projekt/norrkoping/origo/:splat"
   status = 301
 
 # Saknad datafil ska ge 404, inte index.html (annars försöker PMTiles-läsaren tolka HTML).
@@ -49,7 +60,7 @@
   status = 200
 
 # Allt annat som saknas är ett riktigt 404 — inte landningsvyn under fel adress. Om projektet,
-# källor och integritet ligger på arenm.se; sajten har inga egna sidor utöver / och /verktyg/.
+# källor och integritet ligger på arenm.se; sajten har inga egna sidor utöver / och /origo/.
 # Funktioner under /api definierar sina egna sökvägar och matchas före denna regel.
 [[redirects]]
   from = "/projekt/norrkoping/*"
@@ -63,7 +74,7 @@
 # HTML-dokument får Netlifys standard "public, max-age=0, must-revalidate" + ETag (NFK-04).
 
 # Säkerhet (NFK-16, NFK-17) — gäller allt. Själva CSP:n ligger som <meta http-equiv> i varje
-# HTML-sida (strikt på landningsvyn, relaxad style-src/base-uri bara på /verktyg/), eftersom Netlify
+# HTML-sida (strikt på landningsvyn, relaxad style-src/base-uri bara på /origo/), eftersom Netlify
 # inte tillåter olika värden per sökväg på ett förutsägbart sätt. Headern bär bara det som meta
 # inte kan uttrycka: frame-ancestors.
 [[headers]]

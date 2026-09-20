@@ -11,7 +11,7 @@
  *     samma kod som landningsvyn, men mot Origos egen OpenLayers-instans.
  */
 import '../style.css';
-import './verktyg.css';
+import './origo.css';
 import { BASE, IS_DEV, TOPO_PMTILES_URL } from '../config/site.ts';
 import { initI18n, t } from '../i18n/index.ts';
 import { createPmtilesTileLoader, type ImageTileLike } from '../map/pmtilesLoader.ts';
@@ -21,7 +21,7 @@ import { ORIGO_SCRIPT, TOPO_LAYER_NAME, buildOrigoConfig } from './origoConfig.t
 const lang = initI18n();
 initLangToggle();
 
-const status = document.getElementById('verktyg-status');
+const status = document.getElementById('origo-status');
 const wrapper = document.getElementById('app-wrapper');
 
 function showStatus(message: string): void {
@@ -45,7 +45,7 @@ function loadScript(src: string): Promise<void> {
 function attachBasemap(viewer: OrigoViewer): void {
   const layer = viewer.getLayer(TOPO_LAYER_NAME);
   if (!layer) {
-    showStatus(t('verktyg.status.noBasemap'));
+    showStatus(t('origo.status.noBasemap'));
     return;
   }
   const source = layer.getSource();
@@ -59,7 +59,7 @@ function attachBasemap(viewer: OrigoViewer): void {
   source.refresh();
   loader.ready
     .then((info) => source.setAttributions(info.attribution))
-    .catch(() => showStatus(t('verktyg.status.noBasemap')));
+    .catch(() => showStatus(t('origo.status.noBasemap')));
 }
 
 async function boot(): Promise<void> {
@@ -67,23 +67,23 @@ async function boot(): Promise<void> {
   try {
     await loadScript(ORIGO_SCRIPT);
   } catch {
-    showStatus(t('verktyg.status.loadFailed'));
+    showStatus(t('origo.status.loadFailed'));
     return;
   }
   const Origo = window.Origo;
   if (!Origo) {
-    showStatus(t('verktyg.status.loadFailed'));
+    showStatus(t('origo.status.loadFailed'));
     return;
   }
 
   // Origo lägger alltid till <base href={baseUrl}>. Sidans egen katalog ändrar inget i hur relativa
-  // URL:er löses, och CSP:n för /verktyg/ tillåter base-uri 'self' (netlify.toml, ADR-11).
-  const origo = Origo(buildOrigoConfig(lang), { baseUrl: `${BASE}verktyg/` });
+  // URL:er löses, och CSP:n för /origo/ tillåter base-uri 'self' (meta, ADR-12).
+  const origo = Origo(buildOrigoConfig(lang), { baseUrl: `${BASE}origo/` });
   origo.on('load', (viewer) => {
     wrapper.classList.add('is-ready');
     attachBasemap(viewer);
     // Felsökningshandtag lokalt — aldrig i produktion.
-    if (IS_DEV) (window as unknown as { __verktyg?: unknown }).__verktyg = { origo, viewer };
+    if (IS_DEV) (window as unknown as { __origo?: unknown }).__origo = { origo, viewer };
   });
 }
 

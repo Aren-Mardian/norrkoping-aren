@@ -56,6 +56,10 @@ export function applyI18n(root: Document): void {
     const key = el.dataset['i18nAria'] as MessageKey | undefined;
     if (key && key in CATALOGS.sv) el.setAttribute('aria-label', t(key));
   }
+  for (const el of root.querySelectorAll<HTMLElement>('[data-i18n-title]')) {
+    const key = el.dataset['i18nTitle'] as MessageKey | undefined;
+    if (key && key in CATALOGS.sv) el.title = t(key);
+  }
 }
 
 export function initI18n(): Lang {

@@ -127,7 +127,7 @@ const CSP_STRICT =
   "default-src 'self'; img-src 'self' data: blob:; connect-src 'self'; script-src 'self'; style-src 'self'; " +
   "font-src 'self'; manifest-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; " +
   "form-action 'self'; upgrade-insecure-requests";
-/** Verktygsläget (ADR-11): Origo bygger paneler med style-attribut och sätter <base>. script-src förblir strikt. */
+/** Origo-sidan (ADR-11): Origo bygger paneler med style-attribut och sätter <base>. script-src förblir strikt. */
 const CSP_TOOLS = CSP_STRICT.replace("style-src 'self'", "style-src 'self' 'unsafe-inline'").replace("base-uri 'none'", "base-uri 'self'");
 
 function cspMeta(): Plugin {
@@ -135,7 +135,7 @@ function cspMeta(): Plugin {
     name: 'norrkoping-csp-meta',
     apply: 'build',
     transformIndexHtml(_html, ctx) {
-      const content = ctx.path.startsWith('/verktyg/') ? CSP_TOOLS : CSP_STRICT;
+      const content = ctx.path.startsWith('/origo/') ? CSP_TOOLS : CSP_STRICT;
       return [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content }, injectTo: 'head-prepend' }];
     },
   };
@@ -160,7 +160,7 @@ export default defineConfig({
       // Två sidor: landningsvyn och verktygsläget. Origo laddas bara av den senare (TK-05, ADR-02).
       input: {
         main: resolve(ROOT, 'index.html'),
-        verktyg: resolve(ROOT, 'verktyg/index.html'),
+        origo: resolve(ROOT, 'origo/index.html'),
       },
       output: {
         // Kartkärnan i egna chunkar: byts sällan → cachas länge (NFK-04).

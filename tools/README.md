@@ -50,7 +50,7 @@ PMTiles-nivå = LM-nivå + 2 (metadata `lm_zoom_offset`); se docstringen i scrip
 ## Origo (verktygsläget)
 
 `build-origo.mjs` klonar en taggad Origo-version, bygger den med webpack och vendorerar exakt de
-filer som behövs till `public/vendor/origo-<version>/` (+ sidrelativa bilder i `public/verktyg/img/`).
+filer som behövs till `public/vendor/origo-<version>/` (+ sidrelativa bilder i `public/origo/img/`).
 Node-script, ingen Python:
 
 ```bash
@@ -58,8 +58,8 @@ node tools/build-origo.mjs            # v2.10.0
 node tools/build-origo.mjs v2.11.0    # annan tagg
 ```
 
-Efter byte av version: uppdatera `ORIGO_VERSION` i `src/verktyg/origoConfig.ts` och sökvägarna i
-`verktyg/index.html`, kör `npm run check`, och verifiera CSP:n (ADR-11).
+Efter byte av version: uppdatera `ORIGO_VERSION` i `src/origo/origoConfig.ts` och sökvägarna i
+`origo/index.html`, kör `npm run check`, och verifiera CSP:n (ADR-11).
 
 ## Ekonomiska kartan (historiska blad)
 

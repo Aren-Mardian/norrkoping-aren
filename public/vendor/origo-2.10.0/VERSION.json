@@ -20,10 +20,10 @@
     "LICENSE.txt"
   ],
   "pageFiles": [
-    "public/verktyg/img/geolocation_marker.png",
-    "public/verktyg/img/geolocation_marker_heading.png",
-    "public/verktyg/img/loading.gif",
-    "public/verktyg/img/png/drop_blue.png",
-    "public/verktyg/img/png/farg.png"
+    "public/origo/img/geolocation_marker.png",
+    "public/origo/img/geolocation_marker_heading.png",
+    "public/origo/img/loading.gif",
+    "public/origo/img/png/drop_blue.png",
+    "public/origo/img/png/farg.png"
   ]
 }

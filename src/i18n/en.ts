@@ -5,7 +5,7 @@ export const en: Record<MessageKey, string> = {
   'a11y.skipToContent': 'Skip to content',
   'nav.label': 'Main menu',
   'nav.beaches': 'Beaches',
-  'nav.tools': 'Tools',
+  'nav.tools': 'Origo',
   'nav.about': 'About',
   'nav.lang': 'Svenska',
   'nav.langAria': 'Byt språk till svenska',
@@ -25,7 +25,7 @@ export const en: Record<MessageKey, string> = {
   // ── Footer: where the information comes from and how it is fetched ──
   'footer.title': 'Where the information comes from',
   'footer.summary':
-    'Map: Lantmäteriet (self-hosted) · Bathing water: HaV (API) · Weather: SMHI (API) · Boundary: OpenStreetMap · Tools: Origo/OpenLayers',
+    'Map: Lantmäteriet (self-hosted) · Bathing water: HaV (API) · Weather: SMHI (API) · Boundary: OpenStreetMap · Tools: Origo/OpenLayers (/origo/)',
   'footer.intro': 'Every fact on this page comes from an open source. This is where it comes from, how it is fetched and how fresh it is.',
   'footer.src.topo.name': 'Base map',
   'footer.src.topo.body':
@@ -55,10 +55,13 @@ export const en: Record<MessageKey, string> = {
   'footer.sources': 'Sources and licences',
   'footer.privacy': 'Privacy',
   'a11y.skipToMap': 'Skip to the map',
-  'verktyg.backToMap': 'Back to the map',
-  'verktyg.ariaLabel': 'Tool mode: measure, draw, read coordinates, print and share the map of Norrköping Municipality.',
-  'verktyg.status.loadFailed': 'The tool mode could not be loaded. Check your connection and reload the page.',
-  'verktyg.status.noBasemap': 'The base map could not be loaded. The tools work, but the map is empty.',
+  // ── Origo page (core function C) ──
+  'origo.tagline': 'Origo · tools: measure, draw, coordinates, share, print',
+  'origo.ariaLabel': 'Origo tool mode: measure, draw, read coordinates, print and share the map of Norrköping Municipality.',
+  'origo.status.loadFailed': 'Origo could not be loaded. Check your connection and reload the page.',
+  'origo.status.noBasemap': 'The base map could not be loaded. The tools work, but the map is empty.',
+  'origo.footer':
+    'Origo 2.10.0 and OpenLayers (BSD 2-clause), self-hosted · Base map: Lantmäteriet, Topographic web map (CC BY 4.0), self-hosted · Boundary: OpenStreetMap (ODbL) · Coordinates in SWEREF 99 TM, geodetic measurement',
   // ── Beaches (core function B) ──
   'panel.title': 'Beaches',
   'panel.handleExpand': 'Show beaches',

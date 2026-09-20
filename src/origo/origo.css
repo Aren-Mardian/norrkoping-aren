@@ -1,7 +1,7 @@
-/* Verktygsläget: sidans ram runt Origo. Origos egen CSS (vendor/origo-<version>/css/style.css) styr allt
+/* Origo-sidan: sidans ram runt Origo. Origos egen CSS (vendor/origo-<version>/css/style.css) styr allt
    inuti #app-wrapper; här sätter vi bara layouten så att Origo fyller ytan mellan topbar och sidfot. */
 
-.verktyg #app-wrapper {
+.origo-page #app-wrapper {
   flex: 1 1 auto;
   min-height: 0;
   height: auto;
@@ -10,7 +10,7 @@
 }
 
 /* Skelett tills Origo har ritat sin första ram (UX-04). */
-.verktyg #app-wrapper::before {
+.origo-page #app-wrapper::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -20,31 +20,57 @@
   pointer-events: none;
 }
 
-.verktyg #app-wrapper.is-ready::before {
+.origo-page #app-wrapper.is-ready::before {
   display: none;
 }
 
-.verktyg .topbar {
+/* Origo lägger sina fem SVG-spritar (fa-icons, material-icons, miscellaneous, origo-icons, custom)
+   som <div><svg style="display:none">…</svg></div> direkt i <body>. Skulle en för strikt CSP-header
+   (style-src utan 'unsafe-inline') blockera attributet får spritarna inte ta plats i layouten ändå —
+   utan den här regeln syns de som tomma block och trycker ner hela sidan (sett live 2026-09-20). */
+.origo-page > div:not([id]):has(> svg:only-child) {
+  display: none;
+}
+
+.origo-page .topbar {
   flex: 0 0 auto;
 }
 
-.verktyg .footer {
+/* Vad sidan är, i ett ögonkast — döljs när utrymmet inte räcker. */
+.topbar__tagline {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  color: var(--c-text-muted);
+}
+
+@media (max-width: 899px) {
+  .topbar__tagline {
+    display: none;
+  }
+}
+
+.origo-page .footer {
   flex: 0 0 auto;
   padding: var(--space-2) var(--space-4);
   font-size: 0.8rem;
 }
 
-.verktyg .footer__bottom {
+.origo-page .footer__bottom {
   padding-top: 0;
   border-top: 0;
 }
 
-.verktyg .footer__brief {
+.origo-page .footer__brief {
   flex: 1 1 100%;
 }
 
 /* Statusraden ligger i flödet mellan topbar och karta här (ingen kartyta att lägga den över förrän Origo ritat). */
-.verktyg .map-status {
+.origo-page .map-status {
   position: static;
   flex: 0 0 auto;
   border-radius: 0;
@@ -53,7 +79,7 @@
 }
 
 /* Origos paneler är ljusa oavsett systemtema; låt inte vår mörka textfärg ärvas in (kontrast, NFK-10). */
-.verktyg #app-wrapper {
+.origo-page #app-wrapper {
   color-scheme: light;
   color: #1d2126;
 }

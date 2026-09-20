@@ -28,7 +28,7 @@ till `web.config` är [`netlify.toml`](../../netlify.toml) plus byggets `<meta h
 | `<staticContent><mimeMap>` | Netlify känner till `.geojson`/`.pmtiles`; Vite-pluginen sätter typerna lokalt |
 | `<urlCompression>` / `<httpCompression>` | Netlify komprimerar (brotli) automatiskt — verifierat på `kommungrans.geojson` |
 | `<clientCache>` / `<httpProtocol><customHeaders>` | `[[headers]]` i netlify.toml (assets immutable, vendor 30 d, data 1 d + SWR) |
-| `<rewrite><rules>` | `[[redirects]]` i netlify.toml (SPA-fallback, `/verktyg` → `/verktyg/`, 404 för saknad data) |
+| `<rewrite><rules>` | `[[redirects]]` i netlify.toml (`/origo` → `/origo/`, gamla `/verktyg/*` → `/origo/*`, 404 för saknad data och okända sidor) |
 | Säkerhetsheaders | `[[headers]]` + CSP-meta per sida (ADR-11/12) |
 | Applikationskod (ASP.NET, proxy) | Netlify Functions (`netlify/functions/*.mts`) |
 

@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Verktyg — Norrköpingskartan</title>
+    <title>Origo — mät, rita, koordinater, dela och skriv ut — Norrköpingskartan</title>
     <meta
       name="description"
-      content="Mät sträckor och ytor, läs koordinater i SWEREF 99 TM, rita och exportera GeoJSON, skriv ut och dela kartvyer över Norrköpings kommun. Byggt med Origo och OpenLayers."
+      content="Origo-verktyg för Norrköpings kommun: mät sträckor och ytor, läs koordinater i SWEREF 99 TM, rita och exportera GeoJSON, skriv ut och dela kartvyer. Byggt med Origo och OpenLayers."
     />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
@@ -15,9 +15,9 @@
     <!-- Origo laddas bara här, aldrig på landningsvyn (TK-05). Preload startar hämtningen parallellt med vår egen kod. -->
     <link rel="preload" href="/vendor/origo-2.10.0/js/origo.min.js" as="script" />
     <link rel="stylesheet" href="/vendor/origo-2.10.0/css/style.css" />
-    <script type="module" src="/src/verktyg/main.ts"></script>
+    <script type="module" src="/src/origo/main.ts"></script>
   </head>
-  <body class="verktyg">
+  <body class="origo-page">
     <a class="skip-link" href="#app-wrapper" data-i18n="a11y.skipToMap">Hoppa till kartan</a>
 
     <header class="topbar">
@@ -30,21 +30,22 @@
         </svg>
         <span class="brand__name" data-i18n="site.name">Norrköpingskartan</span>
       </a>
+      <p class="topbar__tagline" data-i18n="origo.tagline">Origo · verktyg: mät, rita, koordinater, dela, skriv ut</p>
       <nav class="topnav" aria-label="Huvudmeny" data-i18n-aria="nav.label">
         <a href="%BASE_URL%" data-i18n="nav.beaches">Badplatser</a>
-        <a href="%BASE_URL%verktyg/" aria-current="page" data-i18n="nav.tools">Verktyg</a>
+        <a href="%BASE_URL%origo/" aria-current="page" data-i18n="nav.tools">Origo</a>
         <a href="https://arenm.se/" data-i18n="nav.about">Om</a>
         <a id="nav-lang" class="topnav__lang" href="?lang=en" hreflang="en" lang="en" data-i18n="nav.lang">English</a>
       </nav>
     </header>
 
-    <p id="verktyg-status" class="map-status" role="status" aria-live="polite" hidden></p>
+    <p id="origo-status" class="map-status" role="status" aria-live="polite" hidden></p>
 
     <div
       id="app-wrapper"
       role="application"
-      aria-label="Verktygsläge: mät, rita, läs koordinater, skriv ut och dela kartan över Norrköpings kommun."
-      data-i18n-aria="verktyg.ariaLabel"
+      aria-label="Origo verktygsläge: mät, rita, läs koordinater, skriv ut och dela kartan över Norrköpings kommun."
+      data-i18n-aria="origo.ariaLabel"
     ></div>
 
     <footer class="footer">
@@ -52,8 +53,8 @@
         <p class="footer__disclaimer" data-i18n="footer.disclaimer">
           Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.
         </p>
-        <p class="footer__brief" data-i18n="footer.summary">
-          Karta: Lantmäteriet (självhostad) · Badvatten: HaV (API) · Väder: SMHI (API) · Kommungräns: OpenStreetMap · Verktyg: Origo/OpenLayers
+        <p class="footer__brief" data-i18n="origo.footer">
+          Origo 2.10.0 och OpenLayers (BSD 2-clause), självhostade · Bakgrundskarta: Lantmäteriet, Topografisk webbkarta (CC BY 4.0), självhostad · Kommungräns: OpenStreetMap (ODbL) · Koordinater i SWEREF 99 TM, mätning geodetiskt
         </p>
         <nav class="footer__links" aria-label="Om projektet" data-i18n-aria="footer.linksLabel">
           <a href="https://arenm.se/" data-i18n="footer.about">Om projektet</a>

@@ -4,7 +4,7 @@ export const sv = {
   'a11y.skipToContent': 'Hoppa till innehåll',
   'nav.label': 'Huvudmeny',
   'nav.beaches': 'Badplatser',
-  'nav.tools': 'Verktyg',
+  'nav.tools': 'Origo',
   'nav.about': 'Om',
   'nav.lang': 'English',
   'nav.langAria': 'Switch language to English',
@@ -27,7 +27,7 @@ export const sv = {
   // ── Sidfot: varifrån och hur informationen hämtas (JK-01, Bilaga C) ──
   'footer.title': 'Så hämtas informationen',
   'footer.summary':
-    'Karta: Lantmäteriet (självhostad) · Badvatten: HaV (API) · Väder: SMHI (API) · Kommungräns: OpenStreetMap · Verktyg: Origo/OpenLayers',
+    'Karta: Lantmäteriet (självhostad) · Badvatten: HaV (API) · Väder: SMHI (API) · Kommungräns: OpenStreetMap · Verktyg: Origo/OpenLayers (/origo/)',
   'footer.intro': 'Varje uppgift på sidan kommer från en öppen källa. Här står varifrån den kommer, hur den hämtas och hur färsk den är.',
   'footer.src.topo.name': 'Bakgrundskarta',
   'footer.src.topo.body':
@@ -57,10 +57,13 @@ export const sv = {
   'footer.sources': 'Källor och licenser',
   'footer.privacy': 'Integritet',
   'a11y.skipToMap': 'Hoppa till kartan',
-  'verktyg.backToMap': 'Till kartan',
-  'verktyg.ariaLabel': 'Verktygsläge: mät, rita, läs koordinater, skriv ut och dela kartan över Norrköpings kommun.',
-  'verktyg.status.loadFailed': 'Verktygsläget kunde inte laddas. Kontrollera anslutningen och ladda om sidan.',
-  'verktyg.status.noBasemap': 'Bakgrundskartan kunde inte hämtas. Verktygen fungerar, men kartan är tom.',
+  // ── Origo-sidan (Kärnfunktion C) ──
+  'origo.tagline': 'Origo · verktyg: mät, rita, koordinater, dela, skriv ut',
+  'origo.ariaLabel': 'Origo verktygsläge: mät, rita, läs koordinater, skriv ut och dela kartan över Norrköpings kommun.',
+  'origo.status.loadFailed': 'Origo kunde inte laddas. Kontrollera anslutningen och ladda om sidan.',
+  'origo.status.noBasemap': 'Bakgrundskartan kunde inte hämtas. Verktygen fungerar, men kartan är tom.',
+  'origo.footer':
+    'Origo 2.10.0 och OpenLayers (BSD 2-clause), självhostade · Bakgrundskarta: Lantmäteriet, Topografisk webbkarta (CC BY 4.0), självhostad · Kommungräns: OpenStreetMap (ODbL) · Koordinater i SWEREF 99 TM, mätning geodetiskt',
   // ── Badplatser (Kärnfunktion B) ──
   'panel.title': 'Badplatser',
   'panel.handleExpand': 'Visa badplatser',

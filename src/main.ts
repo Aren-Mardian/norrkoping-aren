@@ -111,10 +111,10 @@ if (panelEl && handleEl instanceof HTMLButtonElement) {
   })();
 }
 
-// Origo (verktygsläget) är ~590 kB brotli och laddas aldrig här (TK-05). Men när användaren
-// visar avsikt att gå dit förhämtar vi scriptet, så att /verktyg känns omedelbar (A4).
-const navVerktyg = document.getElementById('nav-verktyg');
-if (navVerktyg) {
+// Origo-sidan (/origo/) är ~590 kB brotli och laddas aldrig här (TK-05). Men när användaren
+// visar avsikt att gå dit förhämtar vi scriptet, så att sidan känns omedelbar (A4).
+const navOrigo = document.getElementById('nav-origo');
+if (navOrigo) {
   let prefetched = false;
   const prefetch = (): void => {
     if (prefetched) return;
@@ -125,7 +125,7 @@ if (navVerktyg) {
     link.href = `${BASE}vendor/origo-2.10.0/js/origo.min.js`;
     document.head.appendChild(link);
   };
-  navVerktyg.addEventListener('pointerenter', prefetch, { once: true });
-  navVerktyg.addEventListener('focus', prefetch, { once: true });
-  navVerktyg.addEventListener('touchstart', prefetch, { once: true, passive: true });
+  navOrigo.addEventListener('pointerenter', prefetch, { once: true });
+  navOrigo.addEventListener('focus', prefetch, { once: true });
+  navOrigo.addEventListener('touchstart', prefetch, { once: true, passive: true });
 }

@@ -88,7 +88,7 @@ analyse('', 'Landningsvy', {
   totalBudget: BUDGET.firstViewTotal,
   forbidOrigo: true,
 });
-analyse('verktyg', 'Verktygsläge (lazy, egen sida)', {
+analyse('origo', 'Origo-sidan (lazy, egen sida)', {
   jsBudget: BUDGET.origoChunk,
 });
 

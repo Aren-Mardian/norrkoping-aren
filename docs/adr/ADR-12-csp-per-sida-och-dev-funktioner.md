@@ -4,7 +4,7 @@
 
 ## Kontext
 
-ADR-11 relaxade CSP:n för `/verktyg/*` med en sökvägsspecifik Netlify-headerregel. I drift visade
+ADR-11 relaxade CSP:n för `/verktyg/*` (numera `/origo/*`) med en sökvägsspecifik Netlify-headerregel. I drift visade
 det sig att **Netlify inte tillämpar en mer specifik regel när en generell regel sätter samma
 header** — `/*`-regelns `style-src 'self'` gällde även `/verktyg/img/loading.gif`, oavsett
 ordning i `netlify.toml`. Samma sak drabbade `Cache-Control`: en generell `no-cache`-regel slog ut
@@ -36,3 +36,26 @@ väder otestbara lokalt utan `netlify-cli`.
 - Rapportering (`report-to`) är inte möjlig i meta-CSP; introduktionsperiodens rapportering
   (NFK-16) får ske via header när den behövs.
 - Cache-headers verifieras på live efter deploy: `assets/*` immutable, `vendor/*` 30 d, `data/*` 1 d.
+
+## Tillägg 2026-09-20 (kväll): headers och redirects i drift är från första deployen
+
+Vid felsökning av Origo-sidan live (fem synliga, tomma sprite-block, inga verktygspaneler, 395
+CSP-fel) visade `curl -I` att servern fortfarande skickar **exakt** header- och redirect-uppsättningen
+från repots allra första commit (`1dd5944`): full CSP-header med `style-src 'self'`, generell
+`Cache-Control: no-cache`, SPA-fallback, inga 404-regler för `data/*`/`vendor/*` — trots att
+HTML/JS/funktioner är från senaste commit och `netlify.toml` på GitHub är korrekt. Det förklarar i
+efterhand även "Netlify-precedensen" ovan: reglerna uppdaterades aldrig, oavsett ordning.
+
+Sidans meta-CSP kan inte *lätta* en striktare header (webbläsaren tillämpar snittet), så Origo-sidan
+förblir obrukbar tills deployen tar med repots regler. Åtgärd på Netlify-sidan (ägaren): kontrollera
+i deploy-loggen/deploy-sammanfattningen att `netlify.toml` läses ("N redirect rules processed",
+"N header rules processed"), att byggets *Base directory* är tomt och att sajten deployas från
+`main`; gör därefter "Clear cache and deploy site". Beslutet att bära CSP:n i meta per sida står
+kvar — det är rätt oavsett; headern ska bara innehålla `frame-ancestors`.
+
+Härdning i koden samma dag: Origo-sidans egen CSS döljer Origos fem sprite-behållare
+(`body > div:not([id]):has(> svg:only-child)`) så att sidan inte faller ihop om `style="display:none"`
+blockeras av en för strikt header. Verifierat med den lokala testservern i två lägen: korrekt
+meta-CSP (0 konsolfel, allt fungerar) och simulerad stale header (sidan hel, kartan ritas,
+paneler dock felstylade).
+
