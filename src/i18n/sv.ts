@@ -6,12 +6,15 @@ export const sv = {
   'nav.beaches': 'Badplatser',
   'nav.tools': 'Verktyg',
   'nav.about': 'Om',
+  'nav.lang': 'English',
+  'nav.langAria': 'Switch language to English',
   'map.heading': 'Karta över Norrköpings kommun',
   'map.ariaLabel':
     'Interaktiv karta över Norrköpings kommun. Panorera med piltangenterna, zooma med plus och minus.',
   'map.basemap.topo': 'Karta',
   'map.basemap.orto': 'Flygbild',
   'map.basemap.dark': 'Mörk',
+  'map.basemap.ortoUnavailable': 'Flygbild kräver Lantmäteriets appkonto — inte aktiverat ännu.',
   'map.basemap.groupLabel': 'Bakgrundskarta',
   'map.resetView': 'Återställ vy',
   'map.layer.kommungrans': 'Kommungräns',
@@ -21,11 +24,37 @@ export const sv = {
     'Utvecklingsläge: Lantmäteriets tjänster är inte konfigurerade (ingen .env) — flygbild saknas.',
   'dev.noTiles':
     'Utvecklingsläge: bakgrundskartan (data/derived/topowebb-farg.pmtiles) saknas — kör tools/extract_topowebb.py. Visar OpenStreetMap som fallback.',
-  'intro.heading': 'Sevärdheter och badplatser i Norrköping',
-  'intro.body':
-    'Här växer en öppen kartportal fram: de tio mest sevärda platserna i kommunen och alla badplatser med aktuell badvattenstatus. Kartan bygger på Lantmäteriets bakgrundskartor i SWEREF 99 TM.',
+  // ── Sidfot: varifrån och hur informationen hämtas (JK-01, Bilaga C) ──
+  'footer.title': 'Så hämtas informationen',
+  'footer.summary':
+    'Karta: Lantmäteriet (självhostad) · Badvatten: HaV (API) · Väder: SMHI (API) · Kommungräns: OpenStreetMap · Verktyg: Origo/OpenLayers',
+  'footer.intro': 'Varje uppgift på sidan kommer från en öppen källa. Här står varifrån den kommer, hur den hämtas och hur färsk den är.',
+  'footer.src.topo.name': 'Bakgrundskarta',
+  'footer.src.topo.body':
+    'Lantmäteriet, Topografisk webbkarta (nedladdning, raster), licens CC BY 4.0. Nedladdad från Lantmäteriets öppna data, beskuren till kommunen och självhostad som PMTiles-fil — din webbläsare anropar aldrig Lantmäteriet. Utsnitt från {date}.',
+  'footer.src.orto.name': 'Flygbild',
+  'footer.src.orto.body':
+    'Lantmäteriet, Ortofoto historiska (WMS), licens CC0. Hämtas ruta för ruta via sajtens egen proxy (/api/tiles) med Lantmäteriets appkonto.',
+  'footer.src.orto.pending': 'Aktiveras när appkontot är konfigurerat.',
+  'footer.src.kommun.name': 'Kommungräns',
+  'footer.src.kommun.body':
+    'OpenStreetMap (relation 935447), licens ODbL — statisk GeoJSON-fil, i väntan på Lantmäteriets Kommun, Län och Rike (CC BY 4.0).',
+  'footer.src.bad.name': 'Badplatser och badvattenstatus',
+  'footer.src.bad.body':
+    'Havs- och vattenmyndigheten, Badplatsen-API (öppna data). Läge, namn och typ hämtas som grunddata vid bygge. Provsvar, alger, avrådan och vattentemperatur hämtas live via /api/bad/status med 1 timmes cache — statusens ålder visas alltid.',
+  'footer.src.vader.name': 'Väder',
+  'footer.src.vader.body':
+    'SMHI, meteorologisk prognos (API snow1g), licens CC BY 4.0. Hämtas via /api/vader när du öppnar en badplats; prognosens utgivningstid visas.',
+  'footer.src.verktyg.name': 'Kartmotor och verktyg',
+  'footer.src.verktyg.body':
+    'OpenLayers och Origo 2.10.0 (BSD 2-clause), självhostade. Kartan ritas i SWEREF 99 TM (EPSG:3006); mätning sker geodetiskt, aldrig i Web Mercator.',
+  'footer.privacyNote':
+    'Inga kakor, ingen spårning. Alla anrop till HaV, SMHI och Lantmäteriet går via sajtens egen proxy — din IP-adress skickas inte vidare.',
+  'footer.disclaimer': 'Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.',
   'footer.curated': 'Kuraterat innehåll och rankning © Aren Mardian.',
-  'footer.sources': 'Datakällor och licenser',
+  'footer.linksLabel': 'Om projektet',
+  'footer.about': 'Om projektet',
+  'footer.sources': 'Källor och licenser',
   'footer.privacy': 'Integritet',
   'a11y.skipToMap': 'Hoppa till kartan',
   'verktyg.backToMap': 'Till kartan',
@@ -62,10 +91,13 @@ export const sv = {
   'bad.age.hours': '{n} h sedan',
   'bad.age.days': '{n} dygn sedan',
   'bad.source': 'Källa: Havs- och vattenmyndigheten',
+  'bad.source.how': 'Badplatsen-API via /api/bad/status, cache 1 h',
   'bad.top3.title': 'Bäst att bada just nu',
   'bad.top3.titleOffseason': 'Säsongens tre bästa bad',
   'bad.top3.badge': 'Topp 3 · plats {n}',
   'bad.top3.method': 'Så räknas rankningen',
+  'bad.top3.methodBody':
+    'Poäng 0–100 per badplats: EU-klassificering 40 %, provhistorik senaste fem åren 25 %, faciliteter 20 %, algblomning 15 %. Ingen badplats i kommunen är EU-klassificerad, så den delen är neutral (50). Faciliteter är neutrala tills de kuraterats. Anmärkning räknas som halvt avdrag; vid lika poäng vinner fler prov. En badplats med avrådan visas aldrig i Topp 3. Underlag: Havs- och vattenmyndigheten.',
   'bad.detail.back': '← Alla badplatser',
   'bad.detail.status': 'Status',
   'bad.detail.latestSample': 'Senaste prov',
@@ -79,7 +111,7 @@ export const sv = {
   'bad.weather.loading': 'Hämtar prognos …',
   'bad.weather.wind': 'vind',
   'bad.weather.rain': 'nederbörd',
-  'bad.weather.source': 'Källa: SMHI',
+  'bad.weather.source': 'Källa: SMHI, meteorologisk prognos via /api/vader',
   'bad.weather.issued': 'prognos från',
   'bad.weather.symbol.1': 'Klart',
   'bad.weather.symbol.2': 'Mest klart',

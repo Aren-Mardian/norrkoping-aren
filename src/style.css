@@ -2,6 +2,10 @@
    Norrköpingskartan — designsystem med tokens (UX-05).
    Inga hårdkodade färgvärden utanför :root-blocken. Ljus och mörk palett
    härleds ur samma tokens. Typsnitt: systemstack tills egna subsettas (NFK-06).
+
+   Sidan är ett app-skal (ADR-13): topbar + karta/panel + sidfot fyller exakt vyporten och
+   dokumentet scrollar aldrig. Det som scrollar är panelens innehåll — så kan varken fokus,
+   tangentbord eller mobilens adressfält flytta kartan ur bild.
    ───────────────────────────────────────────────────────────────────────────── */
 
 :root {
@@ -20,20 +24,25 @@
 
   --radius-s: 6px;
   --radius-m: 10px;
+  --radius-l: 16px;
 
   /* WCAG 2.2 Target Size, medvetet över AA (NFK-10). */
   --tap: 44px;
+  --topbar-h: 56px;
 
   --shadow-1: 0 1px 2px rgb(0 0 0 / 0.12), 0 2px 8px rgb(0 0 0 / 0.08);
+  --shadow-2: 0 -4px 20px rgb(0 0 0 / 0.16);
 
   /* Ljus palett */
   --c-bg: #f7f6f2;
   --c-surface: #ffffff;
   --c-surface-2: #eeece6;
+  --c-surface-glass: rgb(255 255 255 / 0.9);
   --c-text: #1d2126;
   --c-text-muted: #545c66;
   --c-border: #d6d2c8;
   --c-accent: #0b5d8a;
+  --c-accent-soft: #e3eff6;
   --c-accent-contrast: #ffffff;
   --c-warn-bg: #fff3c4;
   --c-warn-text: #5c4400;
@@ -52,10 +61,12 @@
     --c-bg: #14181d;
     --c-surface: #1e242b;
     --c-surface-2: #262d35;
+    --c-surface-glass: rgb(30 36 43 / 0.9);
     --c-text: #eef1f4;
     --c-text-muted: #aeb7c1;
     --c-border: #384049;
     --c-accent: #6cb6e8;
+    --c-accent-soft: #1f3646;
     --c-accent-contrast: #0d1418;
     --c-warn-bg: #3a2f00;
     --c-warn-text: #ffe28a;
@@ -66,6 +77,7 @@
     --c-boundary: #c77dff;
     --c-boundary-halo: rgba(0, 0, 0, 0.6);
     --shadow-1: 0 1px 2px rgb(0 0 0 / 0.5), 0 2px 8px rgb(0 0 0 / 0.4);
+    --shadow-2: 0 -4px 20px rgb(0 0 0 / 0.5);
   }
 }
 
@@ -78,22 +90,31 @@
 }
 
 html {
+  height: 100%;
   font-family: var(--font-sans);
   line-height: 1.5;
   -webkit-text-size-adjust: 100%;
 }
 
+/* App-skal: exakt vyportshöjd, inget dokumentscroll (dvh följer mobilens adressfält). */
 body {
   margin: 0;
-  background: var(--c-bg);
-  color: var(--c-text);
-  min-height: 100dvh;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
   display: flex;
   flex-direction: column;
+  background: var(--c-bg);
+  color: var(--c-text);
 }
 
 a {
   color: var(--c-accent);
+}
+
+button {
+  font: inherit;
 }
 
 :focus-visible {
@@ -131,8 +152,9 @@ a {
 /* ── Banners (FK-33, NFK-25) ────────────────────────────────────────────────── */
 
 .banner {
+  flex: 0 0 auto;
   padding: var(--space-2) var(--space-4);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   border-bottom: 1px solid var(--c-warn-border);
   background: var(--c-warn-bg);
   color: var(--c-warn-text);
@@ -145,36 +167,50 @@ a {
 /* ── Topbar ───────────────────────────────────────────────────────────────── */
 
 .topbar {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  min-height: var(--tap);
-  padding: var(--space-2) var(--space-4);
+  gap: var(--space-3);
+  height: var(--topbar-h);
+  padding: 0 var(--space-3) 0 var(--space-4);
   background: var(--c-surface);
   border-bottom: 1px solid var(--c-border);
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap);
   font-weight: 700;
   text-decoration: none;
   color: var(--c-text);
   letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.brand__mark {
+  flex: 0 0 auto;
+  color: var(--c-accent);
 }
 
 .topnav {
   display: flex;
+  align-items: center;
   gap: var(--space-1);
+  min-width: 0;
 }
 
 .topnav a {
   display: inline-flex;
   align-items: center;
-  min-height: var(--tap);
+  min-height: 40px;
   padding: 0 var(--space-3);
   text-decoration: none;
   color: var(--c-text-muted);
-  border-radius: var(--radius-s);
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 .topnav a:hover {
@@ -182,25 +218,73 @@ a {
   background: var(--c-surface-2);
 }
 
-.topnav__current {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--tap);
-  padding: 0 var(--space-3);
-  color: var(--c-text);
+.topnav a[aria-current='page'] {
+  color: var(--c-accent);
+  background: var(--c-accent-soft);
   font-weight: 600;
+}
+
+.topnav__lang {
+  margin-left: var(--space-1);
+  border: 1px solid var(--c-border);
+  font-size: 0.85rem;
+}
+
+/* Smala skärmar: menyn rullar i sidled i stället för att bryta rad (topbaren har fast höjd). */
+@media (max-width: 599px) {
+  .topbar {
+    padding-left: var(--space-3);
+  }
+
+  .topnav {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .topnav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .topnav a {
+    flex: 0 0 auto;
+    padding: 0 var(--space-2);
+  }
+}
+
+/* Mycket smala skärmar: aktuell sida behöver ingen egen menypunkt — då får allt plats utan rullning. */
+@media (max-width: 479px) {
+  .brand__name {
+    font-size: 0.95rem;
+  }
+
+  .topnav a[aria-current='page'] {
+    display: none;
+  }
+
+  .topbar {
+    gap: var(--space-2);
+  }
+
+  .topnav__lang {
+    margin-left: 0;
+    font-size: 0.8rem;
+  }
 }
 
 /* ── Karta (UX-01, UX-04) ──────────────────────────────────────────────────── */
 
 .map-section {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .map {
   position: relative;
-  /* Reserverad höjd → ingen layoutförskjutning. ≥ 50 % av vyporten på mobil. */
-  height: max(60dvh, 320px);
+  flex: 1 1 auto;
+  min-height: 0;
   background: var(--c-map-bg);
   overflow: hidden;
 }
@@ -218,12 +302,6 @@ a {
 @media (prefers-reduced-motion: no-preference) {
   .ol-layer-topo {
     transition: filter 200ms ease;
-  }
-}
-
-@media (min-width: 768px) {
-  .map {
-    height: max(70dvh, 480px);
   }
 }
 
@@ -256,13 +334,21 @@ a {
   }
 }
 
+/* Statusrad över kartans överkant — flyttar aldrig layouten (NFK-25). */
 .map-status {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  right: var(--space-2);
+  z-index: 5;
   margin: 0;
-  padding: var(--space-2) var(--space-4);
-  font-size: 0.9rem;
-  background: var(--c-surface-2);
-  color: var(--c-text);
-  border-bottom: 1px solid var(--c-border);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.85rem;
+  background: var(--c-warn-bg);
+  color: var(--c-warn-text);
+  border: 1px solid var(--c-warn-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
 }
 
 .map-status[hidden] {
@@ -281,18 +367,25 @@ a {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  background: var(--c-surface);
+  background: var(--c-surface-glass);
   color: var(--c-text);
   border: 1px solid var(--c-border);
-  border-radius: var(--radius-s);
+  border-radius: var(--radius-m);
   box-shadow: var(--shadow-1);
   cursor: pointer;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 
 .map .ol-control button:hover,
 .map .ol-control button:focus-visible {
   background: var(--c-surface-2);
   color: var(--c-text);
+}
+
+.map .ol-control button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .map .ol-zoom {
@@ -307,7 +400,7 @@ a {
 
 .map .ol-zoom .ol-zoom-in,
 .map .ol-zoom .ol-zoom-out {
-  border-radius: var(--radius-s);
+  border-radius: var(--radius-m);
 }
 
 .map .ol-reset-view {
@@ -317,18 +410,33 @@ a {
   bottom: calc(var(--space-3) + 28px + 2 * var(--tap) + 3 * var(--space-1));
 }
 
+/* Bakgrundsväxlaren som segmenterad kontroll. */
 .map .ol-basemap-switcher {
   top: auto;
   left: var(--space-3);
   bottom: calc(var(--space-3) + 28px);
   display: flex;
-  gap: var(--space-1);
+  padding: 3px;
+  gap: 2px;
+  border-radius: 999px;
+  background: var(--c-surface-glass);
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-1);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
 }
 
 .map .ol-basemap-switcher button {
   width: auto;
+  height: 36px;
   padding: 0 var(--space-3);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 .map .ol-basemap-switcher button[aria-pressed='true'],
@@ -347,13 +455,14 @@ a {
 .map .ol-layer-toggle button {
   width: auto;
   padding: 0 var(--space-3);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  border-radius: 999px;
 }
 
 .map .ol-scale-line {
   left: var(--space-3);
   bottom: var(--space-1);
-  background: var(--c-surface);
+  background: var(--c-surface-glass);
   border-radius: var(--radius-s);
   padding: 2px var(--space-1);
   box-shadow: var(--shadow-1);
@@ -372,7 +481,7 @@ a {
   left: auto;
   max-width: calc(100% - 140px);
   font-size: 0.75rem;
-  background: var(--c-surface);
+  background: var(--c-surface-glass);
   color: var(--c-text-muted);
   border-radius: var(--radius-s) 0 0 0;
   padding: 2px var(--space-2);
@@ -388,36 +497,131 @@ a {
   color: var(--c-accent);
 }
 
-/* ── Innehåll ─────────────────────────────────────────────────────────────── */
-
-.intro {
-  max-width: 68ch;
-  padding: var(--space-6) var(--space-4);
-}
-
-.intro h2 {
-  margin-top: 0;
-}
+/* ── Sidfot: källor, hur de hämtas, friskrivning (JK-01, JK-04) ───────────── */
 
 .footer {
-  margin-top: auto;
-  padding: var(--space-4);
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--space-4);
   border-top: 1px solid var(--c-border);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
   color: var(--c-text-muted);
   background: var(--c-surface);
 }
 
 .footer p {
-  margin: 0 0 var(--space-2);
+  margin: 0;
 }
 
-.footer__disclaimer span {
-  display: block;
+.sources {
+  margin: 0;
 }
 
-.footer__meta {
+.sources__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  min-height: 32px;
+  padding: var(--space-1) 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.sources__summary::-webkit-details-marker {
+  display: none;
+}
+
+.sources__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: 650;
+  color: var(--c-text);
+}
+
+.sources__title::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 150ms ease;
+}
+
+.sources[open] .sources__title::before {
+  transform: rotate(90deg);
+}
+
+.sources__brief {
+  min-width: 0;
+}
+
+.sources__body {
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+/* Desktop: utfälld källförteckning får aldrig äta upp kartan — den scrollar själv i stället. */
+@media (min-width: 900px) {
+  .sources__body {
+    max-height: min(300px, 40vh);
+    overflow-y: auto;
+  }
+}
+
+.sources__intro {
+  margin: 0 0 var(--space-3);
+}
+
+.sources__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-3) var(--space-6);
+  margin: 0;
+}
+
+.sources__item dt {
+  font-weight: 650;
+  color: var(--c-text);
+}
+
+.sources__item dd {
+  margin: 2px 0 0;
+}
+
+.sources__privacy {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--c-border);
+}
+
+.footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--c-border);
+}
+
+.footer__disclaimer {
+  flex: 1 1 320px;
+  color: var(--c-text);
+}
+
+.footer__links {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
+}
+
+.footer__meta {
+  flex: 1 1 100%;
+}
+
+@media (min-width: 1200px) {
+  .footer__meta {
+    flex: 0 0 auto;
+  }
 }

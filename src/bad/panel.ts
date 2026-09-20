@@ -80,6 +80,24 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
   const list = root.querySelector<HTMLOListElement>('#bad-list')!;
   const detail = root.querySelector<HTMLElement>('#bad-detail')!;
   const count = root.querySelector<HTMLElement>('#bad-count')!;
+  const body = root.querySelector<HTMLElement>('#panel-body');
+
+  /** Byte mellan lista och detalj börjar alltid överst — inte där listan råkade vara scrollad. */
+  const scrollToTop = (): void => {
+    if (body) body.scrollTop = 0;
+  };
+
+  const selectedSite = (): Badplats | undefined => (selectedId ? data?.sites.find((s) => s.id === selectedId) : undefined);
+
+  /** En sanning om vad som syns: detaljvy ELLER filter + Topp 3 (bara ofiltrerat) + lista. */
+  function syncVisibility(): void {
+    const detailOpen = selectedSite() !== undefined;
+    detail.hidden = !detailOpen;
+    chips.hidden = detailOpen;
+    list.hidden = detailOpen;
+    // Topp 3-blocket visas bara ofiltrerat — annars står samma kort två gånger.
+    top3.hidden = detailOpen || filter !== 'alla' || top3.childElementCount === 0;
+  }
 
   const FILTERS: Filter[] = ['alla', 'top3', 'hav', 'sjö'];
   for (const f of FILTERS) {
@@ -91,6 +109,7 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
       filter = f;
       for (const c of chips.querySelectorAll('button')) c.setAttribute('aria-pressed', String(c.dataset['filter'] === f));
       renderList();
+      scrollToTop();
     });
     chips.appendChild(b);
   }
@@ -139,7 +158,10 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
     const stale = age > STALE_AFTER_HOURS || data.status.stale;
     const span = el('span', stale ? 'meta--warn' : undefined, `${t('bad.status.updated')} ${fmtAge(age)}${stale ? ` · ${t('bad.status.stale')}` : ''}`);
     meta.appendChild(span);
-    meta.appendChild(el('span', 'meta__source', ` · ${t('bad.source')}`));
+    // Kort i panelhuvudet (får plats i peek-läget); hur datat hämtas står i detaljvyn och sidfoten.
+    const source = el('span', 'meta__source', t('bad.source'));
+    source.title = t('bad.source.how');
+    meta.appendChild(source);
   }
 
   function renderTop3(): void {
@@ -148,15 +170,16 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
     const season = isBathingSeason();
     const picks = sortSites(data.sites).filter((s) => s.props.isTop3 && !s.status?.advisory).slice(0, 3);
     if (picks.length === 0) return;
-    top3.hidden = false;
     top3.classList.toggle('top3--offseason', !season);
     const h = el('h3', 'top3__title', season ? t('bad.top3.title') : t('bad.top3.titleOffseason'));
     top3.appendChild(h);
     const grid = el('div', 'top3__grid');
     for (const s of picks) grid.appendChild(card(s, true));
     top3.appendChild(grid);
-    const method = el('a', 'top3__method', t('bad.top3.method'));
-    method.href = `${import.meta.env.BASE_URL}metod`;
+    // Metoden förklaras på plats (DK-05) — ingen separat sida att navigera bort till.
+    const method = el('details', 'top3__method');
+    method.appendChild(el('summary', undefined, t('bad.top3.method')));
+    method.appendChild(el('p', undefined, t('bad.top3.methodBody')));
     top3.appendChild(method);
   }
 
@@ -166,13 +189,13 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
     const sites = sortSites(applyFilter(data.sites, filter));
     for (const s of sites) list.appendChild(card(s));
     count.textContent = t('bad.count').replace('{n}', String(sites.length)).replace('{total}', String(data.sites.length));
+    syncVisibility();
   }
 
   async function renderDetail(site: Badplats): Promise<void> {
     weatherAbort?.abort();
     weatherAbort = new AbortController();
     detail.replaceChildren();
-    detail.hidden = false;
     const back = el('button', 'detail__back', t('bad.detail.back'));
     back.type = 'button';
     back.addEventListener('click', () => handlers.onSelect(null));
@@ -245,7 +268,7 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
       weather.remove();
     }
 
-    const src = el('p', 'detail__source', `${t('bad.source')} · ${t('bad.detail.provenance')} ${fmtDate(site.props.provenance.updated)}`);
+    const src = el('p', 'detail__source', `${t('bad.source')} (${t('bad.source.how')}) · ${t('bad.detail.provenance')} ${fmtDate(site.props.provenance.updated)}`);
     detail.appendChild(src);
     if (site.props.contact.url) {
       const a = el('a', 'detail__link', t('bad.detail.municipality'));
@@ -254,16 +277,6 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
       a.rel = 'noopener';
       detail.appendChild(a);
     }
-    back.focus();
-  }
-
-  function showList(): void {
-    detail.hidden = true;
-    weatherAbort?.abort();
-    detail.replaceChildren();
-    top3.hidden = false;
-    list.hidden = false;
-    chips.hidden = false;
   }
 
   return {
@@ -276,15 +289,17 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
     setSelected(id) {
       selectedId = id;
       for (const node of root.querySelectorAll<HTMLElement>('.beach')) node.classList.toggle('is-selected', node.dataset['id'] === id);
-      const site = id ? data?.sites.find((s) => s.id === id) : undefined;
+      const site = selectedSite();
       if (site) {
-        top3.hidden = true;
-        list.hidden = true;
-        chips.hidden = true;
         void renderDetail(site);
       } else {
-        showList();
+        weatherAbort?.abort();
+        detail.replaceChildren();
       }
+      syncVisibility();
+      scrollToTop();
+      // Fokus utan scroll: panelen är redan i bild, och inget i dokumentet får flytta sig (ADR-13).
+      if (site) detail.querySelector<HTMLButtonElement>('.detail__back')?.focus({ preventScroll: true });
     },
     setHover(id) {
       for (const node of root.querySelectorAll<HTMLElement>('.beach')) node.classList.toggle('is-hover', node.dataset['id'] === id);

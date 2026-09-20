@@ -54,8 +54,11 @@ export class BasemapSwitcherControl extends Control {
       const active = basemaps.getActive();
       for (const [id, b] of this.buttons) {
         b.setAttribute('aria-pressed', String(id === active));
-        // Flygbild finns bara hos Lantmäteriet — utan LM saknar knappen mening.
-        if (id === 'orto') b.disabled = !basemaps.isLmAvailable();
+        // Flygbild finns bara hos Lantmäteriet — utan appkonto är knappen avstängd, med förklaring.
+        if (id === 'orto') {
+          b.disabled = !basemaps.isLmAvailable();
+          b.title = b.disabled ? t('map.basemap.ortoUnavailable') : '';
+        }
       }
     };
     basemaps.onChange(sync);

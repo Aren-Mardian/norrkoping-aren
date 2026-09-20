@@ -1,9 +1,13 @@
 # Datakällor, licenser och villkor
 
 Kravspec §5, JK-01–JK-07. Varje lager som publiceras ska finnas här **innan** det går till produktion,
-med licens, attribution, hämtdatum och villkor. Detta dokument är också underlag för `/kallor`-sidan.
+med licens, attribution, hämtdatum och villkor. Sajtens sidfot ("Så hämtas informationen", ADR-13)
+sammanfattar detta dokument för besökaren: per källa varifrån, hur (självhostad fil, statisk fil
+eller live via `/api/...`) och hur färskt. Texterna ligger i `src/i18n/sv.ts`/`en.ts` under
+`footer.src.*` — ändras en källa här ska de raderna följa med. Sidorna Om/Källor/Integritet länkar
+till arenm.se.
 
-Senast uppdaterad: 2026-09-19.
+Senast uppdaterad: 2026-09-20.
 
 ## Sammanfattning av läget
 

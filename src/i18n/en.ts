@@ -7,11 +7,14 @@ export const en: Record<MessageKey, string> = {
   'nav.beaches': 'Beaches',
   'nav.tools': 'Tools',
   'nav.about': 'About',
+  'nav.lang': 'Svenska',
+  'nav.langAria': 'Byt språk till svenska',
   'map.heading': 'Map of Norrköping Municipality',
   'map.ariaLabel': 'Interactive map of Norrköping Municipality. Pan with the arrow keys, zoom with plus and minus.',
   'map.basemap.topo': 'Map',
   'map.basemap.orto': 'Aerial',
   'map.basemap.dark': 'Dark',
+  'map.basemap.ortoUnavailable': 'Aerial imagery requires a Lantmäteriet app account — not enabled yet.',
   'map.basemap.groupLabel': 'Base map',
   'map.resetView': 'Reset view',
   'map.layer.kommungrans': 'Municipal boundary',
@@ -19,11 +22,37 @@ export const en: Record<MessageKey, string> = {
   'dev.noToken': 'Development mode: Lantmäteriet services are not configured (no .env) — no aerial imagery.',
   'dev.noTiles':
     'Development mode: the base map (data/derived/topowebb-farg.pmtiles) is missing — run tools/extract_topowebb.py. Showing OpenStreetMap as fallback.',
-  'intro.heading': 'Sights and beaches in Norrköping',
-  'intro.body':
-    'An open map portal in the making: the ten most notable places in the municipality and every beach with current bathing-water status. The map is built on Lantmäteriet base maps in SWEREF 99 TM.',
+  // ── Footer: where the information comes from and how it is fetched ──
+  'footer.title': 'Where the information comes from',
+  'footer.summary':
+    'Map: Lantmäteriet (self-hosted) · Bathing water: HaV (API) · Weather: SMHI (API) · Boundary: OpenStreetMap · Tools: Origo/OpenLayers',
+  'footer.intro': 'Every fact on this page comes from an open source. This is where it comes from, how it is fetched and how fresh it is.',
+  'footer.src.topo.name': 'Base map',
+  'footer.src.topo.body':
+    'Lantmäteriet, Topographic web map (download, raster), licence CC BY 4.0. Downloaded from Lantmäteriet open data, clipped to the municipality and self-hosted as a PMTiles file — your browser never calls Lantmäteriet. Extract from {date}.',
+  'footer.src.orto.name': 'Aerial imagery',
+  'footer.src.orto.body':
+    'Lantmäteriet, historical orthophotos (WMS), licence CC0. Fetched tile by tile through the site’s own proxy (/api/tiles) with a Lantmäteriet app account.',
+  'footer.src.orto.pending': 'Enabled once the app account is configured.',
+  'footer.src.kommun.name': 'Municipal boundary',
+  'footer.src.kommun.body':
+    'OpenStreetMap (relation 935447), licence ODbL — a static GeoJSON file, pending Lantmäteriet’s Municipality, County and Country dataset (CC BY 4.0).',
+  'footer.src.bad.name': 'Beaches and bathing-water status',
+  'footer.src.bad.body':
+    'Swedish Agency for Marine and Water Management (HaV), Badplatsen API (open data). Location, name and type are fetched as base data at build time. Samples, algae, advisories and water temperature are fetched live via /api/bad/status with a one-hour cache — the age of the status is always shown.',
+  'footer.src.vader.name': 'Weather',
+  'footer.src.vader.body':
+    'SMHI, meteorological forecast (API snow1g), licence CC BY 4.0. Fetched via /api/vader when you open a beach; the forecast issue time is shown.',
+  'footer.src.verktyg.name': 'Map engine and tools',
+  'footer.src.verktyg.body':
+    'OpenLayers and Origo 2.10.0 (BSD 2-clause), self-hosted. The map is drawn in SWEREF 99 TM (EPSG:3006); measurements are geodetic, never in Web Mercator.',
+  'footer.privacyNote':
+    'No cookies, no tracking. All requests to HaV, SMHI and Lantmäteriet go through the site’s own proxy — your IP address is never passed on.',
+  'footer.disclaimer': 'An independent project by Aren Mardian. Not an official service of Norrköping Municipality.',
   'footer.curated': 'Curated content and ranking © Aren Mardian.',
-  'footer.sources': 'Data sources and licences',
+  'footer.linksLabel': 'About the project',
+  'footer.about': 'About the project',
+  'footer.sources': 'Sources and licences',
   'footer.privacy': 'Privacy',
   'a11y.skipToMap': 'Skip to the map',
   'verktyg.backToMap': 'Back to the map',
@@ -60,10 +89,13 @@ export const en: Record<MessageKey, string> = {
   'bad.age.hours': '{n} h ago',
   'bad.age.days': '{n} days ago',
   'bad.source': 'Source: Swedish Agency for Marine and Water Management',
+  'bad.source.how': 'Badplatsen API via /api/bad/status, cached 1 h',
   'bad.top3.title': 'Best for a swim right now',
   'bad.top3.titleOffseason': 'The three best beaches of the season',
   'bad.top3.badge': 'Top 3 · rank {n}',
   'bad.top3.method': 'How the ranking is calculated',
+  'bad.top3.methodBody':
+    'Score 0–100 per beach: EU classification 40 %, sample history over the last five years 25 %, facilities 20 %, algal blooms 15 %. No beach in the municipality is EU-classified, so that part is neutral (50). Facilities are neutral until curated. A remark counts as half a deduction; ties go to the beach with more samples. A beach under advisory is never shown in the Top 3. Data: Swedish Agency for Marine and Water Management.',
   'bad.detail.back': '← All beaches',
   'bad.detail.status': 'Status',
   'bad.detail.latestSample': 'Latest sample',
@@ -77,7 +109,7 @@ export const en: Record<MessageKey, string> = {
   'bad.weather.loading': 'Loading forecast …',
   'bad.weather.wind': 'wind',
   'bad.weather.rain': 'precipitation',
-  'bad.weather.source': 'Source: SMHI',
+  'bad.weather.source': 'Source: SMHI, meteorological forecast via /api/vader',
   'bad.weather.issued': 'forecast issued',
   'bad.weather.symbol.1': 'Clear sky',
   'bad.weather.symbol.2': 'Nearly clear',

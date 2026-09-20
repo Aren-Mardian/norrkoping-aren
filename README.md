@@ -13,9 +13,9 @@ Målplattform: `https://arenm.se/projekt/norrkoping`
 |---|---|---|
 | 0 | Grund — repo, Vite+TS, CI, tile-proxy, CSP/headers, dev-läge utan token | **Klar lokalt** — väntar på Netlify-sajt (användaren) |
 | 1 | Karta står — LM-bakgrund, växlare, kommungräns, startextent, skalstock | **Nästan klar** — Lantmäteriets topografiska karta självhostad som PMTiles (ADR-09/10), kommungräns (OSM tills LM:s finns), växlare inkl. mörkt läge, startextent, skalstock. Återstår: flygbild (historiska ortofoton, kräver appkonto) |
-| 3 | Badplatser — HaV-integration, status, Topp 3, varningar, filter, SMHI | **Klar (första version)** — 19 badplatser, `/api/bad/status` (IK-02) med stale-cache, `/api/vader` (IK-03, SMHI snow1g), Topp 3 med publicerad viktning, avrådan som inte kan filtreras bort (DK-07), panel/bottom sheet (UX-03). Återstår: faciliteter (kuratering), badindex (FK-19), tillgänglighetsfilter (FK-20), `/metod`-sidan |
+| 3 | Badplatser — HaV-integration, status, Topp 3, varningar, filter, SMHI | **Klar (första version)** — 19 badplatser, `/api/bad/status` (IK-02) med stale-cache, `/api/vader` (IK-03, SMHI snow1g), Topp 3 med viktningen förklarad på plats, avrådan som inte kan filtreras bort (DK-07), panel/bottom sheet i app-skal (UX-03, ADR-13), språkväxlare. Återstår: faciliteter (kuratering), badindex (FK-19), tillgänglighetsfilter (FK-20) |
 | 4 | Verktygsläge — Origo på egen route: mät, rita, koordinater, dela, utskrift, lager | **Klar** (ADR-11/12) — `/verktyg/`, Origo 2.10.0 vendorerad, PMTiles-bakgrund, CSP per sida. Återstår: höjdmätning (Markhöjd Direkt) |
-| 2, 5–7 | Se kravspec §12 | Ej påbörjad |
+| 2, 5–7 | Se kravspec §12 | Ej påbörjad. Om/Källor/Integritet är beslutade att ligga på arenm.se (ADR-13), inte som egna sidor här |
 
 ## Kom igång (under 10 minuter)
 
@@ -71,6 +71,15 @@ Origo finns inte på npm; bundlen byggs reproducerbart med `node tools/build-ori
 (2,7 MB, med `VERSION.json`). Landningsvyn laddar aldrig Origo — `npm run check:budget` bevakar det
 (TK-05). Detaljer i [ADR-11](docs/adr/ADR-11-origo-verktygslage.md).
 
+### Layout och sidfot (ADR-13)
+
+Sidan är ett app-skal: topbar, karta + panel och sidfot fyller exakt vyporten och dokumentet
+scrollar aldrig — bara panelens innehåll. På mobil är panelen en bottom sheet (peek/half/full)
+och sidfoten flyttas in sist i sheeten. Sidfoten anger för varje uppgift **varifrån** den kommer,
+**hur** den hämtas (självhostad fil, statisk fil eller live via `/api/...` genom proxyn) och
+**hur färsk** den är; kartutsnittets datum injiceras från `data/derived/manifest.json` vid bygge.
+`Om`, `Källor och licenser` och `Integritet` länkar till arenm.se. Okända adresser ger 404.
+
 ## Kommandon
 
 | Kommando | Vad |
@@ -106,7 +115,7 @@ src/                    Klient (Vite + TypeScript, vanilla)
   map/                  Kartkärna, bakgrundskartor med fallback, PMTiles-läsare/-källa, egna kontroller
   net/                  fetch med timeout/omförsök (IK-06, IK-07)
   verktyg/              Origo-konfiguration och bootstrap för verktygsläget (ADR-11)
-  ui/                   Banners och statusrader
+  ui/                   Banners, bottom sheet, språkväxlare och sidfotens placering (ADR-13)
 shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
   geo/crs.ts            EPSG-koder, proj4-strängar, utbredning (ren data, inga beroenden)
   geo/projDefs.ts       proj4-registrering och transformationer (Bilaga B.5)
@@ -122,7 +131,7 @@ netlify/lib/            Testbar logik för funktionerna (hav.ts, smhi.ts, tilesG
 vite/                   Vite-plugin som kör edge-funktionerna i dev
 data/                   Kuraterad geodata (GeoJSON, EPSG:4326), SOURCES.md, derived/ (PMTiles, ej i git)
 public/vendor/          Vendorerade bibliotek (Origo, versionerad sökväg)
-docs/                   Kravspec, referenssystem, villkor, ADR:er, deploy/ (IIS-mall)
+docs/                   Kravspec, referenssystem, villkor, ADR-09–13, deploy/ (IIS-mall)
 scripts/                Byggkontroller, hämtning av kartdata
 tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval; Origo-bygge
 ```

@@ -1,11 +1,6 @@
 /* Verktygsläget: sidans ram runt Origo. Origos egen CSS (vendor/origo-<version>/css/style.css) styr allt
    inuti #app-wrapper; här sätter vi bara layouten så att Origo fyller ytan mellan topbar och sidfot. */
 
-.verktyg {
-  height: 100dvh;
-  overflow: hidden;
-}
-
 .verktyg #app-wrapper {
   flex: 1 1 auto;
   min-height: 0;
@@ -35,17 +30,26 @@
 
 .verktyg .footer {
   flex: 0 0 auto;
-  margin-top: 0;
   padding: var(--space-2) var(--space-4);
   font-size: 0.8rem;
 }
 
-.verktyg .footer p {
-  margin: 0;
+.verktyg .footer__bottom {
+  padding-top: 0;
+  border-top: 0;
 }
 
+.verktyg .footer__brief {
+  flex: 1 1 100%;
+}
+
+/* Statusraden ligger i flödet mellan topbar och karta här (ingen kartyta att lägga den över förrän Origo ritat). */
 .verktyg .map-status {
+  position: static;
   flex: 0 0 auto;
+  border-radius: 0;
+  border-width: 0 0 1px;
+  box-shadow: none;
 }
 
 /* Origos paneler är ljusa oavsett systemtema; låt inte vår mörka textfärg ärvas in (kontrast, NFK-10). */

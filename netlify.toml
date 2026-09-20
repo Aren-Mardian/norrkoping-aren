@@ -37,12 +37,24 @@
   to = "/projekt/norrkoping/404.html"
   status = 404
 
-# SPA-fallback tills per-objekt-sidor förrenderas (NFK-32). Funktioner under /api
-# definierar sina egna sökvägar och matchas före denna regel.
+# Språkprefix (/sv/, /en/ — FK-34) leder till landningsvyn; i18n läser segmentet ur URL:en.
 [[redirects]]
-  from = "/projekt/norrkoping/*"
+  from = "/projekt/norrkoping/sv/*"
   to = "/projekt/norrkoping/index.html"
   status = 200
+
+[[redirects]]
+  from = "/projekt/norrkoping/en/*"
+  to = "/projekt/norrkoping/index.html"
+  status = 200
+
+# Allt annat som saknas är ett riktigt 404 — inte landningsvyn under fel adress. Om projektet,
+# källor och integritet ligger på arenm.se; sajten har inga egna sidor utöver / och /verktyg/.
+# Funktioner under /api definierar sina egna sökvägar och matchas före denna regel.
+[[redirects]]
+  from = "/projekt/norrkoping/*"
+  to = "/projekt/norrkoping/404.html"
+  status = 404
 
 # ── Headers ──────────────────────────────────────────────────────────────────
 # Netlify: när flera regler sätter samma header för en sökväg är resultatet inte

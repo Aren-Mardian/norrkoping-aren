@@ -21,10 +21,20 @@
     <a class="skip-link" href="#app-wrapper" data-i18n="a11y.skipToMap">Hoppa till kartan</a>
 
     <header class="topbar">
-      <a class="brand" href="%BASE_URL%" data-i18n="site.name">Norrköpingskartan</a>
+      <a class="brand" href="%BASE_URL%">
+        <svg class="brand__mark" width="24" height="24" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <rect width="64" height="64" rx="14" fill="currentColor" opacity="0.12" />
+          <path d="M8 38c6-6 10-6 16 0s10 6 16 0 10-6 16 0" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" />
+          <path d="M8 48c6-6 10-6 16 0s10 6 16 0 10-6 16 0" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" opacity="0.55" />
+          <circle cx="32" cy="20" r="8" fill="currentColor" />
+        </svg>
+        <span class="brand__name" data-i18n="site.name">Norrköpingskartan</span>
+      </a>
       <nav class="topnav" aria-label="Huvudmeny" data-i18n-aria="nav.label">
-        <a href="%BASE_URL%" data-i18n="verktyg.backToMap">Till kartan</a>
-        <span class="topnav__current" aria-current="page" data-i18n="nav.tools">Verktyg</span>
+        <a href="%BASE_URL%" data-i18n="nav.beaches">Badplatser</a>
+        <a href="%BASE_URL%verktyg/" aria-current="page" data-i18n="nav.tools">Verktyg</a>
+        <a href="https://arenm.se/" data-i18n="nav.about">Om</a>
+        <a id="nav-lang" class="topnav__lang" href="?lang=en" hreflang="en" lang="en" data-i18n="nav.lang">English</a>
       </nav>
     </header>
 
@@ -38,10 +48,19 @@
     ></div>
 
     <footer class="footer">
-      <p class="footer__disclaimer">
-        <span lang="sv">Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.</span>
-        <span lang="en">An independent project by Aren Mardian. Not an official service of Norrköping Municipality.</span>
-      </p>
+      <div class="footer__bottom">
+        <p class="footer__disclaimer" data-i18n="footer.disclaimer">
+          Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.
+        </p>
+        <p class="footer__brief" data-i18n="footer.summary">
+          Karta: Lantmäteriet (självhostad) · Badvatten: HaV (API) · Väder: SMHI (API) · Kommungräns: OpenStreetMap · Verktyg: Origo/OpenLayers
+        </p>
+        <nav class="footer__links" aria-label="Om projektet" data-i18n-aria="footer.linksLabel">
+          <a href="https://arenm.se/" data-i18n="footer.about">Om projektet</a>
+          <a href="https://arenm.se/" data-i18n="footer.sources">Källor och licenser</a>
+          <a href="https://arenm.se/" data-i18n="footer.privacy">Integritet</a>
+        </nav>
+      </div>
     </footer>
   </body>
 </html>

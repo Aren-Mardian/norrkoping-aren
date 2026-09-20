@@ -22,8 +22,12 @@ export interface AppMap {
   readonly map: Map;
   readonly basemaps: Basemaps;
   resetView(): void;
-  /** Flyger till en punkt (EPSG:3006) på given LM-nivå — respekterar prefers-reduced-motion. */
-  zoomTo(center: number[], zoom: number): void;
+  /**
+   * Flyger till en punkt (EPSG:3006) på given LM-nivå — respekterar prefers-reduced-motion.
+   * `bottomInsetPx` = så mycket av kartans nederkant som täcks (bottom sheet); punkten
+   * centreras i den synliga delen.
+   */
+  zoomTo(center: number[], zoom: number, bottomInsetPx?: number): void;
 }
 
 /** Startextent = kommunens bbox med 5 % marginal (FK-03). */
@@ -110,11 +114,10 @@ export function createMap(target: HTMLElement): AppMap {
 
   basemaps.onChange((id) => target.classList.toggle('map--dark', id === 'dark'));
 
-  const zoomTo = (center: number[], zoom: number): void => {
-    // På mobil täcker panelen nedre delen av kartan — lägg punkten i övre halvan.
-    const size = map.getSize();
-    const desktop = window.matchMedia('(min-width: 900px)').matches;
-    const offsetY = !desktop && size ? Math.round((size[1] ?? 0) * 0.18) : 0;
+  const zoomTo = (center: number[], zoom: number, bottomInsetPx = 0): void => {
+    // Programmatisk navigering lämnar också startvyn — annars återställer nästa storleksändring den.
+    userHasInteracted = true;
+    const offsetY = Math.round(bottomInsetPx / 2);
     const res = LM_3006_RESOLUTIONS[zoom] ?? view.getResolution() ?? 1;
     view.animate({
       center: [center[0] ?? 0, (center[1] ?? 0) - offsetY * res],

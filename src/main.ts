@@ -14,10 +14,14 @@ import { createPanel } from './bad/panel.ts';
 import { BASE, IS_DEV, LM_ENABLED } from './config/site.ts';
 import { initI18n, t } from './i18n/index.ts';
 import { createMap } from './map/createMap.ts';
+import { fillFooterFacts, initLangToggle, placeFooter } from './ui/chrome.ts';
 import { showDevBanner, showMapStatus } from './ui/notices.ts';
 import { createSheet } from './ui/sheet.ts';
 
 initI18n();
+initLangToggle();
+fillFooterFacts();
+placeFooter(document.getElementById('panel-body'));
 
 const target = document.getElementById('map');
 if (!target) throw new Error('Kartcontainern #map saknas i dokumentet');
@@ -54,6 +58,18 @@ if (panelEl && handleEl instanceof HTMLButtonElement) {
     onHover: (id) => badLayer.setHover(id),
   });
 
+  /**
+   * Hur mycket av kartan sheeten täcker efter valet (mobil): peek öppnas till half, annars gäller
+   * nuvarande läge. Kartan slutar redan ovanför peek-höjden (panel.css), så bara överskottet räknas.
+   */
+  const sheetInset = (): number => {
+    if (sheet.isDesktop()) return 0;
+    const layoutH = panelEl.parentElement?.clientHeight ?? 0;
+    const mapH = target.clientHeight;
+    const sheetH = layoutH * (sheet.get() === 'full' ? 0.92 : 0.56);
+    return Math.max(0, Math.round(sheetH - (layoutH - mapH)));
+  };
+
   function select(id: string | null, fromList: boolean): void {
     selectedId = id;
     badLayer.setSelected(id);
@@ -61,8 +77,11 @@ if (panelEl && handleEl instanceof HTMLButtonElement) {
     const feature = id ? badLayer.getFeature(id) : undefined;
     if (feature) {
       const geom = feature.getGeometry();
-      if (geom) app.zoomTo(geom.getCoordinates(), 11);
+      if (geom) app.zoomTo(geom.getCoordinates(), 11, sheetInset());
       if (!fromList) sheet.reveal();
+    } else if (!fromList && !sheet.isDesktop()) {
+      // Klick på tom karta på mobil: ge kartan plats igen.
+      sheet.set('peek');
     }
   }
 

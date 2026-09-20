@@ -15,9 +15,11 @@ import './verktyg.css';
 import { BASE, IS_DEV, TOPO_PMTILES_URL } from '../config/site.ts';
 import { initI18n, t } from '../i18n/index.ts';
 import { createPmtilesTileLoader, type ImageTileLike } from '../map/pmtilesLoader.ts';
+import { initLangToggle } from '../ui/chrome.ts';
 import { ORIGO_SCRIPT, TOPO_LAYER_NAME, buildOrigoConfig } from './origoConfig.ts';
 
 const lang = initI18n();
+initLangToggle();
 
 const status = document.getElementById('verktyg-status');
 const wrapper = document.getElementById('app-wrapper');

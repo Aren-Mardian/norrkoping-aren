@@ -1,4 +1,4 @@
-import { copyFileSync, createReadStream, existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
+import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
@@ -27,6 +27,16 @@ const CONTENT_TYPES: Record<string, string> = {
   geojson: 'application/geo+json; charset=utf-8',
   json: 'application/json; charset=utf-8',
 };
+
+/** Datum för kartutsnittet (ADR-10-manifestet) — visas i sidfotens källförteckning. */
+function dataGenerated(): string {
+  try {
+    const manifest = JSON.parse(readFileSync(join(DATA_DIR, 'derived', 'manifest.json'), 'utf8')) as { files?: Array<{ generated?: string }> };
+    return manifest.files?.[0]?.generated ?? '';
+  } catch {
+    return '';
+  }
+}
 
 function listDataFiles(dir = DATA_DIR): string[] {
   const out: string[] = [];
@@ -134,6 +144,9 @@ function cspMeta(): Plugin {
 export default defineConfig({
   base: BASE,
   plugins: [derivedData(), cspMeta(), devFunctions({ root: ROOT, apiPrefix: `${BASE}api/` })],
+  define: {
+    __DATA_GENERATED__: JSON.stringify(dataGenerated()),
+  },
   build: {
     // Bygg rakt in i den sökväg som Netlify publicerar, så att `dist/` kan
     // publiceras som den är och sajten hamnar under /projekt/norrkoping/.

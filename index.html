@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Norrköpingskartan — sevärdheter och badplatser i Norrköpings kommun</title>
+    <title>Norrköpingskartan — badplatser med aktuell badvattenstatus i Norrköpings kommun</title>
     <meta
       name="description"
       content="Öppen, snabb och tillgänglig karta över Norrköpings kommun: badplatser med aktuell badvattenstatus från Havs- och vattenmyndigheten, väder från SMHI och Lantmäteriets karta i SWEREF 99 TM. Ett oberoende projekt av Aren Mardian."
@@ -27,12 +27,14 @@
           <path d="M8 48c6-6 10-6 16 0s10 6 16 0 10-6 16 0" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" opacity="0.55" />
           <circle cx="32" cy="20" r="8" fill="currentColor" />
         </svg>
-        <span data-i18n="site.name">Norrköpingskartan</span>
+        <span class="brand__name" data-i18n="site.name">Norrköpingskartan</span>
       </a>
       <nav class="topnav" aria-label="Huvudmeny" data-i18n-aria="nav.label">
         <a href="%BASE_URL%" aria-current="page" data-i18n="nav.beaches">Badplatser</a>
         <a href="%BASE_URL%verktyg/" id="nav-verktyg" data-i18n="nav.tools">Verktyg</a>
-        <a href="%BASE_URL%om" data-i18n="nav.about">Om</a>
+        <!-- Om projektet, källor och integritet ligger på arenm.se (portfolion), inte här. -->
+        <a href="https://arenm.se/" data-i18n="nav.about">Om</a>
+        <a id="nav-lang" class="topnav__lang" href="?lang=en" hreflang="en" lang="en" data-i18n="nav.lang">English</a>
       </nav>
     </header>
 
@@ -77,20 +79,87 @@
           <section id="bad-top3" class="top3" aria-live="polite"></section>
           <ol id="bad-list" class="beach-list"></ol>
           <section id="bad-detail" class="detail" hidden></section>
+          <!-- På mobil flyttas sidfoten hit (slutet av panelens scrollyta) av src/main.ts. -->
         </div>
       </aside>
     </main>
 
-    <footer class="footer">
-      <p class="footer__disclaimer">
-        <span lang="sv">Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.</span>
-        <span lang="en">An independent project by Aren Mardian. Not an official service of Norrköping Municipality.</span>
-      </p>
-      <p class="footer__meta">
-        <span data-i18n="footer.curated">Kuraterat innehåll och rankning © Aren Mardian.</span>
-        <a href="%BASE_URL%kallor" data-i18n="footer.sources">Datakällor och licenser</a>
-        <a href="%BASE_URL%integritet" data-i18n="footer.privacy">Integritet</a>
-      </p>
+    <!--
+      Sidfot (JK-01, JK-04, Bilaga C): varje uppgift på sidan spåras till sin källa — varifrån, hur
+      (API via proxy, självhostad fil, statisk fil) och hur färsk. Texten byts per språk av i18n.
+    -->
+    <footer id="site-footer" class="footer">
+      <details id="sources" class="sources">
+        <summary class="sources__summary">
+          <span class="sources__title" data-i18n="footer.title">Så hämtas informationen</span>
+          <span class="sources__brief" data-i18n="footer.summary"
+            >Karta: Lantmäteriet (självhostad) · Badvatten: HaV (API) · Väder: SMHI (API) · Kommungräns: OpenStreetMap · Verktyg: Origo/OpenLayers</span
+          >
+        </summary>
+        <div class="sources__body">
+          <p class="sources__intro" data-i18n="footer.intro">
+            Varje uppgift på sidan kommer från en öppen källa. Här står varifrån den kommer, hur den hämtas och hur färsk den är.
+          </p>
+          <dl class="sources__list">
+            <div class="sources__item">
+              <dt data-i18n="footer.src.bad.name">Badplatser och badvattenstatus</dt>
+              <dd data-i18n="footer.src.bad.body">
+                Havs- och vattenmyndigheten, Badplatsen-API (öppna data). Läge, namn och typ hämtas som grunddata vid bygge. Provsvar,
+                alger, avrådan och vattentemperatur hämtas live via /api/bad/status med 1 timmes cache — statusens ålder visas alltid.
+              </dd>
+            </div>
+            <div class="sources__item">
+              <dt data-i18n="footer.src.vader.name">Väder</dt>
+              <dd data-i18n="footer.src.vader.body">
+                SMHI, meteorologisk prognos (API snow1g), licens CC BY 4.0. Hämtas via /api/vader när du öppnar en badplats; prognosens
+                utgivningstid visas.
+              </dd>
+            </div>
+            <div class="sources__item">
+              <dt data-i18n="footer.src.topo.name">Bakgrundskarta</dt>
+              <dd id="source-topo" data-i18n="footer.src.topo.body">
+                Lantmäteriet, Topografisk webbkarta (nedladdning, raster), licens CC BY 4.0. Nedladdad från Lantmäteriets öppna data,
+                beskuren till kommunen och självhostad som PMTiles-fil — din webbläsare anropar aldrig Lantmäteriet.
+              </dd>
+            </div>
+            <div class="sources__item">
+              <dt data-i18n="footer.src.orto.name">Flygbild</dt>
+              <dd id="source-orto" data-i18n="footer.src.orto.body">
+                Lantmäteriet, Ortofoto historiska (WMS), licens CC0. Hämtas ruta för ruta via sajtens egen proxy (/api/tiles) med
+                Lantmäteriets appkonto.
+              </dd>
+            </div>
+            <div class="sources__item">
+              <dt data-i18n="footer.src.kommun.name">Kommungräns</dt>
+              <dd data-i18n="footer.src.kommun.body">
+                OpenStreetMap (relation 935447), licens ODbL — statisk GeoJSON-fil, i väntan på Lantmäteriets Kommun, Län och Rike (CC BY 4.0).
+              </dd>
+            </div>
+            <div class="sources__item">
+              <dt data-i18n="footer.src.verktyg.name">Kartmotor och verktyg</dt>
+              <dd data-i18n="footer.src.verktyg.body">
+                OpenLayers och Origo 2.10.0 (BSD 2-clause), självhostade. Kartan ritas i SWEREF 99 TM (EPSG:3006); mätning sker geodetiskt,
+                aldrig i Web Mercator.
+              </dd>
+            </div>
+          </dl>
+          <p class="sources__privacy" data-i18n="footer.privacyNote">
+            Inga kakor, ingen spårning. Alla anrop till HaV, SMHI och Lantmäteriet går via sajtens egen proxy — din IP-adress skickas inte
+            vidare.
+          </p>
+        </div>
+      </details>
+      <div class="footer__bottom">
+        <p class="footer__disclaimer" data-i18n="footer.disclaimer">
+          Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.
+        </p>
+        <nav class="footer__links" aria-label="Om projektet" data-i18n-aria="footer.linksLabel">
+          <a href="https://arenm.se/" data-i18n="footer.about">Om projektet</a>
+          <a href="https://arenm.se/" data-i18n="footer.sources">Källor och licenser</a>
+          <a href="https://arenm.se/" data-i18n="footer.privacy">Integritet</a>
+        </nav>
+        <p class="footer__meta" data-i18n="footer.curated">Kuraterat innehåll och rankning © Aren Mardian.</p>
+      </div>
     </footer>
   </body>
 </html>
