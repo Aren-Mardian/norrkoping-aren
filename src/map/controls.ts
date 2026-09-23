@@ -73,10 +73,10 @@ export class BasemapSwitcherControl extends Control {
       const active = basemaps.getActive();
       for (const [id, b] of this.buttons) {
         b.setAttribute('aria-pressed', String(id === active));
-        // Flygbild finns bara hos Lantmäteriet — utan appkonto är knappen avstängd, med förklaring.
+        // Flygbilden stängs av först om Lantmäteriet faktiskt vägrar leverera (ADR-16).
         if (id === 'orto') {
           b.disabled = !basemaps.isLmAvailable();
-          b.title = b.disabled ? t('map.basemap.ortoUnavailable') : '';
+          b.title = b.disabled ? t('map.basemap.ortoUnavailable') : t('map.basemap.ortoTitle');
         }
       }
       yearRow.hidden = active !== 'orto' || !basemaps.isLmAvailable();
@@ -85,6 +85,7 @@ export class BasemapSwitcherControl extends Control {
     };
     basemaps.onChange(sync);
     basemaps.onTopoFailure(sync);
+    basemaps.onOrtoFailure(sync);
     sync();
   }
 }

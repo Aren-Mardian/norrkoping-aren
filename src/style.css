@@ -955,6 +955,16 @@ button {
   width: 32px;
 }
 
+/* Origo lägger sina SVG-spritar (fa-icons, material-icons, miscellaneous, origo-icons, custom)
+   som <div><svg style="display:none">…</svg></div> direkt i <body>. Håller de bara ihop av
+   inline-stilen försvinner de så fort en strikt CSP blockerar style-attribut — då syns de som
+   tomma block och trycker ner kartan. Klassen sätts av tools.ts; regeln här är bältet, och
+   :has() nedan hängslena för den ordning som gäller innan klassen hunnit sättas. */
+.origo-sprite,
+body > div:not([id]):has(> svg:only-child) {
+  display: none !important;
+}
+
 /* Mobil: knappraden delar översta raden med sökrutan. Nedre halvan av kartan är upptagen av
    zoomkontroller, skalstock, attribution och bottom sheeten — där finns ingen plats kvar. */
 @media (max-width: 899px) {
@@ -995,5 +1005,18 @@ button {
   .tools-active .platskort {
     left: calc(var(--space-2) + 48px);
     width: calc(100% - var(--space-2) - 52px - var(--space-2));
+  }
+}
+
+/* Skelett medan Origo hämtas: ytan är tom tills bundlen är på plats (ADR-16). */
+.map--tools.is-loading {
+  background: linear-gradient(100deg, var(--c-skeleton-a) 30%, var(--c-skeleton-b) 50%, var(--c-skeleton-a) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map--tools.is-loading {
+    animation: none;
   }
 }

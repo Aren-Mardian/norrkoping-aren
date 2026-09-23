@@ -91,5 +91,6 @@ Från kravspec Bilaga B.3 (ungefärlig; ska ersättas av verklig kommungränsgeo
 | SWEREF 99 TM | 532 256, 6 460 016 | 618 039, 6 532 953 |
 | Web Mercator | 1 731 018, 8 026 368 | 1 897 998, 8 163 116 |
 
-Panorering och tile-proxyn tillåter 25 km buffert utanför denna (FK-04, NFK-18). I Web Mercator
-motsvarar 25 km på marken ca 48 km i kartenheter på den här latituden — det är skalfaktorn 1,92 igen.
+Panorering och tile-proxyn tillåter 5 km buffert utanför denna (FK-04, NFK-18; sänkt från 25 km
+2026-09-23, ADR-16 — sajten hämtar ingen information om andra kommuner). I Web Mercator motsvarar
+5 km på marken ca 9,6 km i kartenheter på den här latituden — det är skalfaktorn 1,92 igen.

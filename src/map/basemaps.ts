@@ -17,7 +17,7 @@ import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
 import TileGrid from 'ol/tilegrid/TileGrid';
 import { LM_3006_EXTENT, LM_3006_ORIGIN, LM_3006_RESOLUTIONS, LM_TILE_SIZE } from '../../shared/geo/lmTileGrid.ts';
-import { API_BASE, LM_ENABLED, PROXY_AVAILABLE, TOPO_PMTILES_URL } from '../config/site.ts';
+import { API_BASE, PROXY_AVAILABLE, TOPO_PMTILES_URL } from '../config/site.ts';
 import { EPSG_3006 } from '../geo/olProjections.ts';
 import { t } from '../i18n/index.ts';
 import { createPmtilesBasemap } from './pmtilesSource.ts';
@@ -40,15 +40,22 @@ export interface Basemaps {
   isTopoAvailable(): boolean;
   getOrtoYear(): OrtoYear;
   setOrtoYear(year: OrtoYear): void;
-  /** Sant när Lantmäteriets proxy (flygbild) är konfigurerad. */
+  /**
+   * Sant så länge flygbilden kan visas. Avgörs av om proxyn finns — inte av en byggflagga —
+   * och slås av först om Lantmäteriet faktiskt vägrar leverera rutor (ADR-16).
+   */
   isLmAvailable(): boolean;
   /** Anropas en gång om topo-kartan inte går att visa och fallback tar över. */
   onTopoFailure(cb: (reason: TopoFailure) => void): void;
+  /** Anropas en gång om flygbilden inte går att hämta (t.ex. appkonto saknas på servern). */
+  onOrtoFailure(cb: () => void): void;
   onChange(cb: (id: BasemapId) => void): void;
 }
 
 /** Efter så många misslyckade rutor utan en enda lyckad byter vi till fallback. */
 const FAILURES_BEFORE_FALLBACK = 4;
+/** Samma spärr för flygbilden: några enstaka fel kan vara en trasig ruta, inte en trasig tjänst. */
+const ORTO_FAILURES_BEFORE_DISABLE = 4;
 
 /** `levels` = antal nivåer i rutnätet. Slutar rutnätet vid tjänstens sista nivå skalar
  *  OpenLayers upp den sista rutan i stället för att visa tomt när man zoomar vidare. */
@@ -112,9 +119,14 @@ export function createBasemaps(): Basemaps {
   let active: BasemapId = 'topo';
   let ortoYear: OrtoYear = ORTO_YEARS[0] ?? 1960;
   let topoAvailable = true;
-  const lmAvailable = LM_ENABLED;
+  // Flygbilden går genom vår egen proxy. Finns proxyn (allt utom ren `npm run dev` utan .env)
+  // antar vi att den fungerar och låter knappen vara påslagen; svarar Lantmäteriet inte stängs
+  // den av i efterhand med en synlig förklaring. Tidigare avgjordes det av byggflaggan
+  // VITE_LM_ENABLED, vilket gjorde knappen död på varje bygge där variabeln saknades (ADR-16).
+  let lmAvailable = PROXY_AVAILABLE;
   const failureListeners: Array<(reason: TopoFailure) => void> = [];
   const changeListeners: Array<(id: BasemapId) => void> = [];
+  const ortoFailureListeners: Array<() => void> = [];
 
   function apply(): void {
     const wantsTopo = active === 'topo' || active === 'dark';
@@ -128,6 +140,29 @@ export function createBasemaps(): Basemaps {
     topoAvailable = false;
     apply();
     for (const cb of failureListeners) cb(reason);
+  }
+
+  /** Flygbilden svarar inte: stäng av knappen, förklara, och gå tillbaka till kartan. */
+  function failOrto(): void {
+    if (!lmAvailable) return;
+    lmAvailable = false;
+    if (active === 'orto') active = 'topo';
+    apply();
+    for (const cb of ortoFailureListeners) cb();
+    for (const cb of changeListeners) cb(active);
+  }
+
+  let ortoErrors = 0;
+  let ortoSucceeded = false;
+  for (const layer of ortoLayers.values()) {
+    const source = layer.getSource();
+    source?.on('tileloadend', () => {
+      ortoSucceeded = true;
+    });
+    source?.on('tileloaderror', () => {
+      ortoErrors += 1;
+      if (!ortoSucceeded && ortoErrors >= ORTO_FAILURES_BEFORE_DISABLE) failOrto();
+    });
   }
 
   // Saknas filen helt (404) faller vi tillbaka direkt, utan att vänta på tile-fel.
@@ -166,6 +201,9 @@ export function createBasemaps(): Basemaps {
     },
     onTopoFailure(cb) {
       failureListeners.push(cb);
+    },
+    onOrtoFailure(cb) {
+      ortoFailureListeners.push(cb);
     },
     onChange(cb) {
       changeListeners.push(cb);

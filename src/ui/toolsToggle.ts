@@ -91,10 +91,16 @@ export function createToolsController(opts: ToolsOptions): ToolsController {
     if (!mount) return;
     loading = true;
     say(t('tools.loading'));
+    // Växla kartytan FÖRE initieringen. Origo mäter upp sin yta när den skapas, och ändras
+    // storleken efteråt behåller rutlagret en tom, cachad ram — då hämtades bakgrundsrutorna
+    // men ritades aldrig (ADR-16). Nu byggs Origo direkt i full storlek och storleken ändras
+    // aldrig. Ytan står tom någon sekund medan bundlen laddas; skelettet visar att det pågår.
+    mount.classList.add('is-loading');
+    active = true;
+    show('tools');
+    syncButtons();
     try {
       const { loadTools } = await import('../origo/tools.ts');
-      // Monteringselementet måste vara synligt när Origo mäter upp kartytan.
-      mount.hidden = false;
       tools = await loadTools({
         mount,
         view: ownMap.getView(),
@@ -107,15 +113,15 @@ export function createToolsController(opts: ToolsOptions): ToolsController {
       tools.onHover((id) => {
         for (const cb of hoverListeners) cb(id);
       });
-      active = true;
-      show('tools');
       say(null);
       for (const cb of readyListeners) cb(tools);
     } catch {
-      mount.hidden = true;
-      say(t('tools.failed'));
+      // Tillbaka till vår karta — användaren ska inte lämnas med en tom ruta.
       active = false;
+      show('own');
+      say(t('tools.failed'));
     } finally {
+      mount.classList.remove('is-loading');
       loading = false;
       syncButtons();
     }
@@ -138,6 +144,18 @@ export function createToolsController(opts: ToolsOptions): ToolsController {
     if (active) deactivate();
     else void activate();
   });
+
+  // Förhämtning vid avsikt (NFK-34): den som för muspekaren mot knappen får bundlen hämtad i
+  // bakgrunden, så att klicket känns omedelbart. Den som aldrig rör knappen hämtar ingenting.
+  let prefetched = false;
+  const prefetch = (): void => {
+    if (prefetched || tools) return;
+    prefetched = true;
+    void import('../origo/tools.ts');
+  };
+  for (const type of ['pointerenter', 'focus', 'touchstart'] as const) {
+    toggle?.addEventListener(type, prefetch, { once: true, passive: true });
+  }
 
   hojdToggle?.addEventListener('click', () => {
     if (!tools) return;

@@ -81,7 +81,7 @@ export function buildOrigoConfig(targetId: string, view: { center: number[]; zoo
       { code: 'EPSG:3006', alias: 'SWEREF 99 TM', projection: DEF_3006 },
       { code: 'EPSG:3010', alias: 'SWEREF 99 16 30', projection: DEF_3010 },
     ],
-    // Panorering begränsad till kommunen + 25 km (FK-04); zoomsteg = Lantmäteriets matris.
+    // Panorering begränsad till kommunen + 5 km (FK-04, ADR-16); zoomsteg = Lantmäteriets matris.
     extent: [...PAN_LIMIT_3006],
     // Vyn ärvs från kartan användaren redan tittade på (ADR-15) — inget hopp när verktygen slås på.
     center: [...view.center],

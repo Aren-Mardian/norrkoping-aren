@@ -43,6 +43,9 @@ app.basemaps.onTopoFailure((reason) => {
   showMapStatus(t('map.status.fallback'));
 });
 
+// Flygbilden går via proxyn och kan sakna appkonto på servern — då sägs det rakt ut (ADR-16).
+app.basemaps.onOrtoFailure(() => showMapStatus(t('map.status.ortoFailed')));
+
 // ── Verktygsläget: Origo i samma kartruta, på begäran (ADR-15) ────────────────
 const tools = createToolsController({
   ownMap: app,

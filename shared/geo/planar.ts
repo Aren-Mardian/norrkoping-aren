@@ -1,9 +1,9 @@
 /**
  * Planär längd och vitlistan över projektioner där den är godkänd (NFK-12).
  *
- * Egen modul **utan beroenden** — precis som crs.ts. Origo-sidans höjdverktyg behöver bara
- * de här två sakerna, och skulle det importeras ur measure.ts följde proj4 med (42 kB gzip)
- * trots att Origo redan har sin egen kopia inbyggd.
+ * Egen modul **utan beroenden** — precis som crs.ts. Delen är utbruten för att den som bara
+ * behöver planär längd eller vitlistan ska slippa dra in proj4 (42 kB gzip) via measure.ts;
+ * Origos bundle har redan en egen kopia.
  */
 import { EPSG_3006, EPSG_3010 } from './crs.ts';
 
@@ -31,13 +31,4 @@ export function planarLength(coords: readonly XY[]): number {
     sum += Math.hypot(b[0] - a[0], b[1] - a[1]);
   }
   return sum;
-}
-
-/**
- * Planär längd i ett system där det är tillåtet. Kastar för 3857 och andra icke-godkända
- * system — anroparen ska då välja geodetisk beräkning (measure.ts).
- */
-export function planarLengthIn(coords: readonly XY[], projection: string): number {
-  if (!MEASURABLE_PROJECTIONS.has(projection)) throw new ProjectionNotMeasurableError(projection);
-  return planarLength(coords);
 }

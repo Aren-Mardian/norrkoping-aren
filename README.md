@@ -66,8 +66,8 @@ Sökrutan över kartan (båda sidorna) söker i 7 865 ortnamn inom kommunen — 
 Lantmäteriets *Ortnamn* med koordinater i EPSG:3006. Indexet (87 kB gzip) och sökmotorn laddas
 med `import()` först när du fokuserar sökfältet, så landningsvyns kritiska väg är opåverkad (TK-05).
 En vald plats visar koordinater i SWEREF 99 TM och markhöjd i RH 2000 från *Markhöjd Direkt*.
-På Origo-sidan ger knappen **Höjd** markhöjd vid klick, och en ritad linje ger en höjdprofil
-(lägsta/högsta punkt, total stigning, längd) med ett enda batchanrop.
+Med verktygen öppna ger knappen **Höjd** markhöjden där du klickar — ett klick, en höjd, nästa
+klick nästa höjd (ADR-16). Klick utanför kommungränsen ger inget anrop alls.
 
 ### Badplatser
 
@@ -147,7 +147,8 @@ shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
   geo/lmTileGrid.ts     Lantmäteriets 3006-matris
   geo/planar.ts         Planär längd + vitlistan över mätbara projektioner (utan beroenden)
   geo/measure.ts        Längdmätning: 3006/3010/geodetiskt, aldrig 3857 (NFK-12)
-  geo/kommun.ts         Kommunkod, bbox, panoreringsbuffert
+  geo/kommun.ts         Kommunkod, bbox, panoreringsbuffert (5 km)
+  geo/kommunPolygon.ts  Kommungränsen som förenklad polygon + pointInKommun (genererad)
   api/errors.ts         Enhetlig felmodell (IK-04)
 netlify/functions/      Edge-funktioner (Netlify Functions 2.0)
   tiles.mts             IK-01 tile-proxy (flygbild 1960/1975 via WMS, OSM-fallback)
@@ -158,7 +159,7 @@ netlify/lib/            Testbar logik för funktionerna (hav.ts, smhi.ts, tilesG
 vite/                   Vite-plugin som kör edge-funktionerna i dev
 data/                   Kuraterad geodata (GeoJSON, EPSG:4326), SOURCES.md, derived/ (PMTiles, ej i git)
 public/vendor/          Vendorerade bibliotek (Origo, versionerad sökväg)
-docs/                   Kravspec, referenssystem, villkor, ADR-09–15, deploy/ (IIS-mall)
+docs/                   Kravspec, referenssystem, villkor, ADR-09–16, deploy/ (IIS-mall)
 scripts/                Byggkontroller, hämtning av kartdata
 tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval; Origo-bygge
 ```

@@ -72,6 +72,17 @@ tools/.venv/Scripts/python tools/lm_ftp_ekonomiska.py --bbox 562000 6490000 5760
 Hela kommunens bbox = 272 blad ≈ 17 GB; centrala Norrköping = 9 blad ≈ 0,56 GB.
 Nedladdade blad hamnar i `data/raw/` (git-ignorerat) och bearbetas vidare till PMTiles i ett senare steg.
 
+## kommun_polygon.py — kommungränsen som spärr
+
+```bash
+tools/.venv/Scripts/python tools/kommun_polygon.py   # → shared/geo/kommunPolygon.ts
+```
+
+Förenklar Lantmäteriets kommungräns till 222 hörn i EPSG:3006 och skriver den som en
+TypeScript-modul med `pointInKommun()`. Används av `/api/hojd` och höjdverktyget för att avgöra
+om en punkt är Norrköping — bbox:en duger inte, den rymmer fyra grannkommuner (ADR-16).
+Kör om efter varje ny hämtning av kommungränsen. Filen är genererad och redigeras inte för hand.
+
 ## ortnamn_index.py — sökindex för ortnamn (FK-32)
 
 ```bash

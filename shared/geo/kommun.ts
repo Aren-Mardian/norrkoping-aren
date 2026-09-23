@@ -28,8 +28,14 @@ export const KOMMUN_VIEW_BBOX_3006 = [535844, 6475456, 620000, 6524384] as const
 /** [minX, minY, maxX, maxY] i EPSG:3857. Används bara för fallback-lagrets bbox-spärr. */
 export const KOMMUN_BBOX_3857 = [1738532, 8051606, 1955806, 8148876] as const;
 
-/** Panoreringsbuffert runt kommunen (FK-04): 25 km. */
-export const PAN_BUFFER_M = 25_000;
+/** Panoreringsbuffert runt kommunen (FK-04). */
+/**
+ * Hur långt utanför kommunens bbox kartan får panoreras — och därmed hur långt utanför
+ * kommunen tile-proxyn levererar bakgrundsrutor (NFK-18). Sänkt 25 km → 5 km 2026-09-23
+ * (ADR-16): sajten ska inte hämta information om andra kommuner, och 5 km räcker för att
+ * kanten ska ritas snyggt när man panorerar ut till gränsen.
+ */
+export const PAN_BUFFER_M = 5_000;
 
 export type Extent = readonly [number, number, number, number];
 
@@ -44,5 +50,5 @@ export function extentsIntersect(a: Extent, b: Extent): boolean {
 /** Buffrad kommun-bbox i 3006 — gräns för panorering och för tile-proxyn (NFK-18). */
 export const PAN_LIMIT_3006: Extent = bufferExtent(KOMMUN_BBOX_3006, PAN_BUFFER_M);
 
-/** Web Mercator har skalfaktor ≈ 1,92 här, så 25 km på marken ≈ 48 km i kartenheter. */
+/** Web Mercator har skalfaktor ≈ 1,92 här, så 5 km på marken ≈ 9,6 km i kartenheter. */
 export const PAN_LIMIT_3857: Extent = bufferExtent(KOMMUN_BBOX_3857, PAN_BUFFER_M * 1.92);

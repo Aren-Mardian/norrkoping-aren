@@ -89,6 +89,31 @@ function attachBasemap(viewer: OrigoViewer, onFailure: () => void): OrigoTileSou
 }
 
 /**
+ * Origo lägger sina ikonspritar som `<div><svg style="display:none">` direkt i `<body>`, och
+ * litar på inline-stilen. Blockeras style-attribut av en strikt CSP blir divarna synliga tomma
+ * block som trycker ner kartan (sett live). Märk dem i stället med en klass som CSS:en döljer —
+ * ett attribut kan ingen CSP ta bort. Spritarna måste ligga kvar i dokumentet: ikonerna
+ * refererar dem med <use>.
+ */
+function markSprites(): void {
+  for (const svg of document.querySelectorAll('body > div > svg')) {
+    const holder = svg.parentElement;
+    if (holder && holder.children.length === 1 && svg.querySelector(':scope > symbol')) {
+      holder.classList.add('origo-sprite');
+    }
+  }
+}
+
+function hideSpriteContainers(): void {
+  markSprites();
+  // Origo hämtar sprite-filerna med fetch och lägger in dem efterhand, så de finns sällan
+  // när `load` går. En kortlivad observatör fångar dem när de dyker upp och kopplas sedan ned.
+  const observer = new MutationObserver(markSprites);
+  observer.observe(document.body, { childList: true });
+  window.setTimeout(() => observer.disconnect(), 15_000);
+}
+
+/**
  * Origo kräver som standard Ctrl för att zooma med rullhjulet. På den här sidan behövs det
  * inte: kartan fyller sin egen yta och dokumentet bakom scrollar aldrig (ADR-13), så det finns
  * inget att skrolla förbi. Kravet tas bort genom att MouseWheelZoom-interaktionens villkor
@@ -132,6 +157,7 @@ export async function loadTools({ mount, view, statusHost, onBasemapFailure }: L
 
   const topoSource = attachBasemap(viewer, onBasemapFailure);
   allowPlainWheelZoom(viewer);
+  hideSpriteContainers();
 
   const ol = Origo.ol;
   const map = viewer.getMap() as unknown as OlMapLike;

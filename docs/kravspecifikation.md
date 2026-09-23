@@ -513,7 +513,7 @@ Dynamiskt statusobjekt (normaliserat av edge-funktionen):
 
 <a id="fk-04"></a>
 **FK-04 (S) — Panoreringsbegränsning.** Kartan begränsar panorering till en generös buffert runt kommunen.
-*Acceptanskriterium:* Användaren kan inte panorera längre än 25 km utanför kommungränsen; ett tryck på "Återställ vy" återgår till startextent.
+*Acceptanskriterium:* Användaren kan inte panorera längre än 5 km utanför kommungränsen (sänkt från 25 km, ADR-16); ett tryck på "Återställ vy" återgår till startextent.
 
 <a id="fk-05"></a>
 **FK-05 (M) — Kommungräns synlig.** Norrköpings kommungräns renderas som eget lager.

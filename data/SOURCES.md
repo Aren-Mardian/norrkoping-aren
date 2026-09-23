@@ -145,7 +145,7 @@ Alla sju gränssnitt testades med appkontots HTTP Basic. Fullständigt beslut i
 | `stac-hojd/v1` | — (Markhöjd Direkt ger samma höjder utan lagring) | Verifierad, oanvänd |
 | `stac-bild/v1` | — (visningstjänsten nedan ger samma bilder utan lagring) | Verifierad, oanvänd |
 | `ogc-features/v1` | — | **403 på `/items`**: appkontot saknar scope |
-| Markhöjd Direkt | `/api/hojd` — punkt (GET) och profil (POST MultiPoint, ≤ 200 punkter) | I drift |
+| Markhöjd Direkt | `/api/hojd` — punkt (GET). Punkten måste ligga innanför kommungränsen (ADR-16) | I drift |
 | Höjd Direkt | — (samma data, men bara OAuth med 1-timmestoken) | Verifierad, oanvänd |
 
 ### Ortofoto historiska Visning (WMS 1.1.1)
@@ -160,10 +160,12 @@ Alla sju gränssnitt testades med appkontots HTTP Basic. Fullständigt beslut i
 ### Markhöjd Direkt
 
 - **endpoint:** `https://api.lantmateriet.se/distribution/produkter/markhojd/v1/hojd?srid=3006`
-- **GET** `&e=<öst>&n=<norr>` → `Feature(Point [e, n, z])`. **POST** `{"type":"MultiPoint","coordinates":[[e,n],…]}`
-  → `Feature(MultiPoint [[e, n, z], …])`. `nodatavalue` är −9999 och normaliseras till `null` i vår proxy.
+- **GET** `&e=<öst>&n=<norr>` → `Feature(Point [e, n, z])`. `nodatavalue` är −9999 och normaliseras
+  till `null` i vår proxy. Tjänsten stöder även batch (POST MultiPoint); vi använder det inte sedan
+  höjdprofilen togs bort (ADR-16).
 - **höjdsystem:** RH 2000. **license:** CC BY 4.0. **attribution:** `© Lantmäteriet, Markhöjd Direkt`
-- **spärrar:** endast punkter inom kommunens buffrade bbox, högst 200 per anrop (NFK-18)
+- **spärrar:** endast punkter **innanför kommungränsen** — `pointInKommun()` mot den förenklade
+  polygonen i `shared/geo/kommunPolygon.ts`, inte mot bbox:en (ADR-16, NFK-18)
 
 ## Programvara med attributionskrav
 

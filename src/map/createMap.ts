@@ -1,6 +1,6 @@
 /**
  * Kartkärnan för landningsvyn: OpenLayers i EPSG:3006 (ADR-03), startvy låst
- * till kommunen (FK-03), panorering begränsad till 25 km buffert (FK-04),
+ * till kommunen (FK-03), panorering begränsad till kommunen + 5 km (FK-04, ADR-16),
  * skalstock beräknad i projektionen (FK-07) och attribution som inte kan döljas (JK-02).
  *
  * Origo får aldrig importeras här — verktygsläget är en egen lazy route (TK-05).
