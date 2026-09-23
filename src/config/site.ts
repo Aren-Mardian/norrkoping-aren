@@ -34,3 +34,9 @@ export const BADPLATSER_URL = `${BASE}data/bad/badplatser.geojson`;
 /** Dynamisk badvattenstatus (IK-02) och väder (IK-03). */
 export const BAD_STATUS_URL = `${API_BASE}/bad/status`;
 export const VADER_URL = `${API_BASE}/vader`;
+
+/** Markhöjd via Lantmäteriets Markhöjd Direkt (IK-08) — punkt och profil. */
+export const HOJD_URL = `${API_BASE}/hojd`;
+
+/** Ortnamnsindex för sök (FK-32), härlett av tools/ortnamn_index.py. Laddas först vid sökning. */
+export const ORTNAMN_URL = `${BASE}data/sok/ortnamn.json`;

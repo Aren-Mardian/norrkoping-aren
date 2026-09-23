@@ -13,3 +13,5 @@ data/raw/
 tools/.venv/
 # Stora härledda kartfiler publiceras som release-artefakter, inte i git (GitHub-gräns 100 MB/fil)
 data/derived/*.pmtiles
+# Råuttaget av ortnamn (1,3 MB) är bara råvara för tools/ortnamn_index.py; indexet i data/sok/ checkas in
+data/derived/ortnamn.geojson

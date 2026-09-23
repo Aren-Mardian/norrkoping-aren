@@ -7,7 +7,7 @@ eller live via `/api/...`) och hur färskt. Texterna ligger i `src/i18n/sv.ts`/`
 `footer.src.*` — ändras en källa här ska de raderna följa med. Sidorna Om/Källor/Integritet länkar
 till arenm.se.
 
-Senast uppdaterad: 2026-09-20.
+Senast uppdaterad: 2026-09-23.
 
 ## Sammanfattning av läget
 
@@ -16,13 +16,14 @@ Senast uppdaterad 2026-09-19 efter genomgång av Geotorgets produktlista och bes
 | ID | Källa | Status | Konto/nyckel |
 |---|---|---|---|
 | DS-1 | Lantmäteriet, bakgrundskarta | **Ändrad plan.** Kravspecens produkt (*Topografisk webbkarta Visning, översiktlig*) utgår 2026-12-31 och de övriga visningstjänsterna kostar. Bakgrundskartan byggs i stället från **Topografisk webbkarta Nedladdning, raster** (avgiftsfri) → självhostad PMTiles. Se avsnittet Lantmäteriet nedan. | Geotorget-konto; nedladdning via öppen FTP (ingen inloggning) |
-| DS-2 | Lantmäteriet, ortofoto | **Ändrad plan.** *Ortofoto Visning* (aktuellt) kostar. Flygbild = **Ortofoto historiska Visning** (1949–2005, CC0, WMS). | Appkonto för WMS (verifieras) |
-| DS-3 | Lantmäteriet, höjddata | Beställd: *Markhöjdmodell Nedladdning* (1 m, COG via STAC) och *grid 50+* (CC0). | Appkonto för STAC-API |
-| DS-4 | Lantmäteriet, ortnamn | Beställd: *Ortnamn Nedladdning, vektor* (GeoPackage via STAC). | Appkonto för STAC-API |
-| — | Lantmäteriet, kommungräns | Beställd: *Kommun, Län och Rike Nedladdning* (GeoPackage via STAC). Ersätter den uppskattade bbox:en (FK-04, FK-05, DK-01). | Appkonto för STAC-API |
+| DS-2 | Lantmäteriet, ortofoto | **I drift (2026-09-23).** *Ortofoto historiska Visning* (WMS) via proxyn. Lagernamnen verifierade mot GetCapabilities: `OI.Histortho_60` och `OI.Histortho_75` täcker kommunen; färglagren är projektvisa och täcker den inte. | Appkonto (Basic) — verifierat |
+| DS-3 | Lantmäteriet, höjddata | **I drift (2026-09-23).** *Markhöjd Direkt* via `/api/hojd` (punkt + profil, RH 2000). Markhöjdmodellen i STAC-höjd behövs inte — tjänsten ger samma höjder utan lagring. | Appkonto (Basic) — verifierat |
+| DS-4 | Lantmäteriet, ortnamn | **I drift (2026-09-23).** Hämtad via STAC-vektor, förberedd offline till sökindex (7 865 namn, 87 kB gzip). | Appkonto (Basic) — verifierat |
+| — | Lantmäteriet, kommungräns | **I drift (2026-09-23).** *Kommun, län och rike* via STAC-vektor (item `aktuell`), kommunkod 0581. Ersatte OSM-polygonen: licens ODbL → CC BY 4.0, lägesosäkerhet ~10 m → ~2 m. | Appkonto (Basic) — verifierat |
 | DS-5 | HaV, Badplatsen API | **I drift.** `/api/bad/status` normaliserar 19 badplatser (kommunkod 0581); grunddata i `data/bad/badplatser.geojson`. API:et svarar intermittent 500 → omförsök + stale-cache. | Inget konto. |
 | DS-6 | SMHI, meteorologisk prognos | **I drift.** `/api/vader` mot `snow1g` v1 (ersatte `pmp3g` 2026-03-31). | Inget konto |
-| DS-7 | OpenStreetMap | Fallback-bakgrund (raster tiles). | Inget konto |
+| DS-7 | OpenStreetMap | Fallback-bakgrund (raster tiles) när den självhostade kartan saknas. Används inte längre för kommungränsen. | Inget konto |
+| — | Lantmäteriet, OGC-Features | **Blockerad.** `/collections` svarar 200, men `/items` ger 403 *Scope validation failed* — appkontot saknar läsbehörighet till datat. Ingen kod byggd mot det (ADR-14). | Kräver behörighet via Geotorget |
 | DS-8–DS-12 | Wikidata, RAÄ, kommunen, SCB, egen kuratering | Ej påbörjade (sprint 2+). | — |
 
 ## Lantmäteriet — beställda produkter (Geotorget, 2026-09-19)
@@ -103,11 +104,26 @@ Två källor under övergångsperioden:
 
 ### kommungrans — Norrköpings kommungräns (GeoJSON, EPSG:4326)
 
-- **license:** ODbL 1.0 — `data/derived/LICENSE-ODbL`; filen bär `"license": "ODbL-1.0"` i sina egenskaper (JK-03)
-- **licenseUrl:** <https://opendatacommons.org/licenses/odbl/1-0/>
-- **attribution:** `© OpenStreetMap-bidragsgivare` (visas i kartan när lagret är tänt)
-- **retrieved:** 2026-09-19 via Nominatim, OSM-relation 935447, förenklad ~5 m, 899 hörn, 20 kB (7 kB gzip)
-- **terms:** interim tills Lantmäteriets *Kommun, Län och Rike* (CC BY 4.0) hämtats via STAC. Används till kommungränslagret (FK-05), panoreringsspärr (FK-04), datavalidering (DK-01) och till klippning av kartutsnittet. Lägesosäkerhet ~10 m. Reproduceras med `tools/kommungrans_osm.py`.
+- **license:** CC BY 4.0 — filen bär `"license": "CC-BY-4.0"` i sina egenskaper (JK-03)
+- **licenseUrl:** <https://creativecommons.org/licenses/by/4.0/>
+- **attribution:** `© Lantmäteriet` (visas i kartan när lagret är tänt)
+- **retrieved:** 2026-09-23 ur *Kommun, län och rike* via STAC-vektor (item `aktuell`), kommunkod 0581, förenklad ~2 m, 1 115 hörn, 25 kB
+- **terms:** Används till kommungränslagret (FK-05), panoreringsspärr (FK-04), datavalidering (DK-01) och till klippning av kartutsnittet. Lägesosäkerhet ~2 m. Reproduceras med `tools/lm_stac.py kommun`.
+- **tidigare:** OSM-relation 935447 (ODbL) användes 2026-09-19–2026-09-23 som interim; `tools/kommungrans_osm.py` finns kvar som reservväg och skriver då även `data/derived/LICENSE-ODbL` (JK-03).
+
+### ortnamn — sökindex för ortnamn (JSON, EPSG:3006)
+
+- **license:** CC BY 4.0
+- **attribution:** `© Lantmäteriet` (visas i platskortet och i sidfoten)
+- **retrieved:** 2026-09-23 ur *Ortnamn Nedladdning, vektor* via STAC-vektor (item `ortnamn_se`, 56 MB)
+- **terms:** Bearbetad: urval inom kommunen (8 445 namn), transformerad till EPSG:3006, namn för samma objekt sammanslagna (10 km enkellänkad klustring) → 7 865 poster i `data/sok/ortnamn.json` (251 kB, 87 kB gzip). Reproduceras med `tools/lm_stac.py ortnamn` + `tools/ortnamn_index.py`.
+
+### hojd — markhöjd (tjänst, ingen lagring)
+
+- **license:** CC BY 4.0
+- **attribution:** `© Lantmäteriet, Markhöjd Direkt`
+- **retrieved:** live via `/api/hojd` (punkt cachas 7 dygn på kanten, profil cachas inte)
+- **terms:** Höjdsystem RH 2000. Endast punkter inom kommunens buffrade bbox, högst 200 per anrop (NFK-18).
 
 ### osm — OpenStreetMap standard tiles (fallback, EPSG:3857)
 
@@ -116,6 +132,38 @@ Två källor under övergångsperioden:
 - **attribution:** `© OpenStreetMap-bidragsgivare`
 - **retrieved:** live; direkt i dev-läge, via proxy i produktion (CSP och integritet)
 - **terms:** OSMF:s Tile Usage Policy kräver tydlig User-Agent och attribution och avråder från tung användning. Lagret används enbart som fallback när Lantmäteriet inte är tillgängligt. Ska på sikt ersättas av självhostade vektortiles (PMTiles, ADR-06) från ett Geofabrik-uttag.
+
+## Lantmäteriets API:er — verifierade anrop (2026-09-23)
+
+Alla sju gränssnitt testades med appkontots HTTP Basic. Fullständigt beslut i
+[ADR-14](../docs/adr/ADR-14-lantmateriets-api.md).
+
+| API | Används till | Läge |
+|---|---|---|
+| `stac-vektor/v1` | Kommungräns (`kommun-lan-rike`, item `aktuell`) och ortnamn (`ortnamn_se`) | Offline, `tools/lm_stac.py` |
+| `stac-karta/v1` | `topowebb` — källan till den självhostade PMTiles-filen (ADR-09) | Offline |
+| `stac-hojd/v1` | — (Markhöjd Direkt ger samma höjder utan lagring) | Verifierad, oanvänd |
+| `stac-bild/v1` | — (visningstjänsten nedan ger samma bilder utan lagring) | Verifierad, oanvänd |
+| `ogc-features/v1` | — | **403 på `/items`**: appkontot saknar scope |
+| Markhöjd Direkt | `/api/hojd` — punkt (GET) och profil (POST MultiPoint, ≤ 200 punkter) | I drift |
+| Höjd Direkt | — (samma data, men bara OAuth med 1-timmestoken) | Verifierad, oanvänd |
+
+### Ortofoto historiska Visning (WMS 1.1.1)
+
+- **endpoint:** `https://maps.lantmateriet.se/historiska-ortofoton/wms/v1`, via proxyn `/api/tiles/{lager}/…`
+- **lager (verifierade mot GetCapabilities):** `OI.Histortho_60` (referensår 1960) och
+  `OI.Histortho_75` (1975), 0,5 m, svartvita, rikstäckande. Färglagren `OI.Histortho_color_2002–2005`
+  är projektvisa mosaiker **utan täckning över Norrköping** (testruta gav nästan tom bild) och används inte.
+- **attribution:** `© Lantmäteriet, historiska ortofoton <år>` (Bilaga C)
+- **referenssystem:** EPSG:3006 (tjänsten stöder även 3007–3011), Lantmäteriets tile-matris t.o.m. nivå 13
+
+### Markhöjd Direkt
+
+- **endpoint:** `https://api.lantmateriet.se/distribution/produkter/markhojd/v1/hojd?srid=3006`
+- **GET** `&e=<öst>&n=<norr>` → `Feature(Point [e, n, z])`. **POST** `{"type":"MultiPoint","coordinates":[[e,n],…]}`
+  → `Feature(MultiPoint [[e, n, z], …])`. `nodatavalue` är −9999 och normaliseras till `null` i vår proxy.
+- **höjdsystem:** RH 2000. **license:** CC BY 4.0. **attribution:** `© Lantmäteriet, Markhöjd Direkt`
+- **spärrar:** endast punkter inom kommunens buffrade bbox, högst 200 per anrop (NFK-18)
 
 ## Programvara med attributionskrav
 

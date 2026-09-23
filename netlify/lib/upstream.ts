@@ -10,6 +10,9 @@ export interface UpstreamOptions {
   timeoutMs?: number;
   retries?: number;
   headers?: Record<string, string>;
+  /** Standard är GET. POST används för batchanrop (t.ex. höjdprofil, IK-08). */
+  method?: 'GET' | 'POST';
+  body?: string;
 }
 
 export class UpstreamError extends Error {
@@ -22,13 +25,18 @@ export class UpstreamError extends Error {
   }
 }
 
-export async function fetchUpstream(url: string, { timeoutMs = 8_000, retries = 2, headers = {} }: UpstreamOptions = {}): Promise<Response> {
+export async function fetchUpstream(url: string, { timeoutMs = 8_000, retries = 2, headers = {}, method = 'GET', body }: UpstreamOptions = {}): Promise<Response> {
   let lastError: UpstreamError | null = null;
   for (let attempt = 0; attempt <= retries; attempt++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json', ...headers }, signal: controller.signal });
+      const res = await fetch(url, {
+        method,
+        ...(body === undefined ? {} : { body }),
+        headers: { 'User-Agent': UA, Accept: 'application/json', ...headers },
+        signal: controller.signal,
+      });
       clearTimeout(timer);
       if (res.ok) return res;
       await res.body?.cancel();

@@ -51,6 +51,8 @@
         >
           <div class="map-skeleton" aria-hidden="true"></div>
         </div>
+        <!-- Sökrutan och platskortet ligger ovanpå kartan; fylls av src/sok/panel.ts (FK-32). -->
+        <div id="sok-host" class="sok-host"></div>
         <p id="map-status" class="map-status" role="status" aria-live="polite" hidden></p>
       </section>
 
@@ -125,14 +127,28 @@
             <div class="sources__item">
               <dt data-i18n="footer.src.orto.name">Flygbild</dt>
               <dd id="source-orto" data-i18n="footer.src.orto.body">
-                Lantmäteriet, Ortofoto historiska (WMS), licens CC0. Hämtas ruta för ruta via sajtens egen proxy (/api/tiles) med
-                Lantmäteriets appkonto.
+                Lantmäteriet, Ortofoto historiska Visning (WMS), licens CC0. Två rikstäckande mosaiker täcker kommunen: referensår
+                1960 och 1975, 0,5 m. Hämtas ruta för ruta via sajtens egen proxy (/api/tiles) med Lantmäteriets appkonto.
+              </dd>
+            </div>
+            <div class="sources__item">
+              <dt data-i18n="footer.src.hojd.name">Markhöjd</dt>
+              <dd data-i18n="footer.src.hojd.body">
+                Lantmäteriet, Markhöjd Direkt (CC BY 4.0). Höjden hämtas live via /api/hojd när du väljer en plats eller mäter i Origo;
+                höjdsystem RH 2000.
+              </dd>
+            </div>
+            <div class="sources__item">
+              <dt data-i18n="footer.src.ortnamn.name">Ortnamn (sök)</dt>
+              <dd id="source-ortnamn" data-i18n="footer.src.ortnamn.body">
+                Lantmäteriet, Ortnamn Nedladdning vektor (CC BY 4.0). Förberett offline till ett sökindex inom kommunen; laddas först när du
+                börjar söka.
               </dd>
             </div>
             <div class="sources__item">
               <dt data-i18n="footer.src.kommun.name">Kommungräns</dt>
-              <dd data-i18n="footer.src.kommun.body">
-                OpenStreetMap (relation 935447), licens ODbL — statisk GeoJSON-fil, i väntan på Lantmäteriets Kommun, Län och Rike (CC BY 4.0).
+              <dd id="source-kommun" data-i18n="footer.src.kommun.body">
+                Lantmäteriet, Kommun, län och rike (CC BY 4.0). Kommunkod 0581, statisk GeoJSON-fil i SWEREF 99 TM.
               </dd>
             </div>
             <div class="sources__item">

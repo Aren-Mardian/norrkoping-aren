@@ -14,6 +14,8 @@ import { createPanel } from './bad/panel.ts';
 import { BASE, IS_DEV, LM_ENABLED } from './config/site.ts';
 import { initI18n, t } from './i18n/index.ts';
 import { createMap } from './map/createMap.ts';
+import { createPlatsmarkor } from './map/platsmarkor.ts';
+import { createSok } from './sok/panel.ts';
 import { fillFooterFacts, initLangToggle, placeFooter } from './ui/chrome.ts';
 import { showDevBanner, showMapStatus } from './ui/notices.ts';
 import { createSheet } from './ui/sheet.ts';
@@ -41,6 +43,20 @@ app.basemaps.onTopoFailure((reason) => {
   if (IS_DEV && reason === 'missing') showDevBanner(t('dev.noTiles'));
   showMapStatus(t('map.status.fallback'));
 });
+
+// ── Ortnamnssök (FK-32) + markhöjd (IK-08) ────────────────────────────────────
+// Sökrutan ligger över kartan; motorn och indexet hämtas först när användaren söker (TK-05).
+const sokHost = document.getElementById('sok-host');
+if (sokHost) {
+  const markor = createPlatsmarkor(app.map, sokHost.parentElement ?? sokHost);
+  createSok(sokHost, {
+    onPick(traff) {
+      // Zooma till LM-nivå 11 (~10 m/px) — nära nog för att se platsen, utan att gissa skala.
+      app.zoomTo([traff.e, traff.n], 11);
+      markor.show(traff);
+    },
+  });
+}
 
 // ── Badplatser (Kärnfunktion B) ───────────────────────────────────────────────
 const panelEl = document.getElementById('panel');

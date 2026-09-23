@@ -6,7 +6,7 @@
 import { PAN_LIMIT_3006, PAN_LIMIT_3857, extentsIntersect } from '../../shared/geo/kommun.ts';
 import { LM_TILE_SIZE, lmMatrixSize, lmTileExtent, webMercatorTileExtent } from '../../shared/geo/lmTileGrid.ts';
 
-export type LayerId = 'histortho' | 'osm';
+export type LayerId = 'histortho60' | 'histortho75' | 'osm';
 
 export interface LayerSpec {
   /** Tile-matrisens referenssystem: LM:s 3006-matris eller standard Web Mercator. */
@@ -29,20 +29,25 @@ export interface LayerSpec {
 
 const UA = 'Norrkopingskartan/0.1 (+https://norrkoping.netlify.app)';
 
+/** Lantmäteriets "Ortofoto historiska Visning" (WMS 1.1.1, kräver appkonto). */
+const histortho = (wmsLayerEnv: string, defaultWmsLayer: string): LayerSpec => ({
+  grid: '3006',
+  kind: 'wms',
+  templateEnv: 'LM_HISTORTHO_WMS',
+  defaultTemplate: 'https://maps.lantmateriet.se/historiska-ortofoton/wms/v1',
+  wmsLayerEnv,
+  defaultWmsLayer,
+  requiresLmAuth: true,
+  maxZoom: 13,
+  userAgent: UA,
+});
+
 export const LAYERS: Readonly<Record<LayerId, LayerSpec>> = {
-  // Lantmäteriets "Ortofoto historiska Visning" (CC0, WMS 1.1.1, kräver appkonto). Flygbild 1949–2005.
-  // Lagernamnet verifieras mot GetCapabilities med appkontot; överstyrs via LM_HISTORTHO_LAYER.
-  histortho: {
-    grid: '3006',
-    kind: 'wms',
-    templateEnv: 'LM_HISTORTHO_WMS',
-    defaultTemplate: 'https://maps.lantmateriet.se/historiska-ortofoton/wms/v1',
-    wmsLayerEnv: 'LM_HISTORTHO_LAYER',
-    defaultWmsLayer: 'OI.Histortho_60',
-    requiresLmAuth: true,
-    maxZoom: 13,
-    userAgent: UA,
-  },
+  // De två rikstäckande referensårsmosaikerna. Verifierade mot GetCapabilities 2026-09-23:
+  // kommunen täcks helt av båda, medan färglagren (OI.Histortho_color_*) är projektvisa
+  // mosaiker utan täckning här — därför bara dessa två.
+  histortho60: histortho('LM_HISTORTHO_LAYER_60', 'OI.Histortho_60'),
+  histortho75: histortho('LM_HISTORTHO_LAYER_75', 'OI.Histortho_75'),
   // Fallback-bakgrund (NFK-25). Proxas för att CSP:n bara tillåter egen origin (NFK-16)
   // och för att besökarens IP inte ska nå tredje part (NFK-23). Låg volym: används
   // bara när Lantmäteriet inte svarar. Ska på sikt ersättas av självhostade PMTiles (ADR-06).

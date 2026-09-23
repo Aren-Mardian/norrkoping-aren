@@ -21,12 +21,36 @@ const ROOT = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const DATA_DIR = resolve(ROOT, 'data');
 const DATA_PREFIX = `${BASE}data/`;
 const SERVED = /^(?!raw\/)(?:[\w-]+\/)*[\w.-]+\.(pmtiles|geojson|json)$/;
-const EXCLUDED = new Set(['derived/manifest.json']);
+// derived/ortnamn.geojson (1,3 MB) är råvara för tools/ortnamn_index.py, inte något klienten
+// behöver — sökindexet i data/sok/ortnamn.json är det som levereras.
+const EXCLUDED = new Set(['derived/manifest.json', 'derived/ortnamn.geojson']);
 const CONTENT_TYPES: Record<string, string> = {
   pmtiles: 'application/octet-stream',
   geojson: 'application/geo+json; charset=utf-8',
   json: 'application/json; charset=utf-8',
 };
+
+/** Kommungränsens hämtdatum, ur filens egen proveniens. */
+function kommunRetrieved(): string {
+  try {
+    const gj = JSON.parse(readFileSync(join(DATA_DIR, 'derived', 'kommungrans.geojson'), 'utf8')) as {
+      features?: Array<{ properties?: { retrieved?: string } }>;
+    };
+    return gj.features?.[0]?.properties?.retrieved ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/** Ortnamnsindexets datum och antal namn — visas i sidfotens källförteckning (JK-01). */
+function ortnamnFacts(): { date: string; count: string } {
+  try {
+    const index = JSON.parse(readFileSync(join(DATA_DIR, 'sok', 'ortnamn.json'), 'utf8')) as { retrieved?: string; items?: unknown[] };
+    return { date: index.retrieved ?? '', count: String(index.items?.length ?? 0) };
+  } catch {
+    return { date: '', count: '' };
+  }
+}
 
 /** Datum för kartutsnittet (ADR-10-manifestet) — visas i sidfotens källförteckning. */
 function dataGenerated(): string {
@@ -146,6 +170,8 @@ export default defineConfig({
   plugins: [derivedData(), cspMeta(), devFunctions({ root: ROOT, apiPrefix: `${BASE}api/` })],
   define: {
     __DATA_GENERATED__: JSON.stringify(dataGenerated()),
+    __ORTNAMN_FACTS__: JSON.stringify(ortnamnFacts()),
+    __KOMMUN_RETRIEVED__: JSON.stringify(kommunRetrieved()),
   },
   build: {
     // Bygg rakt in i den sökväg som Netlify publicerar, så att `dist/` kan

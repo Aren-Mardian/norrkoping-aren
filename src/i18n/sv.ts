@@ -15,9 +15,13 @@ export const sv = {
   'map.basemap.orto': 'Flygbild',
   'map.basemap.dark': 'Mörk',
   'map.basemap.ortoUnavailable': 'Flygbild kräver Lantmäteriets appkonto — inte aktiverat ännu.',
+  'map.basemap.yearLabel': 'Flygbildens årgång',
+  'map.basemap.yearTitle': 'Lantmäteriets ortofotomosaik med referensår {year}',
   'map.basemap.groupLabel': 'Bakgrundskarta',
   'map.resetView': 'Återställ vy',
   'map.layer.kommungrans': 'Kommungräns',
+  'map.layer.orto60': 'Flygbild 1960',
+  'map.layer.orto75': 'Flygbild 1975',
   'map.status.fallback':
     'Lantmäteriets bakgrundskarta kunde inte hämtas just nu. Visar OpenStreetMap i stället.',
   'dev.noToken':
@@ -27,18 +31,24 @@ export const sv = {
   // ── Sidfot: varifrån och hur informationen hämtas (JK-01, Bilaga C) ──
   'footer.title': 'Så hämtas informationen',
   'footer.summary':
-    'Karta: Lantmäteriet (självhostad) · Badvatten: HaV (API) · Väder: SMHI (API) · Kommungräns: OpenStreetMap · Verktyg: Origo/OpenLayers (/origo/)',
+    'Karta, flygbild, höjd, ortnamn och kommungräns: Lantmäteriet · Badvatten: HaV · Väder: SMHI · Verktyg: Origo/OpenLayers',
   'footer.intro': 'Varje uppgift på sidan kommer från en öppen källa. Här står varifrån den kommer, hur den hämtas och hur färsk den är.',
   'footer.src.topo.name': 'Bakgrundskarta',
   'footer.src.topo.body':
     'Lantmäteriet, Topografisk webbkarta (nedladdning, raster), licens CC BY 4.0. Nedladdad från Lantmäteriets öppna data, beskuren till kommunen och självhostad som PMTiles-fil — din webbläsare anropar aldrig Lantmäteriet. Utsnitt från {date}.',
   'footer.src.orto.name': 'Flygbild',
   'footer.src.orto.body':
-    'Lantmäteriet, Ortofoto historiska (WMS), licens CC0. Hämtas ruta för ruta via sajtens egen proxy (/api/tiles) med Lantmäteriets appkonto.',
+    'Lantmäteriet, Ortofoto historiska Visning (WMS), licens CC0. Två rikstäckande mosaiker täcker kommunen: referensår 1960 och 1975, 0,5 m upplösning. Hämtas ruta för ruta via sajtens egen proxy (/api/tiles) med Lantmäteriets appkonto — din webbläsare anropar aldrig Lantmäteriet direkt.',
   'footer.src.orto.pending': 'Aktiveras när appkontot är konfigurerat.',
+  'footer.src.hojd.name': 'Markhöjd',
+  'footer.src.hojd.body':
+    'Lantmäteriet, Markhöjd Direkt (CC BY 4.0). Höjden hämtas live via /api/hojd när du väljer en plats eller mäter i Origo; höjdsystem RH 2000. En punkt cachas ett dygn, profiler cachas inte.',
+  'footer.src.ortnamn.name': 'Ortnamn (sök)',
+  'footer.src.ortnamn.body':
+    'Lantmäteriet, Ortnamn Nedladdning vektor (CC BY 4.0), hämtad via STAC-API:et {date}. Förberett offline till ett sökindex med {count} namn inom kommunen; laddas först när du börjar söka.',
   'footer.src.kommun.name': 'Kommungräns',
   'footer.src.kommun.body':
-    'OpenStreetMap (relation 935447), licens ODbL — statisk GeoJSON-fil, i väntan på Lantmäteriets Kommun, Län och Rike (CC BY 4.0).',
+    'Lantmäteriet, Kommun, län och rike (CC BY 4.0), hämtad via STAC-API:et {date}. Kommunkod 0581, statisk GeoJSON-fil i SWEREF 99 TM.',
   'footer.src.bad.name': 'Badplatser och badvattenstatus',
   'footer.src.bad.body':
     'Havs- och vattenmyndigheten, Badplatsen-API (öppna data). Läge, namn och typ hämtas som grunddata vid bygge. Provsvar, alger, avrådan och vattentemperatur hämtas live via /api/bad/status med 1 timmes cache — statusens ålder visas alltid.',
@@ -58,12 +68,36 @@ export const sv = {
   'footer.privacy': 'Integritet',
   'a11y.skipToMap': 'Hoppa till kartan',
   // ── Origo-sidan (Kärnfunktion C) ──
-  'origo.tagline': 'Origo · verktyg: mät, rita, koordinater, dela, skriv ut',
+  'origo.tagline': 'Origo · verktyg: mät, rita, höjd, koordinater, dela, skriv ut',
+  'origo.hojd.title': 'Höjd och höjdprofil',
+  'origo.hojd.button': 'Höjd',
+  'origo.hojd.hint': 'Klicka i kartan för markhöjd. Klicka flera gånger för en höjdprofil, dubbelklicka för att avsluta.',
+  'origo.hojd.loading': 'Hämtar höjd …',
+  'origo.hojd.point': '{n} m ö.h. (RH 2000)',
+  'origo.hojd.missing': 'Höjddata saknas för punkten.',
+  'origo.hojd.failed': 'Höjddata kunde inte hämtas.',
+  'origo.hojd.profile': 'Profil: {points} punkter · lägst {min} m · högst {max} m · stigning {gain} m · längd {length}',
+  'origo.hojd.clear': 'Rensa höjdmätningen',
+  'origo.hojd.source': 'Källa: Lantmäteriet, Markhöjd Direkt (CC BY 4.0)',
   'origo.ariaLabel': 'Origo verktygsläge: mät, rita, läs koordinater, skriv ut och dela kartan över Norrköpings kommun.',
   'origo.status.loadFailed': 'Origo kunde inte laddas. Kontrollera anslutningen och ladda om sidan.',
   'origo.status.noBasemap': 'Bakgrundskartan kunde inte hämtas. Verktygen fungerar, men kartan är tom.',
   'origo.footer':
-    'Origo 2.10.0 och OpenLayers (BSD 2-clause), självhostade · Bakgrundskarta: Lantmäteriet, Topografisk webbkarta (CC BY 4.0), självhostad · Kommungräns: OpenStreetMap (ODbL) · Koordinater i SWEREF 99 TM, mätning geodetiskt',
+    'Origo 2.10.0 och OpenLayers (BSD 2-clause), självhostade · Bakgrundskarta och flygbild: Lantmäteriet (CC BY 4.0) · Höjd: Markhöjd Direkt · Ortnamn och kommungräns: Lantmäteriet · Koordinater i SWEREF 99 TM, mätning geodetiskt',
+  // ── Sök och plats (FK-32, IK-08) ──
+  'sok.label': 'Sök plats i Norrköpings kommun',
+  'sok.placeholder': 'Sök plats, sjö eller by …',
+  'sok.placeholderOrigo': 'Sök plats att mäta vid …',
+  'sok.clear': 'Rensa sökningen',
+  'sok.noHits': 'Ingen plats med det namnet i kommunen.',
+  'sok.failed': 'Sökregistret kunde inte hämtas just nu.',
+  'plats.close': 'Stäng platsinformationen',
+  'plats.coords': 'SWEREF 99 TM',
+  'plats.hojd': 'Markhöjd',
+  'plats.hojdLoading': 'hämtar …',
+  'plats.hojdValue': '{n} m ö.h. (RH 2000)',
+  'plats.hojdMissing': 'saknas här',
+  'plats.source': 'Ortnamn: Lantmäteriet (CC BY 4.0) · Höjd: Lantmäteriet, Markhöjd Direkt',
   // ── Badplatser (Kärnfunktion B) ──
   'panel.title': 'Badplatser',
   'panel.handleExpand': 'Visa badplatser',
@@ -144,7 +178,7 @@ export const sv = {
   'bad.weather.symbol.26': 'Snöfall',
   'bad.weather.symbol.27': 'Kraftigt snöfall',
   'attribution.lantmateriet': '© Lantmäteriet',
-  'attribution.lantmateriet.orto': '© Lantmäteriet, historiska ortofoton (CC0)',
+  'attribution.lantmateriet.orto': '© Lantmäteriet, historiska ortofoton {year}',
   'attribution.osm': '© OpenStreetMap-bidragsgivare',
 } as const;
 

@@ -112,7 +112,11 @@ export function createMap(target: HTMLElement): AppMap {
   map.once('rendercomplete', ready);
   window.setTimeout(ready, 3000);
 
-  basemaps.onChange((id) => target.classList.toggle('map--dark', id === 'dark'));
+  basemaps.onChange((id) => {
+    target.classList.toggle('map--dark', id === 'dark');
+    // Flygbildsläget fäller ut en årtalsrad i växlaren; lagerknappen ovanför flyttas i CSS.
+    target.classList.toggle('map--orto', id === 'orto');
+  });
 
   const zoomTo = (center: number[], zoom: number, bottomInsetPx = 0): void => {
     // Programmatisk navigering lämnar också startvyn — annars återställer nästa storleksändring den.

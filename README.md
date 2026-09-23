@@ -12,9 +12,10 @@ Målplattform: `https://arenm.se/projekt/norrkoping`
 | Sprint | Milstolpe | Läge |
 |---|---|---|
 | 0 | Grund — repo, Vite+TS, CI, tile-proxy, CSP/headers, dev-läge utan token | **Klar lokalt** — väntar på Netlify-sajt (användaren) |
-| 1 | Karta står — LM-bakgrund, växlare, kommungräns, startextent, skalstock | **Nästan klar** — Lantmäteriets topografiska karta självhostad som PMTiles (ADR-09/10), kommungräns (OSM tills LM:s finns), växlare inkl. mörkt läge, startextent, skalstock. Återstår: flygbild (historiska ortofoton, kräver appkonto) |
+| 1 | Karta står — LM-bakgrund, växlare, kommungräns, startextent, skalstock | **Klar** — Lantmäteriets topografiska karta självhostad som PMTiles (ADR-09/10), **kommungräns från Lantmäteriet** (CC BY 4.0), växlare inkl. mörkt läge och **flygbild 1960/1975** (ADR-14), startextent, skalstock |
 | 3 | Badplatser — HaV-integration, status, Topp 3, varningar, filter, SMHI | **Klar (första version)** — 19 badplatser, `/api/bad/status` (IK-02) med stale-cache, `/api/vader` (IK-03, SMHI snow1g), Topp 3 med viktningen förklarad på plats, avrådan som inte kan filtreras bort (DK-07), panel/bottom sheet i app-skal (UX-03, ADR-13), språkväxlare. Återstår: faciliteter (kuratering), badindex (FK-19), tillgänglighetsfilter (FK-20) |
 | 4 | Origo-sidan — verktygsläge på egen route: mät, rita, koordinater, dela, utskrift, lager | **Klar** (ADR-11/12) — `/origo/` (hette `/verktyg/` t.o.m. 2026-09-20, 301 finns), Origo 2.10.0 vendorerad, PMTiles-bakgrund, CSP per sida. Återstår: höjdmätning (Markhöjd Direkt) |
+| — | Lantmäteriets API:er — flygbild, höjd, ortnamn, kommungräns | **Klar** (ADR-14) — `/api/hojd` (Markhöjd Direkt), ortnamnssök på båda sidorna, höjdprofil i Origo. Återstår: OGC-Features (appkontot saknar behörighet) |
 | 2, 5–7 | Se kravspec §12 | Ej påbörjad. Om/Källor/Integritet är beslutade att ligga på arenm.se (ADR-13), inte som egna sidor här |
 
 ## Kom igång (under 10 minuter)
@@ -50,10 +51,23 @@ Vites dev-server via [vite/devFunctions.ts](vite/devFunctions.ts) — ingen `net
 2. Flygbild = Lantmäteriets *Ortofoto historiska* (WMS, CC0) via proxyn `/api/tiles/histortho/…`.
    Lagernamnet (`LM_HISTORTHO_LAYER`) verifieras mot GetCapabilities, se `.env.example`.
 3. `tools/.venv/Scripts/python tools/lm_stac.py` hämtar Lantmäteriets kommungräns och ortnamn via
-   STAC-API:et och skriver `data/derived/kommungrans.geojson` (ersätter OSM) och `ortnamn.geojson`.
+   STAC-API:et och skriver `data/derived/kommungrans.geojson` och `ortnamn.geojson`;
+   `tools/ortnamn_index.py` gör om det senare till sökindexet `data/sok/ortnamn.json`.
+4. Höjd (`/api/hojd`) och flygbild (`/api/tiles/histortho60|histortho75`) går via edge-proxyn med
+   samma appkonto. Vilka av Lantmäteriets sju API:er som används, och varför inte de övriga, står i
+   [ADR-14](docs/adr/ADR-14-lantmateriets-api.md).
 
 Proxyn är den enda platsen där Lantmäteriets uppgifter finns. Klientbundlen innehåller aldrig
 en hemlighet — variabler med prefix `VITE_` är publika.
+
+### Sök, höjd och flygbild
+
+Sökrutan över kartan (båda sidorna) söker i 7 865 ortnamn inom kommunen — ett index härlett ur
+Lantmäteriets *Ortnamn* med koordinater i EPSG:3006. Indexet (87 kB gzip) och sökmotorn laddas
+med `import()` först när du fokuserar sökfältet, så landningsvyns kritiska väg är opåverkad (TK-05).
+En vald plats visar koordinater i SWEREF 99 TM och markhöjd i RH 2000 från *Markhöjd Direkt*.
+På Origo-sidan ger knappen **Höjd** markhöjd vid klick, och en ritad linje ger en höjdprofil
+(lägsta/högsta punkt, total stigning, längd) med ett enda batchanrop.
 
 ### Badplatser
 
@@ -119,6 +133,8 @@ src/                    Klient (Vite + TypeScript, vanilla)
   geo/olProjections.ts  Registrerar EPSG:3006/3010 i OpenLayers
   i18n/                 sv/en-kataloger utan runtime-bibliotek (FK-34)
   bad/                  Badplatser: datamodell, kartlager, panel (Kärnfunktion B)
+  lm/                   Lantmäteriets tjänster i klienten (höjd via /api/hojd)
+  sok/                  Ortnamnssök: sökruta (kritisk väg) + motor och index (lazy, FK-32)
   map/                  Kartkärna, bakgrundskartor med fallback, PMTiles-läsare/-källa, egna kontroller
   net/                  fetch med timeout/omförsök (IK-06, IK-07)
   origo/                Origo-konfiguration och bootstrap för Origo-sidan (ADR-11)
@@ -127,18 +143,20 @@ shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
   geo/crs.ts            EPSG-koder, proj4-strängar, utbredning (ren data, inga beroenden)
   geo/projDefs.ts       proj4-registrering och transformationer (Bilaga B.5)
   geo/lmTileGrid.ts     Lantmäteriets 3006-matris
+  geo/planar.ts         Planär längd + vitlistan över mätbara projektioner (utan beroenden)
   geo/measure.ts        Längdmätning: 3006/3010/geodetiskt, aldrig 3857 (NFK-12)
   geo/kommun.ts         Kommunkod, bbox, panoreringsbuffert
   api/errors.ts         Enhetlig felmodell (IK-04)
 netlify/functions/      Edge-funktioner (Netlify Functions 2.0)
-  tiles.mts             IK-01 tile-proxy (flygbild via WMS, OSM-fallback)
+  tiles.mts             IK-01 tile-proxy (flygbild 1960/1975 via WMS, OSM-fallback)
+  hojd.mts              IK-08 markhöjd (Markhöjd Direkt, punkt + profil)
   bad-status.mts        IK-02 badvattenstatus (HaV)
   vader.mts             IK-03 väder (SMHI)
-netlify/lib/            Testbar logik för funktionerna (hav.ts, smhi.ts, tilesGuard.ts, upstream.ts)
+netlify/lib/            Testbar logik för funktionerna (hav.ts, smhi.ts, tilesGuard.ts, hojd.ts, upstream.ts)
 vite/                   Vite-plugin som kör edge-funktionerna i dev
 data/                   Kuraterad geodata (GeoJSON, EPSG:4326), SOURCES.md, derived/ (PMTiles, ej i git)
 public/vendor/          Vendorerade bibliotek (Origo, versionerad sökväg)
-docs/                   Kravspec, referenssystem, villkor, ADR-09–13, deploy/ (IIS-mall)
+docs/                   Kravspec, referenssystem, villkor, ADR-09–14, deploy/ (IIS-mall)
 scripts/                Byggkontroller, hämtning av kartdata
 tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval; Origo-bygge
 ```

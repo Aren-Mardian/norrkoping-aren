@@ -21,6 +21,17 @@ interface OrigoMap {
   render(): void;
 }
 
+/** Origo exponerar sin egen OpenLayers under `Origo.ol` — höjdverktyget använder den (ADR-14). */
+interface OrigoOl {
+  geom: Record<string, unknown>;
+  interaction: Record<string, unknown>;
+  layer: Record<string, unknown>;
+  source: Record<string, unknown>;
+  style: Record<string, unknown>;
+  Feature: unknown;
+  Overlay: unknown;
+}
+
 interface OrigoViewer {
   getLayer(name: string): OrigoLayer | undefined;
   getMap(): OrigoMap;
@@ -34,6 +45,7 @@ interface OrigoInstance {
 
 interface OrigoStatic {
   (config: Record<string, unknown> | string, options?: Record<string, unknown>): OrigoInstance;
+  readonly ol?: OrigoOl;
 }
 
 interface Window {

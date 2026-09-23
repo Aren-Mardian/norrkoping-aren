@@ -3,7 +3,9 @@
  *
  *  - topo:     Lantmäteriets topografiska webbkarta som självhostad PMTiles i EPSG:3006
  *              (utsnitt av "Topografisk webbkarta Nedladdning, raster", ADR-09). Ingen token.
- *  - orto:     Lantmäteriets historiska ortofoton (CC0) via tile-proxyn (kräver appkonto på edge, IK-01).
+ *  - orto:     Lantmäteriets historiska ortofoton via tile-proxyn (kräver appkonto på edge, IK-01).
+ *              Två rikstäckande referensårsmosaiker täcker kommunen: 1960 och 1975. Årtalet byts
+ *              utan att något annat lager laddas om — bara den aktiva årgångens rutor hämtas.
  *  - fallback: OpenStreetMap i EPSG:3857, reprojicerad av OpenLayers. Används bara om
  *              PMTiles-filen saknas (t.ex. lokalt innan tools/extract_topowebb.py körts)
  *              eller slutar svara.
@@ -22,6 +24,11 @@ import { createPmtilesBasemap } from './pmtilesSource.ts';
 
 export type BasemapId = 'topo' | 'orto' | 'dark';
 
+/** Flygbildens årgång (FK-02). Lagren är Lantmäteriets referensårsmosaiker. */
+export type OrtoYear = 1960 | 1975;
+export const ORTO_YEARS: readonly OrtoYear[] = [1960, 1975];
+const ORTO_LAYER_ID: Record<OrtoYear, string> = { 1960: 'histortho60', 1975: 'histortho75' };
+
 /** Varför topo-lagret inte kan visas. */
 export type TopoFailure = 'missing' | 'errors';
 
@@ -31,6 +38,8 @@ export interface Basemaps {
   setActive(id: BasemapId): void;
   /** Sant när den självhostade topografiska kartan kan användas. */
   isTopoAvailable(): boolean;
+  getOrtoYear(): OrtoYear;
+  setOrtoYear(year: OrtoYear): void;
   /** Sant när Lantmäteriets proxy (flygbild) är konfigurerad. */
   isLmAvailable(): boolean;
   /** Anropas en gång om topo-kartan inte går att visa och fallback tar över. */
@@ -50,15 +59,15 @@ function lmTileGrid(): TileGrid {
   });
 }
 
-/** Flygbild: Lantmäteriets historiska ortofoton (CC0) via proxyn, som gör WMS GetMap per ruta. */
-function ortoLayer(): TileLayer<XYZ> {
+/** Flygbild: Lantmäteriets historiska ortofoton via proxyn, som gör WMS GetMap per ruta. */
+function ortoLayer(year: OrtoYear): TileLayer<XYZ> {
   return new TileLayer({
     visible: false,
     source: new XYZ({
-      url: `${API_BASE}/tiles/histortho/{z}/{y}/{x}.jpg`,
+      url: `${API_BASE}/tiles/${ORTO_LAYER_ID[year]}/{z}/{y}/{x}.jpg`,
       projection: EPSG_3006,
       tileGrid: lmTileGrid(),
-      attributions: t('attribution.lantmateriet.orto'),
+      attributions: t('attribution.lantmateriet.orto').replace('{year}', String(year)),
       maxZoom: 13,
       transition: 0,
     }),
@@ -89,10 +98,13 @@ export function createBasemaps(): Basemaps {
   const pmtiles = createPmtilesBasemap(TOPO_PMTILES_URL, t('attribution.lantmateriet'));
   // Egen klass på lagrets element så att mörkt läge kan filtrera just den här canvasen.
   const topo = new TileLayer({ visible: false, source: pmtiles.source, className: 'ol-layer ol-layer-topo' });
-  const orto = ortoLayer();
+  // Ett lager per årgång: att byta år blir en synlighetsväxling, och redan hämtade rutor
+  // ligger kvar i OL:s cache så att man kan jämföra 1960/1975 utan ny nedladdning.
+  const ortoLayers = new Map<OrtoYear, TileLayer<XYZ>>(ORTO_YEARS.map((y) => [y, ortoLayer(y)]));
   const fallback = fallbackLayer();
 
   let active: BasemapId = 'topo';
+  let ortoYear: OrtoYear = ORTO_YEARS[0] ?? 1960;
   let topoAvailable = true;
   const lmAvailable = LM_ENABLED;
   const failureListeners: Array<(reason: TopoFailure) => void> = [];
@@ -101,7 +113,7 @@ export function createBasemaps(): Basemaps {
   function apply(): void {
     const wantsTopo = active === 'topo' || active === 'dark';
     topo.setVisible(wantsTopo && topoAvailable);
-    orto.setVisible(active === 'orto' && lmAvailable);
+    for (const [year, layer] of ortoLayers) layer.setVisible(active === 'orto' && lmAvailable && year === ortoYear);
     fallback.setVisible((wantsTopo && !topoAvailable) || (active === 'orto' && !lmAvailable));
   }
 
@@ -129,7 +141,7 @@ export function createBasemaps(): Basemaps {
   apply();
 
   return {
-    layers: [fallback, topo, orto],
+    layers: [fallback, topo, ...ortoLayers.values()],
     getActive: () => active,
     setActive(id) {
       if (id === active) return;
@@ -139,6 +151,13 @@ export function createBasemaps(): Basemaps {
     },
     isTopoAvailable: () => topoAvailable,
     isLmAvailable: () => lmAvailable,
+    getOrtoYear: () => ortoYear,
+    setOrtoYear(year) {
+      if (year === ortoYear) return;
+      ortoYear = year;
+      apply();
+      for (const cb of changeListeners) cb(active);
+    },
     onTopoFailure(cb) {
       failureListeners.push(cb);
     },

@@ -15,7 +15,9 @@ import './origo.css';
 import { BASE, IS_DEV, TOPO_PMTILES_URL } from '../config/site.ts';
 import { initI18n, t } from '../i18n/index.ts';
 import { createPmtilesTileLoader, type ImageTileLike } from '../map/pmtilesLoader.ts';
+import { createSok } from '../sok/panel.ts';
 import { initLangToggle } from '../ui/chrome.ts';
+import { createHojdVerktyg } from './hojdverktyg.ts';
 import { ORIGO_SCRIPT, TOPO_LAYER_NAME, buildOrigoConfig } from './origoConfig.ts';
 
 const lang = initI18n();
@@ -62,6 +64,51 @@ function attachBasemap(viewer: OrigoViewer): void {
     .catch(() => showStatus(t('origo.status.noBasemap')));
 }
 
+/**
+ * Höjdverktyget (IK-08) och ortnamnssöket (FK-32) läggs i ett eget fält ovanpå kartan, inte som
+ * Origo-kontroller: Origos kontroll-API är gjort för dess egna verktyg, och vår panel ska se ut
+ * som resten av sajten. Origos egen OpenLayers nås via `Origo.ol`.
+ */
+function attachTools(origoStatic: OrigoStatic, viewer: OrigoViewer): void {
+  const ol = (origoStatic as unknown as { ol?: unknown }).ol;
+  const map = viewer.getMap() as unknown as Parameters<typeof createHojdVerktyg>[1];
+  const host = document.createElement('div');
+  host.className = 'origo-tools';
+  wrapper?.appendChild(host);
+
+  // Sök: samma komponent som landningsvyn, index och motor laddas först vid sökning (TK-05).
+  const sokHost = document.createElement('div');
+  sokHost.className = 'origo-tools__sok';
+  host.appendChild(sokHost);
+  createSok(sokHost, {
+    placeholderKey: 'sok.placeholderOrigo',
+    onPick(traff) {
+      const view = (viewer.getMap() as unknown as { getView(): { animate(o: Record<string, unknown>): void } }).getView();
+      view.animate({ center: [traff.e, traff.n], zoom: 11, duration: 400 });
+    },
+  });
+
+  if (!ol) return;
+  const panel = document.createElement('div');
+  panel.className = 'hojd';
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'hojd__toggle';
+  toggle.textContent = t('origo.hojd.button');
+  toggle.title = t('origo.hojd.title');
+  toggle.setAttribute('aria-pressed', 'false');
+  panel.appendChild(toggle);
+  host.appendChild(panel);
+
+  const verktyg = createHojdVerktyg(ol as Parameters<typeof createHojdVerktyg>[0], map, panel);
+  toggle.addEventListener('click', () => {
+    const next = !verktyg.isActive();
+    verktyg.setActive(next);
+    toggle.setAttribute('aria-pressed', String(next));
+    panel.classList.toggle('is-active', next);
+  });
+}
+
 async function boot(): Promise<void> {
   if (!wrapper) throw new Error('#app-wrapper saknas');
   try {
@@ -82,6 +129,7 @@ async function boot(): Promise<void> {
   origo.on('load', (viewer) => {
     wrapper.classList.add('is-ready');
     attachBasemap(viewer);
+    attachTools(Origo, viewer);
     // Felsökningshandtag lokalt — aldrig i produktion.
     if (IS_DEV) (window as unknown as { __origo?: unknown }).__origo = { origo, viewer };
   });

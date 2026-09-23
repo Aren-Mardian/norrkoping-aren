@@ -42,6 +42,15 @@ function matchPath(pattern: string, pathname: string): Record<string, string> | 
   return params;
 }
 
+function readBody(req: IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    req.on('data', (c: Buffer) => chunks.push(c));
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    req.on('error', reject);
+  });
+}
+
 export function devFunctions(opts: { root: string; apiPrefix: string }): Plugin {
   const dir = resolve(opts.root, 'netlify/functions');
   return {
@@ -64,7 +73,11 @@ export function devFunctions(opts: { root: string; apiPrefix: string }): Plugin 
               if (!params) continue;
               const headers = new Headers();
               for (const [k, v] of Object.entries(req.headers)) if (typeof v === 'string') headers.set(k, v);
-              const request = new Request(`http://localhost:5173${req.url}`, { method: req.method ?? 'GET', headers });
+              const method = req.method ?? 'GET';
+              // Netlify ger handlern en hel Request; här måste kroppen läsas ur strömmen först
+              // (POST används av höjdprofilen, IK-08).
+              const body = method === 'GET' || method === 'HEAD' ? undefined : await readBody(req);
+              const request = new Request(`http://localhost:5173${req.url}`, { method, headers, ...(body === undefined ? {} : { body }) });
               const response = await mod.default(request, { params, ip: '127.0.0.1', site: { url: 'http://localhost:5173' } });
               res.statusCode = response.status;
               response.headers.forEach((v, k) => res.setHeader(k, v));

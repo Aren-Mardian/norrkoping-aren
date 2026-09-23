@@ -8,6 +8,9 @@ export interface FetchJsonOptions {
   timeoutMs?: number;
   retries?: number;
   signal?: AbortSignal | undefined;
+  /** Standard är GET. POST används för batchanrop (höjdprofil, IK-08). */
+  method?: 'GET' | 'POST';
+  body?: string;
 }
 
 export class HttpError extends Error {
@@ -20,7 +23,7 @@ export class HttpError extends Error {
   }
 }
 
-export async function fetchJson<T>(url: string, { timeoutMs = 8_000, retries = 2, signal }: FetchJsonOptions = {}): Promise<T> {
+export async function fetchJson<T>(url: string, { timeoutMs = 8_000, retries = 2, signal, method = 'GET', body }: FetchJsonOptions = {}): Promise<T> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= retries; attempt++) {
     const controller = new AbortController();
@@ -28,7 +31,12 @@ export async function fetchJson<T>(url: string, { timeoutMs = 8_000, retries = 2
     signal?.addEventListener('abort', onAbort, { once: true });
     const timer = window.setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetch(url, { signal: controller.signal, headers: { Accept: 'application/json' } });
+      const res = await fetch(url, {
+        method,
+        ...(body === undefined ? {} : { body }),
+        signal: controller.signal,
+        headers: { Accept: 'application/json', ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
+      });
       if (res.ok) return (await res.json()) as T;
       if (res.status >= 400 && res.status < 500) throw new HttpError(res.status, `HTTP ${res.status}`);
       lastError = new HttpError(res.status, `HTTP ${res.status}`);

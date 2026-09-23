@@ -71,3 +71,18 @@ tools/.venv/Scripts/python tools/lm_ftp_ekonomiska.py --bbox 562000 6490000 5760
 
 Hela kommunens bbox = 272 blad ≈ 17 GB; centrala Norrköping = 9 blad ≈ 0,56 GB.
 Nedladdade blad hamnar i `data/raw/` (git-ignorerat) och bearbetas vidare till PMTiles i ett senare steg.
+
+## ortnamn_index.py — sökindex för ortnamn (FK-32)
+
+```bash
+tools/.venv/Scripts/python tools/lm_stac.py ortnamn     # 56 MB från Lantmäteriet → derived/ortnamn.geojson
+tools/.venv/Scripts/python tools/ortnamn_index.py       # → data/sok/ortnamn.json (87 kB gzip)
+```
+
+Gör om GeoJSON-uttaget till det index klienten söker i: koordinater transformerade till EPSG:3006
+och avrundade till hela meter (kartan renderar i samma system, så klienten slipper proj4), namntyper
+som index i stället för koder, och punkter för samma namngivna objekt sammanslagna med enkellänkad
+klustring inom 10 km — annars listas långsträckta objekt som Bråviken fem gånger i sökresultatet.
+
+Mellanfilen `data/derived/ortnamn.geojson` är git-ignorerad och följer inte med bygget; det är
+indexet i `data/sok/` som checkas in och levereras.

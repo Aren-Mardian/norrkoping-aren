@@ -9,9 +9,9 @@
  * Planär beräkning i EPSG:3857 avvisas aktivt: skalfaktorn är ≈ 1,92 på 58,6° N,
  * så 1 000 m skulle rapporteras som ≈ 1 914 m (Bilaga B.4).
  */
+import { MEASURABLE_PROJECTIONS, ProjectionNotMeasurableError, planarLength } from './planar.ts';
 import {
   EPSG_3006,
-  EPSG_3010,
   EPSG_3857,
   EPSG_4326,
   transformXY,
@@ -19,28 +19,9 @@ import {
   type XY,
 } from './projDefs.ts';
 
-/** Projektioner där planär längd/area är godkänd. */
-export const MEASURABLE_PROJECTIONS: ReadonlySet<string> = new Set([EPSG_3006, EPSG_3010]);
-
-export class ProjectionNotMeasurableError extends Error {
-  constructor(public readonly projection: string) {
-    super(
-      `Mätning i ${projection} är inte tillåten (NFK-12). Använd ${EPSG_3006}/${EPSG_3010} eller geodetisk beräkning.`,
-    );
-    this.name = 'ProjectionNotMeasurableError';
-  }
-}
-
-/** Planär längd av en bruten linje i godtyckliga projicerade enheter. Ingen kontroll — se measureLength. */
-export function planarLength(coords: readonly XY[]): number {
-  let sum = 0;
-  for (let i = 1; i < coords.length; i++) {
-    const a = coords[i - 1]!;
-    const b = coords[i]!;
-    sum += Math.hypot(b[0] - a[0], b[1] - a[1]);
-  }
-  return sum;
-}
+// Vitlistan och den planära beräkningen ligger i planar.ts (utan beroenden) och återexporteras
+// här, så att den som bara behöver dem slipper dra in proj4 (Origo-sidan gör det).
+export { MEASURABLE_PROJECTIONS, ProjectionNotMeasurableError, planarLength } from './planar.ts';
 
 /**
  * Längd av en bruten linje given i `projection`. Kastar för 3857 och andra

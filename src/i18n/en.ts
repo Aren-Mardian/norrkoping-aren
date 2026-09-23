@@ -15,9 +15,13 @@ export const en: Record<MessageKey, string> = {
   'map.basemap.orto': 'Aerial',
   'map.basemap.dark': 'Dark',
   'map.basemap.ortoUnavailable': 'Aerial imagery requires a Lantmäteriet app account — not enabled yet.',
+  'map.basemap.yearLabel': 'Aerial imagery year',
+  'map.basemap.yearTitle': 'Lantmäteriet orthophoto mosaic, reference year {year}',
   'map.basemap.groupLabel': 'Base map',
   'map.resetView': 'Reset view',
   'map.layer.kommungrans': 'Municipal boundary',
+  'map.layer.orto60': 'Aerial 1960',
+  'map.layer.orto75': 'Aerial 1975',
   'map.status.fallback': 'The Lantmäteriet base map could not be loaded right now. Showing OpenStreetMap instead.',
   'dev.noToken': 'Development mode: Lantmäteriet services are not configured (no .env) — no aerial imagery.',
   'dev.noTiles':
@@ -25,18 +29,24 @@ export const en: Record<MessageKey, string> = {
   // ── Footer: where the information comes from and how it is fetched ──
   'footer.title': 'Where the information comes from',
   'footer.summary':
-    'Map: Lantmäteriet (self-hosted) · Bathing water: HaV (API) · Weather: SMHI (API) · Boundary: OpenStreetMap · Tools: Origo/OpenLayers (/origo/)',
+    'Map, aerial imagery, elevation, place names and boundary: Lantmäteriet · Bathing water: HaV · Weather: SMHI · Tools: Origo/OpenLayers',
   'footer.intro': 'Every fact on this page comes from an open source. This is where it comes from, how it is fetched and how fresh it is.',
   'footer.src.topo.name': 'Base map',
   'footer.src.topo.body':
     'Lantmäteriet, Topographic web map (download, raster), licence CC BY 4.0. Downloaded from Lantmäteriet open data, clipped to the municipality and self-hosted as a PMTiles file — your browser never calls Lantmäteriet. Extract from {date}.',
   'footer.src.orto.name': 'Aerial imagery',
   'footer.src.orto.body':
-    'Lantmäteriet, historical orthophotos (WMS), licence CC0. Fetched tile by tile through the site’s own proxy (/api/tiles) with a Lantmäteriet app account.',
+    'Lantmäteriet, Ortofoto historiska Visning (WMS), licence CC0. Two national mosaics cover the municipality: reference years 1960 and 1975, 0.5 m resolution. Fetched tile by tile through the site’s own proxy (/api/tiles) with a Lantmäteriet app account — your browser never calls Lantmäteriet directly.',
   'footer.src.orto.pending': 'Enabled once the app account is configured.',
+  'footer.src.hojd.name': 'Ground elevation',
+  'footer.src.hojd.body':
+    'Lantmäteriet, Markhöjd Direkt (CC BY 4.0). Elevation is fetched live via /api/hojd when you pick a place or measure in Origo; height system RH 2000. A single point is cached for a day, profiles are not cached.',
+  'footer.src.ortnamn.name': 'Place names (search)',
+  'footer.src.ortnamn.body':
+    'Lantmäteriet, Ortnamn Nedladdning vektor (CC BY 4.0), retrieved via the STAC API {date}. Prepared offline into a search index of {count} names within the municipality; loaded only when you start searching.',
   'footer.src.kommun.name': 'Municipal boundary',
   'footer.src.kommun.body':
-    'OpenStreetMap (relation 935447), licence ODbL — a static GeoJSON file, pending Lantmäteriet’s Municipality, County and Country dataset (CC BY 4.0).',
+    'Lantmäteriet, Kommun, län och rike (CC BY 4.0), retrieved via the STAC API {date}. Municipality code 0581, static GeoJSON in SWEREF 99 TM.',
   'footer.src.bad.name': 'Beaches and bathing-water status',
   'footer.src.bad.body':
     'Swedish Agency for Marine and Water Management (HaV), Badplatsen API (open data). Location, name and type are fetched as base data at build time. Samples, algae, advisories and water temperature are fetched live via /api/bad/status with a one-hour cache — the age of the status is always shown.',
@@ -56,12 +66,36 @@ export const en: Record<MessageKey, string> = {
   'footer.privacy': 'Privacy',
   'a11y.skipToMap': 'Skip to the map',
   // ── Origo page (core function C) ──
-  'origo.tagline': 'Origo · tools: measure, draw, coordinates, share, print',
+  'origo.tagline': 'Origo · tools: measure, draw, elevation, coordinates, share, print',
+  'origo.hojd.title': 'Elevation and elevation profile',
+  'origo.hojd.button': 'Elevation',
+  'origo.hojd.hint': 'Click the map for ground elevation. Click several times for a profile, double-click to finish.',
+  'origo.hojd.loading': 'Fetching elevation …',
+  'origo.hojd.point': '{n} m above sea level (RH 2000)',
+  'origo.hojd.missing': 'No elevation data for that point.',
+  'origo.hojd.failed': 'Elevation data could not be fetched.',
+  'origo.hojd.profile': 'Profile: {points} points · lowest {min} m · highest {max} m · ascent {gain} m · length {length}',
+  'origo.hojd.clear': 'Clear the elevation measurement',
+  'origo.hojd.source': 'Source: Lantmäteriet, Markhöjd Direkt (CC BY 4.0)',
   'origo.ariaLabel': 'Origo tool mode: measure, draw, read coordinates, print and share the map of Norrköping Municipality.',
   'origo.status.loadFailed': 'Origo could not be loaded. Check your connection and reload the page.',
   'origo.status.noBasemap': 'The base map could not be loaded. The tools work, but the map is empty.',
   'origo.footer':
-    'Origo 2.10.0 and OpenLayers (BSD 2-clause), self-hosted · Base map: Lantmäteriet, Topographic web map (CC BY 4.0), self-hosted · Boundary: OpenStreetMap (ODbL) · Coordinates in SWEREF 99 TM, geodetic measurement',
+    'Origo 2.10.0 and OpenLayers (BSD 2-clause), self-hosted · Base map and aerial imagery: Lantmäteriet (CC BY 4.0) · Elevation: Markhöjd Direkt · Place names and boundary: Lantmäteriet · Coordinates in SWEREF 99 TM, geodetic measurement',
+  // ── Search and place (FK-32, IK-08) ──
+  'sok.label': 'Search for a place in Norrköping Municipality',
+  'sok.placeholder': 'Search place, lake or village …',
+  'sok.placeholderOrigo': 'Search for a place to measure at …',
+  'sok.clear': 'Clear the search',
+  'sok.noHits': 'No place by that name in the municipality.',
+  'sok.failed': 'The search index could not be loaded right now.',
+  'plats.close': 'Close the place information',
+  'plats.coords': 'SWEREF 99 TM',
+  'plats.hojd': 'Ground elevation',
+  'plats.hojdLoading': 'loading …',
+  'plats.hojdValue': '{n} m above sea level (RH 2000)',
+  'plats.hojdMissing': 'not available here',
+  'plats.source': 'Place names: Lantmäteriet (CC BY 4.0) · Elevation: Lantmäteriet, Markhöjd Direkt',
   // ── Beaches (core function B) ──
   'panel.title': 'Beaches',
   'panel.handleExpand': 'Show beaches',
@@ -142,6 +176,6 @@ export const en: Record<MessageKey, string> = {
   'bad.weather.symbol.26': 'Snowfall',
   'bad.weather.symbol.27': 'Heavy snowfall',
   'attribution.lantmateriet': '© Lantmäteriet',
-  'attribution.lantmateriet.orto': '© Lantmäteriet, historical orthophotos (CC0)',
+  'attribution.lantmateriet.orto': '© Lantmäteriet, historical orthophotos {year}',
   'attribution.osm': '© OpenStreetMap contributors',
 };

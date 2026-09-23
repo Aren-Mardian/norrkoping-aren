@@ -64,10 +64,25 @@ export function placeFooter(panelBody: HTMLElement | null): void {
   place();
 }
 
-/** Fyller i det som bara är känt vid bygge/körning: kartutsnittets datum och om flygbilden är aktiv. */
+/**
+ * Fyller i det som bara är känt vid bygge: kartutsnittets datum, ortnamnsindexets hämtdatum och
+ * antal namn, samt om flygbilden är aktiv. Siffrorna kommer ur datafilerna själva (vite define),
+ * så sidfoten kan aldrig påstå något annat än vad som faktiskt levereras (JK-01).
+ */
 export function fillFooterFacts(): void {
   const topo = document.getElementById('source-topo');
   if (topo) topo.textContent = t('footer.src.topo.body').replace('{date}', __DATA_GENERATED__);
+
+  const ortnamn = document.getElementById('source-ortnamn');
+  if (ortnamn) {
+    ortnamn.textContent = t('footer.src.ortnamn.body')
+      .replace('{date}', __ORTNAMN_FACTS__.date)
+      .replace('{count}', __ORTNAMN_FACTS__.count);
+  }
+
+  const kommun = document.getElementById('source-kommun');
+  if (kommun) kommun.textContent = t('footer.src.kommun.body').replace('{date}', __KOMMUN_RETRIEVED__);
+
   const orto = document.getElementById('source-orto');
   if (orto && !LM_ENABLED) orto.textContent = `${t('footer.src.orto.body')} ${t('footer.src.orto.pending')}`;
 }

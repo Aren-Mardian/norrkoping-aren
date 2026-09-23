@@ -449,7 +449,12 @@ button {
 .map .ol-layer-toggle {
   top: auto;
   left: var(--space-3);
+  /* Ligger ovanför bakgrundsväxlaren; i flygbildsläge är den en rad högre (årtalen). */
   bottom: calc(var(--space-3) + 28px + var(--tap) + var(--space-2));
+}
+
+.map--orto .ol-layer-toggle {
+  bottom: calc(var(--space-3) + 28px + var(--tap) + var(--space-2) + 34px);
 }
 
 .map .ol-layer-toggle button {
@@ -624,4 +629,236 @@ button {
   .footer__meta {
     flex: 0 0 auto;
   }
+}
+
+/* ── Ortnamnssök över kartan (FK-32) ──────────────────────────────────────── */
+
+.sok-host {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 10;
+  width: min(360px, calc(100% - 2 * var(--space-3)));
+}
+
+/* Statusraden (NFK-25) tar plats överst när den syns — flytta sökrutan under den. */
+.map-status:not([hidden]) ~ .sok-host {
+  top: calc(var(--space-3) + 44px);
+}
+
+.sok {
+  position: relative;
+}
+
+.sok__field {
+  display: flex;
+  align-items: center;
+  background: var(--c-surface-glass);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.sok__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--tap);
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-m);
+  background: none;
+  color: var(--c-text);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.sok__input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.sok__input:focus {
+  outline: none;
+}
+
+.sok__field:focus-within {
+  border-color: var(--c-accent);
+  box-shadow: var(--shadow-1), 0 0 0 2px var(--c-accent);
+}
+
+.sok__clear {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  margin-right: 4px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--c-text-muted);
+  cursor: pointer;
+}
+
+.sok__clear:hover {
+  background: var(--c-surface-2);
+  color: var(--c-text);
+}
+
+.sok__list {
+  position: absolute;
+  top: calc(var(--tap) + var(--space-1));
+  left: 0;
+  right: 0;
+  z-index: 1;
+  max-height: min(320px, 50dvh);
+  overflow-y: auto;
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+}
+
+.sok__list[hidden] {
+  display: none;
+}
+
+.sok__hit {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+
+.sok__hit.is-active,
+.sok__hit:hover {
+  background: var(--c-accent-soft);
+}
+
+.sok__name {
+  font-weight: 600;
+}
+
+.sok__type {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  color: var(--c-text-muted);
+}
+
+.sok__status {
+  margin: var(--space-1) 0 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.85rem;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+  color: var(--c-text-muted);
+}
+
+.sok__status[hidden] {
+  display: none;
+}
+
+/* ── Platskort: vald plats med koordinater och markhöjd (IK-08) ───────────── */
+
+.platskort {
+  position: absolute;
+  top: calc(var(--space-3) + var(--tap) + var(--space-2));
+  left: var(--space-3);
+  z-index: 9;
+  width: min(360px, calc(100% - 2 * var(--space-3)));
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-3);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+}
+
+.platskort[hidden] {
+  display: none;
+}
+
+.platskort__close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--c-text-muted);
+  cursor: pointer;
+}
+
+.platskort__close:hover {
+  background: var(--c-surface-2);
+  color: var(--c-text);
+}
+
+.platskort__title {
+  margin: 0 var(--space-6) 0 0;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.platskort__meta {
+  margin: 2px 0 var(--space-2);
+  font-size: 0.8rem;
+  color: var(--c-text-muted);
+}
+
+.platskort__facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px var(--space-3);
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.platskort__facts dt {
+  color: var(--c-text-muted);
+}
+
+.platskort__facts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.platskort__source {
+  margin: var(--space-2) 0 0;
+  font-size: 0.72rem;
+  color: var(--c-text-muted);
+}
+
+/* Årtalsrad för flygbilden — syns bara när flygbild är vald. */
+.map .ol-basemap-switcher {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: 3px;
+  border-radius: var(--radius-m);
+}
+
+.map .ol-basemap-switcher__row,
+.map .ol-basemap-switcher__years {
+  display: flex;
+  gap: 2px;
+}
+
+.map .ol-basemap-switcher__years[hidden] {
+  display: none;
+}
+
+.map .ol-basemap-switcher__years button {
+  height: 30px;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }

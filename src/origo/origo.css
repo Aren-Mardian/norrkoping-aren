@@ -89,3 +89,88 @@
   height: 32px;
   width: 32px;
 }
+
+/* ── Egna verktyg ovanpå Origo: ortnamnssök (FK-32) och höjd (IK-08) ──────── */
+
+.origo-tools {
+  position: absolute;
+  top: var(--space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: min(520px, calc(100% - 120px));
+  color-scheme: light;
+}
+
+.origo-tools__sok {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hojd {
+  flex: 0 0 auto;
+}
+
+.hojd__toggle {
+  height: var(--tap);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  background: var(--c-surface-glass);
+  color: var(--c-text);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.hojd__toggle[aria-pressed='true'] {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: var(--c-accent-contrast);
+}
+
+/* Statusraden syns bara när verktyget är påslaget — annars tar den plats i onödan. */
+.hojd__status {
+  display: none;
+  position: absolute;
+  top: calc(var(--tap) + var(--space-2));
+  right: 0;
+  width: max(260px, 100%);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--c-text);
+}
+
+.hojd.is-active {
+  position: relative;
+}
+
+.hojd.is-active .hojd__status {
+  display: block;
+}
+
+@media (max-width: 899px) {
+  .origo-tools {
+    width: calc(100% - 100px);
+    left: var(--space-2);
+    transform: none;
+    flex-wrap: wrap;
+  }
+
+  .hojd.is-active .hojd__status {
+    width: calc(100vw - 2 * var(--space-2));
+    right: auto;
+    left: 0;
+  }
+}
