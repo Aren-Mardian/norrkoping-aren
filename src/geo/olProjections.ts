@@ -1,13 +1,13 @@
 /**
- * Registrerar SWEREF 99 TM (3006) och SWEREF 99 16 30 (3010) i OpenLayers via proj4.
+ * Registrerar SWEREF 99 TM (3006) i OpenLayers via proj4 — sajtens enda referenssystem (ADR-18).
  * Definitionerna kommer från shared/geo/projDefs.ts så att klient, edge och test
  * använder exakt samma parametrar (NFK-13).
  */
 import { get as getProjection } from 'ol/proj';
 import { register } from 'ol/proj/proj4';
-import { EPSG_3006, EPSG_3010, EXTENT_3006, registerProjDefs } from '../../shared/geo/projDefs.ts';
+import { EPSG_3006, EXTENT_3006, registerProjDefs } from '../../shared/geo/projDefs.ts';
 
-export { EPSG_3006, EPSG_3010 };
+export { EPSG_3006 };
 
 let done = false;
 

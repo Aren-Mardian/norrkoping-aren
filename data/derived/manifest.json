@@ -3,11 +3,11 @@
   "files": [
     {
       "name": "topowebb-farg.pmtiles",
-      "description": "Topografisk webbkarta (Lantmäteriet, CC BY 4.0), utsnitt Norrköpings kommun, LM-matris 3006, PMTiles-offset +2",
-      "url": "https://github.com/Aren-Mardian/norrkoping-aren/releases/download/data-2026-09-19/topowebb-farg.pmtiles",
-      "sha256": "d8aa951fc905bb21d4fc5211231deeb5e5edd3f784cd7b3f21e22d8178bc0c8a",
-      "bytes": 263094348,
-      "generated": "2026-09-19"
+      "description": "Topografisk webbkarta (Lantmäteriet, CC BY 4.0), utsnitt Norrköpings kommun i källans egen upplösning 0,5 m/px, LM-matris 3006, PMTiles-offset +2",
+      "url": "https://github.com/Aren-Mardian/norrkoping-aren/releases/download/data-2026-09-23/topowebb-farg.pmtiles",
+      "sha256": "db61924293de4e6bfd5d2ddb5fe535b0391778fc05a37facef50bbb9cb19ec97",
+      "bytes": 697645227,
+      "generated": "2026-09-23"
     }
   ]
 }

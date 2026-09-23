@@ -606,7 +606,7 @@ Dynamiskt statusobjekt (normaliserat av edge-funktionen):
 *Acceptanskriterium:* Buffertradie anges i meter och renderas korrekt i EPSG:3006.
 
 <a id="fk-26"></a>
-**FK-26 (M) — Koordinatavläsning.** Aktuell muspekare/markering visar koordinater i minst SWEREF 99 TM, SWEREF 99 16 30 och WGS 84 (decimalgrader och grader-minuter-sekunder).
+**FK-26 (M) — Koordinatavläsning.** Aktuell muspekare/markering visar koordinater i minst SWEREF 99 TM, SWEREF 99 16 30 och WGS 84 (decimalgrader och grader-minuter-sekunder). *(Ändrat 2026-09-23 på beställarens begäran, ADR-18: sajten visar **enbart SWEREF 99 TM**. SWEREF 99 16 30 och WGS 84 är borttagna ur gränssnittet.)*
 *Acceptanskriterium:* Värdena stämmer mot kontrollpunkter i Bilaga B inom 0,1 m i plan.
 
 <a id="fk-27"></a>

@@ -17,7 +17,9 @@ Urval per nivå (--steps ZMAX:BUFFER,…): en ruta tas med om den skär kommungr
 för panorering (FK-04), detaljnivåer bara en smal kant. Detaljområden (--detail) lägger
 till högre nivåer inom ett mindre område.
 
-Standardkörning (~300 MB): hela kommunen till 2 m/px, centralorten till 1 m/px, innerstaden till 0,5 m/px.
+Standardkörning (~650 MB): hela kommunen i källans egen upplösning 0,5 m/px, utan omkodning.
+Besökaren laddar bara de rutor som syns (Range-requests mot PMTiles), så filstorleken kostar
+lagring och byggtid — inte laddtid för besökaren.
 
   python tools/extract_topowebb.py --gpkg D:/lantmateriet/6104864_234624.gpkg --out data/derived/topowebb-farg.pmtiles
 
@@ -46,11 +48,12 @@ LM_ORIGIN = (-1_200_000.0, 8_500_000.0)
 LM_TILE_PX = 256
 
 DEFAULT_CLIP = "data/derived/kommungrans.geojson"
-# z ≤ 8 (16 m/px): 25 km panoreringsbuffert. z9 (8 m/px): 10 km. z10–11 (4–2 m/px): 3 km kant.
-DEFAULT_STEPS = "8:25000,9:10000,11:3000"
-# Centralorten (Norrköping tätort med Lindö, Åby, Svärtinge, Skärblacka-hållet) till 1 m/px,
-# innerstaden (Industrilandskapet, city, Himmelstalund) till 0,5 m/px.
-DEFAULT_DETAIL = ["556000,6486000,582000,6506000:12", "563000,6490000,574000,6500000:13"]
+# Hela kommunen i källans egen upplösning, 0,5 m/px (ADR-18). Översiktsnivåerna får 5 km
+# buffert — lika mycket som kartan får panoreras (ADR-16) — och detaljnivåerna en smal kant
+# på 500 m så att gränsen ritas snyggt utan att rutor över grannkommunerna följer med.
+DEFAULT_STEPS = "8:5000,9:5000,11:3000,13:500"
+# Inga extra detaljområden behövs: hela kommunen ligger redan på finaste nivån.
+DEFAULT_DETAIL: list[str] = []
 
 
 @dataclass(frozen=True)

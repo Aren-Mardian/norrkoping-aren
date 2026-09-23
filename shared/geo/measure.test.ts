@@ -5,10 +5,10 @@
  * referenspunkten i Bilaga B.2. Slutpunkten är beräknad med PROJ (pyproj Geod.fwd):
  *   start  16,18590000° Ö, 58,58734000° N
  *   slut   16,20309351° Ö, 58,58733885° N
- * PROJ-referens för planära längder: 3006 → 999,659 m, 3010 → 1 000,004 m, 3857 → 1 913,973 m.
+ * PROJ-referens för planära längder: 3006 → 999,659 m, 3857 → 1 913,973 m.
  */
 import { describe, expect, it } from 'vitest';
-import { EPSG_3006, EPSG_3010, EPSG_3857, EPSG_4326, toSweref991630, toSweref99TM, type LonLat } from './projDefs.ts';
+import { EPSG_3006, EPSG_3857, EPSG_4326, toSweref99TM, type LonLat } from './projDefs.ts';
 import {
   ProjectionNotMeasurableError,
   geodesicLength,
@@ -31,17 +31,13 @@ describe('TK-03 kontrollsträcka 1 000 m', () => {
     const len = lengthInSweref99TM(LINE);
     expect(Math.abs(len - 999.659)).toBeLessThanOrEqual(0.01);
     expect(Math.abs(len - 1000)).toBeLessThanOrEqual(5);
+    // lengthInSweref99TM transformerar först; planarLength på redan projicerade koordinater
+    // ska ge exakt samma svar — samma beräkning, olika ingång.
+    expect(planarLength(LINE.map(toSweref99TM))).toBeCloseTo(len, 9);
   });
 
-  it('planär längd i EPSG:3010 ger 1 000,004 m, inom kravets ±5 m', () => {
-    const len = planarLength(LINE.map(toSweref991630));
-    expect(Math.abs(len - 1000.004)).toBeLessThanOrEqual(0.01);
-    expect(Math.abs(len - 1000)).toBeLessThanOrEqual(5);
-  });
-
-  it('measureLength accepterar 3006, 3010 och 4326', () => {
+  it('measureLength accepterar 3006 och 4326', () => {
     expect(measureLength(LINE.map(toSweref99TM), EPSG_3006)).toBeCloseTo(999.659, 2);
-    expect(measureLength(LINE.map(toSweref991630), EPSG_3010)).toBeCloseTo(1000.004, 2);
     expect(measureLength(LINE, EPSG_4326)).toBeCloseTo(1000, 2);
   });
 

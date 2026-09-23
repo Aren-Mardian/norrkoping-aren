@@ -8,7 +8,7 @@
  */
 import { KOMMUN_VIEW_BBOX_3006, PAN_LIMIT_3006 } from '../../shared/geo/kommun.ts';
 import { LM_3006_EXTENT, LM_3006_ORIGIN, LM_3006_RESOLUTIONS, LM_TILE_SIZE } from '../../shared/geo/lmTileGrid.ts';
-import { DEF_3006, DEF_3010, EXTENT_3006 } from '../../shared/geo/crs.ts';
+import { DEF_3006, EXTENT_3006 } from '../../shared/geo/crs.ts';
 import { API_BASE, BASE, KOMMUNGRANS_URL } from '../config/site.ts';
 
 export const ORIGO_VERSION = '2.10.0';
@@ -50,8 +50,8 @@ const t = {
     '<p>Verktygsläget är byggt med <a href="https://github.com/origo-map/origo" target="_blank" rel="noopener">Origo</a> ' +
     `(version ${ORIGO_VERSION}, BSD 2-clause) — det öppna kartramverk som svenska kommuner använder — ovanpå OpenLayers.</p>` +
     '<p>Kartan visas och mäts i <b>SWEREF 99 TM (EPSG:3006)</b>. Längd och area beräknas geodetiskt, aldrig planärt i Web Mercator. ' +
-    'Koordinater kan läsas av i SWEREF 99 TM, SWEREF 99 16 30 och WGS 84.</p>' +
-    '<p>Ritade objekt exporteras som GeoJSON i WGS 84 (RFC 7946). Filer du släpper på kartan läses enbart lokalt i webbläsaren och laddas aldrig upp.</p>' +
+    'Koordinater läses av i <b>SWEREF 99 TM</b> — sajtens enda referenssystem.</p>' +
+    '<p>Ritade objekt exporteras som GeoJSON. Filformatet kräver WGS 84 (RFC 7946), så exportfilen bär de koordinaterna — allt du ser i kartan är SWEREF 99 TM. Filer du släpper på kartan läses enbart lokalt i webbläsaren och laddas aldrig upp.</p>' +
     '<p><b>Höjd:</b> markhöjd och höjdprofil hämtas från Lantmäteriets <i>Markhöjd Direkt</i> i RH 2000, ' +
     'via sajtens egen proxy. Profilen mäts längs den ritade linjen med jämnt fördelade punkter.</p>' +
     '<p><b>Datakällor:</b> Topografisk webbkarta Nedladdning, raster och Ortofoto historiska Visning © Lantmäteriet ' +
@@ -77,10 +77,9 @@ export function buildOrigoConfig(targetId: string, view: { center: number[]; zoo
     // ── Referenssystem (ADR-03, Bilaga B) ───────────────────────────────────
     projectionCode: 'EPSG:3006',
     projectionExtent: [...EXTENT_3006],
-    proj4Defs: [
-      { code: 'EPSG:3006', alias: 'SWEREF 99 TM', projection: DEF_3006 },
-      { code: 'EPSG:3010', alias: 'SWEREF 99 16 30', projection: DEF_3010 },
-    ],
+    // Sajtens enda referenssystem (ADR-18). Origo bär sin egen proj4; definitionen är samma
+    // sträng som klienten använder, så koordinaterna kan inte skilja sig åt (NFK-13).
+    proj4Defs: [{ code: 'EPSG:3006', alias: 'SWEREF 99 TM', projection: DEF_3006 }],
     // Panorering begränsad till kommunen + 5 km (FK-04, ADR-16); zoomsteg = Lantmäteriets matris.
     extent: [...PAN_LIMIT_3006],
     // Vyn ärvs från kartan användaren redan tittade på (ADR-15) — inget hopp när verktygen slås på.
@@ -102,19 +101,9 @@ export function buildOrigoConfig(targetId: string, view: { center: number[]; zoo
       { name: 'attribution' },
       { name: 'fullscreen' },
       { name: 'legend', options: { expanded: true, useGroupIndication: true, labelOpacitySlider: 'Opacitet' } },
-      // FK-26: koordinatavläsning i minst 3006, 3010 och WGS 84 (decimalgrader + grader-minuter-sekunder).
-      {
-        name: 'position',
-        options: {
-          // `title` lägger kartans projektion (3006) först i listan.
-          title: t.positionTitle,
-          projections: [
-            { projectionCode: 'EPSG:3010', projectionLabel: 'SWEREF 99 16 30', precision: 1 },
-            { projectionCode: 'EPSG:4326', projectionLabel: 'WGS 84', precision: 5 },
-            { projectionCode: 'EPSG:4326', projectionLabel: 'WGS 84 (DMS)', dms: true, precision: 2 },
-          ],
-        },
-      },
+      // FK-26: koordinatavläsning. Sajten visar bara SWEREF 99 TM (ADR-18) — `title` är
+      // etiketten för kartans egen projektion, och listan med alternativa system är tom.
+      { name: 'position', options: { title: t.positionTitle, projections: [] } },
       // FK-23/24/25: längd, area, buffert; delsträckor visas. Höjd kopplas på när Markhöjd Direkt finns.
       {
         name: 'measure',
@@ -128,7 +117,8 @@ export function buildOrigoConfig(targetId: string, view: { center: number[]; zoo
           snapRadius: 15,
         },
       },
-      // FK-27: rita punkt/linje/yta/text och ladda ned som GeoJSON (WGS 84).
+      // FK-27: rita punkt/linje/yta/text och ladda ned som GeoJSON. Filformatet kräver WGS 84
+      // (RFC 7946) — en filkonvention, inte något gränssnittet visar (ADR-18).
       { name: 'draw', options: { showDownloadButton: true, showAttributeButton: true, multipleLayers: true } },
       // FK-28: dela vy, lager och ritade objekt som länk (bara klientstate i URL:en).
       { name: 'sharemap' },

@@ -6,7 +6,7 @@
     <title>Norrköpingskartan — karta över Norrköpings kommun med badplatser och mätverktyg</title>
     <meta
       name="description"
-      content="Öppen, snabb och tillgänglig karta över Norrköpings kommun: badplatser med aktuell badvattenstatus från Havs- och vattenmyndigheten, väder från SMHI, flygbilder från Lantmäteriet och verktyg för att mäta, rita och läsa koordinater i SWEREF 99 TM."
+      content="Öppen, snabb och tillgänglig karta över Norrköpings kommun i SWEREF 99 TM: Lantmäteriets topografiska karta i 0,5 m/px, badplatser med aktuell badvattenstatus från Havs- och vattenmyndigheten, väder från SMHI, historiska flygbilder och verktyg för att mäta, rita och läsa koordinater."
     />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
@@ -129,12 +129,13 @@
         <summary class="sources__summary">
           <span class="sources__title" data-i18n="footer.title">Så hämtas informationen</span>
           <span class="sources__brief" data-i18n="footer.summary"
-            >Karta: Lantmäteriet (självhostad) · Badvatten: HaV (API) · Väder: SMHI (API) · Kommungräns: OpenStreetMap · Verktyg: Origo/OpenLayers (/origo/)</span
+            >SWEREF 99 TM · Karta 0,5 m/px: Lantmäteriet · Flygbild, höjd, ortnamn och kommungräns: Lantmäteriet · Badvatten: HaV · Väder: SMHI</span
           >
         </summary>
         <div class="sources__body">
           <p class="sources__intro" data-i18n="footer.intro">
-            Varje uppgift på sidan kommer från en öppen källa. Här står varifrån den kommer, hur den hämtas och hur färsk den är.
+            Kartan visas och mäts i SWEREF 99 TM (EPSG:3006) — sajtens enda referenssystem. Varje uppgift kommer från en öppen källa;
+            här står varifrån den kommer, hur den hämtas, hur färsk den är och vilken upplösning den har.
           </p>
           <dl class="sources__list">
             <div class="sources__item">
@@ -154,15 +155,15 @@
             <div class="sources__item">
               <dt data-i18n="footer.src.topo.name">Bakgrundskarta</dt>
               <dd id="source-topo" data-i18n="footer.src.topo.body">
-                Lantmäteriet, Topografisk webbkarta (nedladdning, raster), licens CC BY 4.0. Nedladdad från Lantmäteriets öppna data,
-                beskuren till kommunen och självhostad som PMTiles-fil — din webbläsare anropar aldrig Lantmäteriet.
+                Lantmäteriet, Topografisk webbkarta (nedladdning, raster), licens CC BY 4.0. Hela kommunen i källans egen upplösning
+                0,5 m/px, rutorna kopierade utan omkodning. Självhostad som PMTiles-fil i SWEREF 99 TM.
               </dd>
             </div>
             <div class="sources__item">
               <dt data-i18n="footer.src.orto.name">Flygbild</dt>
               <dd id="source-orto" data-i18n="footer.src.orto.body">
                 Lantmäteriet, Ortofoto historiska Visning (WMS), licens CC0. Två rikstäckande mosaiker täcker kommunen: referensår
-                1960 och 1975, 0,5 m. Hämtas ruta för ruta via sajtens egen proxy (/api/tiles) med Lantmäteriets appkonto.
+                1960 och 1975, 0,5 m/px, svartvita. Hämtas ruta för ruta i SWEREF 99 TM via sajtens egen proxy (/api/tiles).
               </dd>
             </div>
             <div class="sources__item">
@@ -188,8 +189,8 @@
             <div class="sources__item">
               <dt data-i18n="footer.src.verktyg.name">Kartmotor och verktyg</dt>
               <dd data-i18n="footer.src.verktyg.body">
-                OpenLayers och Origo 2.10.0 (BSD 2-clause), självhostade. Kartan ritas i SWEREF 99 TM (EPSG:3006); mätning sker geodetiskt,
-                aldrig i Web Mercator.
+                OpenLayers och Origo 2.10.0 (BSD 2-clause), självhostade. Allt — visning, koordinatavläsning och mätning — sker i
+                SWEREF 99 TM (EPSG:3006), aldrig i Web Mercator.
               </dd>
             </div>
           </dl>

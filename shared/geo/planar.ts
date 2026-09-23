@@ -5,17 +5,20 @@
  * behöver planär längd eller vitlistan ska slippa dra in proj4 (42 kB gzip) via measure.ts;
  * Origos bundle har redan en egen kopia.
  */
-import { EPSG_3006, EPSG_3010 } from './crs.ts';
+import { EPSG_3006 } from './crs.ts';
 
 export type XY = readonly [number, number];
 
-/** Projektioner där planär längd/area är godkänd. Web Mercator finns medvetet inte med. */
-export const MEASURABLE_PROJECTIONS: ReadonlySet<string> = new Set([EPSG_3006, EPSG_3010]);
+/**
+ * Projektioner där planär längd/area är godkänd. Sedan ADR-18 är det bara SWEREF 99 TM —
+ * sajtens enda referenssystem. Web Mercator finns medvetet inte med (NFK-12).
+ */
+export const MEASURABLE_PROJECTIONS: ReadonlySet<string> = new Set([EPSG_3006]);
 
 export class ProjectionNotMeasurableError extends Error {
   constructor(public readonly projection: string) {
     super(
-      `Mätning i ${projection} är inte tillåten (NFK-12). Använd ${EPSG_3006}/${EPSG_3010} eller geodetisk beräkning.`,
+      `Mätning i ${projection} är inte tillåten (NFK-12). Använd ${EPSG_3006} eller geodetisk beräkning.`,
     );
     this.name = 'ProjectionNotMeasurableError';
   }

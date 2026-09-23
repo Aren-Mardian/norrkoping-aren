@@ -67,8 +67,8 @@ Topografisk_webbkarta_raster/
   kommunutsnitt (varje liten läsning = ny överföring). Sekventiell hastighet ~10 MB/s (parallellt ~13 MB/s):
   **hela filen tar ~4 h**. Beslut: ladda ned en gång till D:, klipp ut kommunen lokalt med
   `tools/extract_topowebb.py`, radera originalet.
-- Uppskattad storlek på utsnittet (bbox + 25 km buffert): ≈ 150 MB t.o.m. 2 m/px, ≈ 600 MB t.o.m. 1 m/px,
-  ≈ 2,3 GB t.o.m. 0,5 m/px. Plan: hela kommunen till 2 m/px + centralorten till 0,5 m/px; mäts när filen finns.
+- Utfall (klippt mot kommungränsen, inte mot bbox:en): **0,5 m/px över hela kommunen = 665 MB**. Den
+  tidigare uppskattningen på 2,3 GB avsåg bbox + 25 km buffert och var därför kraftigt tilltagen.
 
 ### Ekonomiska kartan — struktur
 
@@ -89,7 +89,7 @@ Två källor under övergångsperioden:
    - **license:** CC BY 4.0
    - **licenseUrl:** <https://creativecommons.org/licenses/by/4.0/> — villkorstext: [docs/villkor/topografisk-webbkarta-nedladdning-raster.md](../docs/villkor/topografisk-webbkarta-nedladdning-raster.md)
    - **attribution:** i kartan `© Lantmäteriet, CC BY 4.0` (licensen länkad); fullständig text enligt villkoren §3.1 i PMTiles-metadata (`attribution_full`) och på `/kallor`: *"Datakälla: Topografisk webbkarta Nedladdning, raster. © Lantmäteriet. Informationen har bearbetats (utsnitt över Norrköpings kommun, ompaketerad till PMTiles). CC BY 4.0 gäller för Topografisk webbkarta Nedladdning, raster."*
-   - **retrieved:** FTP-filens datum 2026-06-22, nedladdad 2026-09-19; utsnitt genererat 2026-09-19 med `tools/extract_topowebb.py` (urval: kommungräns +25 km t.o.m. 16 m/px, +10 km vid 8 m/px, +3 km vid 4–2 m/px; centralorten till 1 m/px; innerstaden till 0,5 m/px)
+   - **retrieved:** FTP-filens datum 2026-06-22, nedladdad 2026-09-19; utsnitt genererat **2026-09-23** med `tools/extract_topowebb.py` (urval: kommungräns +5 km t.o.m. 8 m/px, +3 km vid 4–2 m/px, +500 m vid 1–0,5 m/px). **Hela kommunen i källans egen upplösning 0,5 m/px** — 189 052 rutor, 665 MB, rutorna kopierade oförändrade utan omkodning (ADR-18). Tidigare utsnitt (2026-09-19) hade 2 m/px utanför centralorten och vägde 251 MB.
    - **terms:** vidarepublicering från egen server tillåten (CC BY). Produkten kan innehålla personuppgifter (§4) — utsnittet är enbart kartbild; ingen personuppgiftsbehandling. Leverans till produktion enligt ADR-10 (GitHub Release + manifest med SHA-256).
 2. **Live-WMTS via proxy** (*Topografisk webbkarta Visning, översiktlig*, utgår 2026-12-31) — endast fram till årsskiftet.
    - **terms:** _Sammanfattning skrivs här när behörigheten är beviljad (JK-07)._

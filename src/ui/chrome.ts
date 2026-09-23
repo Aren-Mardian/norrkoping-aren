@@ -38,7 +38,9 @@ export function placeFooter(panelBody: HTMLElement | null): void {
  */
 export function fillFooterFacts(): void {
   const topo = document.getElementById('source-topo');
-  if (topo) topo.textContent = t('footer.src.topo.body').replace('{date}', __DATA_GENERATED__);
+  if (topo) {
+    topo.textContent = t('footer.src.topo.body').replace('{date}', __TOPO_FACTS__.date).replace('{size}', __TOPO_FACTS__.size);
+  }
 
   const ortnamn = document.getElementById('source-ortnamn');
   if (ortnamn) {

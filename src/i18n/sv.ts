@@ -28,14 +28,15 @@ export const sv = {
   // ── Sidfot: varifrån och hur informationen hämtas (JK-01, Bilaga C) ──
   'footer.title': 'Så hämtas informationen',
   'footer.summary':
-    'Karta, flygbild, höjd, ortnamn och kommungräns: Lantmäteriet · Badvatten: HaV · Väder: SMHI · Verktyg: Origo/OpenLayers',
-  'footer.intro': 'Varje uppgift på sidan kommer från en öppen källa. Här står varifrån den kommer, hur den hämtas och hur färsk den är.',
+    'SWEREF 99 TM · Karta 0,5 m/px: Lantmäteriet · Flygbild, höjd, ortnamn och kommungräns: Lantmäteriet · Badvatten: HaV · Väder: SMHI',
+  'footer.intro':
+    'Kartan visas och mäts i SWEREF 99 TM (EPSG:3006) — sajtens enda referenssystem. Varje uppgift kommer från en öppen källa; här står varifrån den kommer, hur den hämtas, hur färsk den är och vilken upplösning den har.',
   'footer.src.topo.name': 'Bakgrundskarta',
   'footer.src.topo.body':
-    'Lantmäteriet, Topografisk webbkarta (nedladdning, raster), licens CC BY 4.0. Nedladdad från Lantmäteriets öppna data, beskuren till kommunen och självhostad som PMTiles-fil — din webbläsare anropar aldrig Lantmäteriet. Utsnitt från {date}.',
+    'Lantmäteriet, Topografisk webbkarta (nedladdning, raster), licens CC BY 4.0. Hela kommunen i källans egen upplösning 0,5 m/px, rutorna kopierade utan omkodning — ingen kvalitetsförlust. Beskuren till kommunen och självhostad som PMTiles-fil ({size}), så din webbläsare anropar aldrig Lantmäteriet och hämtar bara de rutor som syns. SWEREF 99 TM, zoomnivåer 4096–0,5 m/px. Utsnitt från {date}.',
   'footer.src.orto.name': 'Flygbild',
   'footer.src.orto.body':
-    'Lantmäteriet, Ortofoto historiska Visning (WMS), licens CC0. Två rikstäckande mosaiker täcker kommunen: referensår 1960 och 1975, 0,5 m upplösning. Hämtas ruta för ruta via sajtens egen proxy (/api/tiles) med Lantmäteriets appkonto — din webbläsare anropar aldrig Lantmäteriet direkt.',
+    'Lantmäteriet, Ortofoto historiska Visning (WMS), licens CC0. Två rikstäckande mosaiker täcker kommunen: referensår 1960 och 1975, 0,5 m/px, svartvita. Hämtas ruta för ruta i SWEREF 99 TM via sajtens egen proxy (/api/tiles) med Lantmäteriets appkonto — din webbläsare anropar aldrig Lantmäteriet direkt.',
   'footer.src.orto.pending': 'Aktiveras när appkontot är konfigurerat.',
   'footer.src.hojd.name': 'Markhöjd',
   'footer.src.hojd.body':
@@ -45,7 +46,7 @@ export const sv = {
     'Lantmäteriet, Ortnamn Nedladdning vektor (CC BY 4.0), hämtad via STAC-API:et {date}. Förberett offline till ett sökindex med {count} namn inom kommunen; laddas först när du börjar söka.',
   'footer.src.kommun.name': 'Kommungräns',
   'footer.src.kommun.body':
-    'Lantmäteriet, Kommun, län och rike (CC BY 4.0), hämtad via STAC-API:et {date}. Kommunkod 0581, statisk GeoJSON-fil i SWEREF 99 TM.',
+    'Lantmäteriet, Kommun, län och rike (CC BY 4.0), hämtad via STAC-API:et {date}. Kommunkod 0581, lägesosäkerhet ca 2 m. Gränsen avgör också vilka punkter sajten hämtar höjd för.',
   'footer.src.bad.name': 'Badplatser och badvattenstatus',
   'footer.src.bad.body':
     'Havs- och vattenmyndigheten, Badplatsen-API (öppna data). Läge, namn och typ hämtas som grunddata vid bygge. Provsvar, alger, avrådan och vattentemperatur hämtas live via /api/bad/status med 1 timmes cache — statusens ålder visas alltid.',
@@ -54,7 +55,7 @@ export const sv = {
     'SMHI, meteorologisk prognos (API snow1g), licens CC BY 4.0. Hämtas via /api/vader när du öppnar en badplats; prognosens utgivningstid visas.',
   'footer.src.verktyg.name': 'Kartmotor och verktyg',
   'footer.src.verktyg.body':
-    'OpenLayers och Origo 2.10.0 (BSD 2-clause), självhostade. Kartan ritas i SWEREF 99 TM (EPSG:3006); mätning sker geodetiskt, aldrig i Web Mercator.',
+    'OpenLayers och Origo 2.10.0 (BSD 2-clause), självhostade. Allt — visning, koordinatavläsning och mätning — sker i SWEREF 99 TM (EPSG:3006); mätning planärt där eller geodetiskt på GRS80, aldrig i Web Mercator. Ritade objekt exporteras som GeoJSON, vars filformat kräver WGS 84.',
   'footer.privacyNote':
     'Inga kakor, ingen spårning. Alla anrop till HaV, SMHI och Lantmäteriet går via sajtens egen proxy — din IP-adress skickas inte vidare.',
   'footer.disclaimer': 'Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.',
@@ -85,7 +86,7 @@ export const sv = {
   'sok.noHits': 'Ingen plats med det namnet i kommunen.',
   'sok.failed': 'Sökregistret kunde inte hämtas just nu.',
   'plats.close': 'Stäng platsinformationen',
-  'plats.coords': 'SWEREF 99 TM',
+  'plats.coords': 'SWEREF 99 TM (N/E)',
   'plats.hojd': 'Markhöjd',
   'plats.hojdLoading': 'hämtar …',
   'plats.hojdValue': '{n} m ö.h. (RH 2000)',

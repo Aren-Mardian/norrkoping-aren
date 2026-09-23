@@ -4,12 +4,17 @@ Kravspec §6.1, Bilaga B, NFK-12, NFK-13, TK-02, TK-03.
 
 ## Vilka system används till vad
 
+**Sajten har ett enda referenssystem: SWEREF 99 TM (EPSG:3006)** (ADR-18). Allt besökaren ser —
+kartan, koordinatavläsningen, mätningen, höjdpunkterna — är i det systemet. SWEREF 99 16 30 (3010)
+togs bort 2026-09-23; WGS 84 finns kvar enbart som *dataformat* och visas aldrig.
+
 | Användning | System | EPSG | Var i koden |
 |---|---|---|---|
-| Kartvisning och tile-matris | SWEREF 99 TM | 3006 | `src/map/createMap.ts` (View), `shared/geo/lmTileGrid.ts` |
-| Lokalt kommunalt system (visning/inmatning) | SWEREF 99 16 30 | 3010 | `shared/geo/projDefs.ts` |
-| Lagring i GeoJSON | WGS 84 | 4326 | `data/**/*.geojson` (lon, lat) |
-| Längd- och areamätning | SWEREF 99 TM eller geodetiskt på GRS80 | 3006 / — | `shared/geo/measure.ts` |
+| Kartvisning, tile-matris, koordinatavläsning, mätning | SWEREF 99 TM | 3006 | `src/map/createMap.ts` (View), `shared/geo/lmTileGrid.ts`, `src/origo/origoConfig.ts` |
+| Inkommande data i GeoJSON (RFC 7946 kräver det) | WGS 84 | 4326 | `data/**/*.geojson` (lon, lat) |
+| Punktprognos från SMHI (API:et tar lat/lon) | WGS 84 | 4326 | `netlify/functions/vader.mts` |
+| Export av ritade objekt (RFC 7946 kräver det) | WGS 84 | 4326 | Origos draw-kontroll |
+| Referensmetod för längd | Geodetiskt på GRS80 (Vincenty) | — | `shared/geo/measure.ts` |
 | Fallback-bakgrund (raster, reprojiceras) | Web Mercator | 3857 | `src/map/basemaps.ts` |
 | **Förbjudet för mätning** | Web Mercator | 3857 | `measureLength()` kastar `ProjectionNotMeasurableError` |
 
@@ -22,18 +27,22 @@ plattdrift — irrelevant för kartvisning och mätning på meter-nivå).
 
 ```
 EPSG:3006  +proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs
-EPSG:3010  +proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0
-           +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs
 ```
 
-**Att göra före produktion (NFK-13):** jämför mot Lantmäteriets officiella parametrar för SWEREF 99 TM
-och SWEREF 99 16 30 och notera datum för kontrollen här.
+Samma sträng används av klienten och av Origos inbyggda proj4 (`proj4Defs` i `origoConfig.ts`), så
+koordinater kan inte skilja sig åt mellan kartan och verktygen (NFK-13).
+
+**Att göra före produktion (NFK-13):** jämför mot Lantmäteriets officiella parametrar för
+SWEREF 99 TM och notera datum för kontrollen här.
 
 ## Kontrollpunkter (TK-02)
 
 Referensvärdena är beräknade med PROJ via pyproj 3.6.1 (`Transformer.from_crs(..., always_xy=True)`),
 alltså oberoende av proj4js som används i klienten. Testet `shared/geo/projDefs.test.ts` kräver
 avvikelse ≤ 0,01 m.
+
+Kolumnen för SWEREF 99 16 30 står kvar som underlag för analysen nedan; systemet erbjuds inte
+längre i gränssnittet (ADR-18) och testas inte.
 
 | Punkt | WGS 84 (lon, lat) | SWEREF 99 TM (E, N) | SWEREF 99 16 30 (E, N) |
 |---|---|---|---|
@@ -53,11 +62,12 @@ slutar i 16,20309351° Ö, 58,58733885° N. Så här lång blir den beräknad p�
 |---|---|---|---|
 | Geodetiskt (Vincenty, GRS80) | 1 000,000 m | referens | ja |
 | Planärt i EPSG:3006 | 999,659 m | −0,034 % | ja |
-| Planärt i EPSG:3010 | 1 000,004 m | +0,0004 % | ja |
+| Planärt i EPSG:3010 | 1 000,004 m | +0,0004 % | ~~ja~~ — systemet erbjuds inte längre (ADR-18) |
 | Planärt i EPSG:3857 | 1 913,973 m | **+91,4 %** | **nej — avvisas av koden** |
 
-Testet `shared/geo/measure.test.ts` verifierar alla fyra raderna, inklusive att implementationen kastar
-vid försök att mäta i 3857.
+Tabellen är skälet till att SWEREF 99 TM räcker som enda system: −0,034 % på en kilometer är
+0,34 meter, långt under TK-03:s ±5 m. Testet `shared/geo/measure.test.ts` verifierar de rader som
+fortfarande gäller, inklusive att implementationen kastar vid försök att mäta i 3857.
 
 ## Mätning i verktygsläget (Origo)
 
@@ -68,8 +78,9 @@ Norrköpings latitud som störst ≈ 0,35 % (öst–västliga sträckor; krökni
 ≈ 6 393 km) och ≈ 0,12 % för nord–sydliga. Det ligger inom TK-03:s krav (1 000 ± 5 m), men vår egen
 `shared/geo/measure.ts` (Vincenty på GRS80) är referensen om skillnaden någon gång blir avgörande.
 
-Koordinatavläsningen i Origo (position-kontrollen) använder Origos egen proj4 med samma definitioner
-som ovan; kontrollerat 2026-09-19 mot PROJ: avvikelse < 0,3 m i SWEREF 99 16 30, exakt i WGS 84 → 3006.
+Koordinatavläsningen i Origo (position-kontrollen) visar sedan 2026-09-23 enbart SWEREF 99 TM
+(ADR-18) och använder samma proj4-sträng som klienten, så kartan och verktygen kan inte visa olika
+koordinater för samma punkt.
 
 ## Lantmäteriets tile-matris "3006"
 

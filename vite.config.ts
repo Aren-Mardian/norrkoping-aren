@@ -53,13 +53,17 @@ function ortnamnFacts(): { date: string; count: string } {
   }
 }
 
-/** Datum för kartutsnittet (ADR-10-manifestet) — visas i sidfotens källförteckning. */
-function dataGenerated(): string {
+/** Kartutsnittets datum och storlek (ADR-10-manifestet) — visas i sidfotens källförteckning. */
+function topoFacts(): { date: string; size: string } {
   try {
-    const manifest = JSON.parse(readFileSync(join(DATA_DIR, 'derived', 'manifest.json'), 'utf8')) as { files?: Array<{ generated?: string }> };
-    return manifest.files?.[0]?.generated ?? '';
+    const manifest = JSON.parse(readFileSync(join(DATA_DIR, 'derived', 'manifest.json'), 'utf8')) as {
+      files?: Array<{ generated?: string; bytes?: number }>;
+    };
+    const file = manifest.files?.[0];
+    const mb = file?.bytes ? Math.round(file.bytes / 1024 / 1024) : 0;
+    return { date: file?.generated ?? '', size: mb ? `${mb} MB` : '' };
   } catch {
-    return '';
+    return { date: '', size: '' };
   }
 }
 
@@ -191,7 +195,7 @@ export default defineConfig({
   base: BASE,
   plugins: [derivedData(), cspMeta(), netlifyRules(), devFunctions({ root: ROOT, apiPrefix: `${BASE}api/` })],
   define: {
-    __DATA_GENERATED__: JSON.stringify(dataGenerated()),
+    __TOPO_FACTS__: JSON.stringify(topoFacts()),
     __ORTNAMN_FACTS__: JSON.stringify(ortnamnFacts()),
     __KOMMUN_RETRIEVED__: JSON.stringify(kommunRetrieved()),
   },

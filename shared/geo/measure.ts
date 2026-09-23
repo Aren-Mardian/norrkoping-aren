@@ -2,22 +2,15 @@
  * Längdmätning — aldrig planärt i Web Mercator (NFK-12, TK-03).
  *
  * Två godkända metoder:
- *  1. Planärt i ett lämpligt projicerat system (EPSG:3006 eller 3010). I Norrköping
- *     ger 3006 ca −0,03 % och 3010 ca +0,0004 % avvikelse — båda långt under kravet 0,5 %.
+ *  1. Planärt i SWEREF 99 TM (EPSG:3006) — sajtens enda referenssystem (ADR-18). I Norrköping
+ *     ger det ca −0,03 % avvikelse, långt under kravet 0,5 %.
  *  2. Geodetiskt på GRS80-ellipsoiden (Vincentys inversa formel). Referensmetod.
  *
  * Planär beräkning i EPSG:3857 avvisas aktivt: skalfaktorn är ≈ 1,92 på 58,6° N,
  * så 1 000 m skulle rapporteras som ≈ 1 914 m (Bilaga B.4).
  */
 import { MEASURABLE_PROJECTIONS, ProjectionNotMeasurableError, planarLength } from './planar.ts';
-import {
-  EPSG_3006,
-  EPSG_3857,
-  EPSG_4326,
-  transformXY,
-  type LonLat,
-  type XY,
-} from './projDefs.ts';
+import { EPSG_3006, EPSG_3857, EPSG_4326, transformXY, type LonLat, type XY } from './projDefs.ts';
 
 // Vitlistan och den planära beräkningen ligger i planar.ts (utan beroenden) och återexporteras
 // här, så att den som bara behöver dem slipper dra in proj4 (Origo-sidan gör det).

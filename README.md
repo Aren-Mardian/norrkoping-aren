@@ -28,7 +28,8 @@ npm run dev
 ```
 
 Öppna <http://localhost:5173/projekt/norrkoping/>. Bakgrundskartan är Lantmäteriets topografiska
-webbkarta som självhostad PMTiles-fil (`data/derived/topowebb-farg.pmtiles`, CC BY 4.0). Den ligger
+webbkarta som självhostad PMTiles-fil (`data/derived/topowebb-farg.pmtiles`, CC BY 4.0) — hela
+kommunen i källans egen upplösning **0,5 m/px**, 665 MB (ADR-18). Den ligger
 inte i git: `npm run build` (eller `npm run fetch:tiles`) hämtar den från GitHub Releases enligt
 `data/derived/manifest.json` och verifierar SHA-256 ([ADR-10](docs/adr/ADR-10-leverans-av-stora-datafiler.md)).
 Repot är publikt, så release-filen hämtas utan token (privat repo: se ADR-10).
@@ -150,6 +151,7 @@ shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
   geo/projDefs.ts       proj4-registrering och transformationer (Bilaga B.5)
   geo/lmTileGrid.ts     Lantmäteriets 3006-matris
   geo/planar.ts         Planär längd + vitlistan över mätbara projektioner (utan beroenden)
+  geo/crs.ts            SWEREF 99 TM-definitionen; WGS 84/3857 bara som dataformat respektive spärr
   geo/measure.ts        Längdmätning: 3006/3010/geodetiskt, aldrig 3857 (NFK-12)
   geo/kommun.ts         Kommunkod, bbox, panoreringsbuffert (5 km)
   geo/kommunPolygon.ts  Kommungränsen som förenklad polygon + pointInKommun (genererad)
@@ -164,7 +166,7 @@ netlify/lib/            Testbar logik för funktionerna (hav.ts, smhi.ts, tilesG
 vite/                   Vite-plugin som kör edge-funktionerna i dev
 data/                   Kuraterad geodata (GeoJSON, EPSG:4326), SOURCES.md, derived/ (PMTiles, ej i git)
 public/vendor/          Vendorerade bibliotek (Origo, versionerad sökväg)
-docs/                   Kravspec, referenssystem, villkor, ADR-09–17, deploy/ (IIS-mall)
+docs/                   Kravspec, referenssystem, villkor, ADR-09–18, deploy/ (IIS-mall)
 scripts/                Byggkontroller, hämtning av kartdata
 tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval; Origo-bygge
 ```
@@ -172,7 +174,8 @@ tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FT
 ## Arkitektur i korthet
 
 Statisk sajt + edge-funktioner (ADR-01). **En sida med en karta** (ADR-15), renderad av OpenLayers i
-**EPSG:3006** (ADR-03). Gränssnittet är enspråkigt svenskt.
+**SWEREF 99 TM (EPSG:3006)** — sajtens enda referenssystem (ADR-18). Gränssnittet är enspråkigt svenskt.
+WGS 84 förekommer bara som dataformat (GeoJSON in och ut, SMHI:s API) och visas aldrig.
 Bakgrundskartan är ett självhostat PMTiles-utsnitt av Lantmäteriets topografiska webbkarta (ADR-09) —
 inga anrop till Lantmäteriet från besökaren. Flygbild och live-tjänster går via en tile-proxy med
 Origin-lås, zoom- och bbox-spärr (ADR-04, NFK-18). Verktygsläget (Origo) är en egen sida under

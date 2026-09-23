@@ -1,23 +1,15 @@
 /**
  * TK-02 — Transformationstest.
- * Kända kontrollpunkter transformeras mellan EPSG:4326, 3006 och 3010 med
- * avvikelse ≤ 0,01 m mot referensvärden.
+ * Kända kontrollpunkter transformeras mellan EPSG:4326 och SWEREF 99 TM (3006) med
+ * avvikelse ≤ 0,01 m mot referensvärden. Sedan ADR-18 är 3006 sajtens enda referenssystem;
+ * 4326 finns kvar enbart som inkommande dataformat.
  *
  * Referensvärdena är beräknade oberoende av proj4js, med PROJ via pyproj 3.6.1
- * (Transformer.from_crs('EPSG:4326', 'EPSG:3006'/'EPSG:3010', always_xy=True)).
- * Kravspec Bilaga B.2 anger samma punkt avrundad till hel meter: 568 944 / 6 494 713
- * respektive 131 732 / 6 496 745.
+ * (Transformer.from_crs('EPSG:4326', 'EPSG:3006', always_xy=True)).
+ * Kravspec Bilaga B.2 anger samma punkt avrundad till hel meter: 568 944 / 6 494 713.
  */
 import { describe, expect, it } from 'vitest';
-import {
-  EPSG_3006,
-  EPSG_3010,
-  toLonLat,
-  toSweref991630,
-  toSweref99TM,
-  transformXY,
-  type LonLat,
-} from './projDefs.ts';
+import { EPSG_3006, toLonLat, toSweref99TM, transformXY, type LonLat } from './projDefs.ts';
 
 const TOLERANCE_M = 0.01;
 
@@ -55,7 +47,7 @@ const CONTROL_POINTS: readonly ControlPoint[] = [
   },
 ];
 
-describe('TK-02 transformationer mellan 4326, 3006 och 3010', () => {
+describe('TK-02 transformationer mellan 4326 och SWEREF 99 TM', () => {
   for (const cp of CONTROL_POINTS) {
     it(`${cp.name}: 4326 → 3006 inom ${TOLERANCE_M} m`, () => {
       const [e, n] = toSweref99TM(cp.lonLat);
@@ -63,17 +55,6 @@ describe('TK-02 transformationer mellan 4326, 3006 och 3010', () => {
       expect(Math.abs(n - cp.sweref99tm[1])).toBeLessThanOrEqual(TOLERANCE_M);
     });
 
-    it(`${cp.name}: 4326 → 3010 inom ${TOLERANCE_M} m`, () => {
-      const [e, n] = toSweref991630(cp.lonLat);
-      expect(Math.abs(e - cp.sweref991630[0])).toBeLessThanOrEqual(TOLERANCE_M);
-      expect(Math.abs(n - cp.sweref991630[1])).toBeLessThanOrEqual(TOLERANCE_M);
-    });
-
-    it(`${cp.name}: 3006 → 3010 direkt inom ${TOLERANCE_M} m`, () => {
-      const [e, n] = transformXY(cp.sweref99tm, EPSG_3006, EPSG_3010);
-      expect(Math.abs(e - cp.sweref991630[0])).toBeLessThanOrEqual(TOLERANCE_M);
-      expect(Math.abs(n - cp.sweref991630[1])).toBeLessThanOrEqual(TOLERANCE_M);
-    });
 
     it(`${cp.name}: 3006 → 4326 → 3006 rundtur inom 0,001 m`, () => {
       const back = transformXY(toLonLat(cp.sweref99tm, EPSG_3006), 'EPSG:4326', EPSG_3006);
