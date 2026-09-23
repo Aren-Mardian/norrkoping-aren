@@ -44,13 +44,14 @@ PMTiles-nivå = LM-nivå + 2 (metadata `lm_zoom_offset`); se docstringen i scrip
 
 ## Kommungräns
 
-`kommungrans_osm.py` hämtar Norrköpings kommungräns från OpenStreetMap (Nominatim) till
-`data/derived/kommungrans.geojson` (ODbL, incheckad). Interim tills Lantmäteriets polygon hämtas via STAC.
+`lm_stac.py kommun` hämtar Norrköpings kommungräns från Lantmäteriet (CC BY 4.0) till
+`data/derived/kommungrans.geojson`. Den OSM-baserade interimsvägen (`kommungrans_osm.py`) togs bort
+2026-09-23 när Lantmäteriets polygon var på plats — finns i git-historiken om den behövs igen.
 
 ## Origo (verktygsläget)
 
 `build-origo.mjs` klonar en taggad Origo-version, bygger den med webpack och vendorerar exakt de
-filer som behövs till `public/vendor/origo-<version>/` (+ sidrelativa bilder i `public/origo/img/`).
+filer som behövs till `public/vendor/origo-<version>/` (+ sidrelativa bilder i `public/img/`, som Origo löser mot `<base href>`).
 Node-script, ingen Python:
 
 ```bash

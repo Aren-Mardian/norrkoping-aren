@@ -97,12 +97,16 @@ och sidfoten flyttas in sist i sheeten. Sidfoten anger för varje uppgift **vari
 Menyn har två poster: **Karta** och **Om** (arenm.se). `Källor och licenser` och `Integritet` i
 sidfoten går också till arenm.se. Okända adresser ger 404.
 
-**Driftnotis (2026-09-20):** live-servern skickade fortfarande HTTP-headers och redirects från
-allra första deployen (bl.a. en strikt `Content-Security-Policy`-header som slog ut sidans egen
-meta-CSP och gjorde Origo-sidan obrukbar). Repots `netlify.toml` är korrekt; kontrollera i Netlify
-att deployen rapporterar "redirect rules"/"header rules" från `netlify.toml` (se ADR-12, tillägg).
-Origo-sidan döljer numera sina sprite-behållare med egen CSS så att den inte faller ihop även under
-en för strikt header, men verktygspanelerna kräver `style-src 'unsafe-inline'` från meta-CSP:n.
+**Driftnotis (2026-09-23):** Netlify tillämpar en gammal version av byggkonfigurationen. Deployen
+för `f7a1965` rapporterade 2 redirect- och 3 headerregler — exakt vad repots *första* commit hade —
+medan repot hade 8 respektive 4, och koden uppdaterades normalt. Omdirigeringar och headers ligger
+därför numera i `netlify/rules.ts` och skrivs som `_redirects`/`_headers` i publiceringsmappen vid
+bygget ([ADR-17](docs/adr/ADR-17-regler-som-filer.md)); omdirigeringarna slår då igenom direkt.
+Headerna gör det inte förrän den gamla konfigurationen släpper, eftersom `netlify.toml` vinner över
+`_headers` vid konflikt. Kontrollera i Netlify att deployens sammanfattning rapporterar **10
+redirect- och 4 headerregler**; gör den inte det, kör "Clear cache and deploy site", och hjälper
+inte det heller: skapa om sajten från repot. Sajten fungerar under tiden (ADR-16) — det som syns är
+att Origos paneler ritas ostylade.
 
 ## Kommandon
 
@@ -155,11 +159,12 @@ netlify/functions/      Edge-funktioner (Netlify Functions 2.0)
   hojd.mts              IK-08 markhöjd (Markhöjd Direkt, punkt + profil)
   bad-status.mts        IK-02 badvattenstatus (HaV)
   vader.mts             IK-03 väder (SMHI)
+netlify/rules.ts        Omdirigeringar och headers — skrivs som _redirects/_headers vid bygget (ADR-17)
 netlify/lib/            Testbar logik för funktionerna (hav.ts, smhi.ts, tilesGuard.ts, hojd.ts, upstream.ts)
 vite/                   Vite-plugin som kör edge-funktionerna i dev
 data/                   Kuraterad geodata (GeoJSON, EPSG:4326), SOURCES.md, derived/ (PMTiles, ej i git)
 public/vendor/          Vendorerade bibliotek (Origo, versionerad sökväg)
-docs/                   Kravspec, referenssystem, villkor, ADR-09–16, deploy/ (IIS-mall)
+docs/                   Kravspec, referenssystem, villkor, ADR-09–17, deploy/ (IIS-mall)
 scripts/                Byggkontroller, hämtning av kartdata
 tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval; Origo-bygge
 ```

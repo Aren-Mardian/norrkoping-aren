@@ -24,7 +24,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const VERSION_DIR = `origo-${ORIGO_VERSION.replace(/^v/, '')}`;
 const TARGET = join(ROOT, 'public', 'vendor', VERSION_DIR);
 /** Origo refererar vissa bilder sidrelativt ("img/…") — de måste ligga under verktygssidans URL. */
-const PAGE_DIR = join(ROOT, 'public', 'origo');
+// Origo löser sina sidrelativa bilder mot <base href>, som är sajtens rot (ADR-15) — inte mot
+// någon undersida. Därför ligger de i public/img/ och hamnar på /projekt/norrkoping/img/.
+const PAGE_DIR = join(ROOT, 'public', 'img');
 
 /** Exakt de filer bundlen refererar (grep "img/|css/" i origo.min.js) plus sprites enligt svgSprites. */
 const FILES = [
@@ -86,7 +88,7 @@ try {
         built: new Date().toISOString().slice(0, 10),
         builtWith: `node ${process.version}`,
         files: FILES.map(([, to]) => to),
-        pageFiles: PAGE_FILES.map(([, to]) => `public/origo/${to}`),
+        pageFiles: PAGE_FILES.map(([, to]) => `public/img/${to}`),
       },
       null,
       2,

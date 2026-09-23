@@ -1,7 +1,8 @@
-import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
+import { renderHeaders, renderRedirects } from './netlify/rules.ts';
 import { devFunctions } from './vite/devFunctions.ts';
 
 /**
@@ -154,6 +155,25 @@ const CSP_STRICT =
 /** Origo-sidan (ADR-11): Origo bygger paneler med style-attribut och sätter <base>. script-src förblir strikt. */
 const CSP_TOOLS = CSP_STRICT.replace("style-src 'self'", "style-src 'self' 'unsafe-inline'").replace("base-uri 'none'", "base-uri 'self'");
 
+/**
+ * Skriver `_redirects` och `_headers` i publiceringsroten (ADR-17). Reglerna följer därmed med
+ * som vanliga filer i deployen i stället för att läsas ur byggkonfigurationen — vilket visade
+ * sig kunna bli gammal utan att något märktes.
+ */
+function netlifyRules(): Plugin {
+  return {
+    name: 'norrkoping-netlify-rules',
+    apply: 'build',
+    closeBundle() {
+      // outDir är dist/<BASE>; filerna ska ligga i publiceringsroten, alltså dist/.
+      const publishRoot = resolve(ROOT, 'dist');
+      mkdirSync(publishRoot, { recursive: true });
+      writeFileSync(join(publishRoot, '_redirects'), renderRedirects(), 'utf8');
+      writeFileSync(join(publishRoot, '_headers'), renderHeaders(), 'utf8');
+    },
+  };
+}
+
 function cspMeta(): Plugin {
   return {
     name: 'norrkoping-csp-meta',
@@ -169,7 +189,7 @@ function cspMeta(): Plugin {
 
 export default defineConfig({
   base: BASE,
-  plugins: [derivedData(), cspMeta(), devFunctions({ root: ROOT, apiPrefix: `${BASE}api/` })],
+  plugins: [derivedData(), cspMeta(), netlifyRules(), devFunctions({ root: ROOT, apiPrefix: `${BASE}api/` })],
   define: {
     __DATA_GENERATED__: JSON.stringify(dataGenerated()),
     __ORTNAMN_FACTS__: JSON.stringify(ortnamnFacts()),

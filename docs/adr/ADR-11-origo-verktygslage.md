@@ -24,7 +24,7 @@ planärt i Web Mercator — förenligt med NFK-12.
 ## Beslut
 
 1. **Origo vendoreras som färdigbyggd artefakt** i `public/vendor/origo-<version>/` (2,7 MB: `origo.min.js`,
-   CSS, SVG-sprites, norrpil) plus sidrelativa bilder i `public/origo/img/`. Bygget är reproducerbart
+   CSS, SVG-sprites, norrpil) plus sidrelativa bilder i `public/img/` (ADR-16). Bygget är reproducerbart
    med `tools/build-origo.mjs` (klonar taggen, `npm ci`, `npm run build`, kopierar exakt de filer bundlen
    refererar) och dokumenterat i `VERSION.json` (version, commit, licens, byggdatum). Versionen ligger i
    sökvägen → filerna kan cachas i 30 dagar som `immutable`. BSD 2-clause-licensen följer med.

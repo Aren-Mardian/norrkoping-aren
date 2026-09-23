@@ -109,7 +109,7 @@ Två källor under övergångsperioden:
 - **attribution:** `© Lantmäteriet` (visas i kartan när lagret är tänt)
 - **retrieved:** 2026-09-23 ur *Kommun, län och rike* via STAC-vektor (item `aktuell`), kommunkod 0581, förenklad ~2 m, 1 115 hörn, 25 kB
 - **terms:** Används till kommungränslagret (FK-05), panoreringsspärr (FK-04), datavalidering (DK-01) och till klippning av kartutsnittet. Lägesosäkerhet ~2 m. Reproduceras med `tools/lm_stac.py kommun`.
-- **tidigare:** OSM-relation 935447 (ODbL) användes 2026-09-19–2026-09-23 som interim; `tools/kommungrans_osm.py` finns kvar som reservväg och skriver då även `data/derived/LICENSE-ODbL` (JK-03).
+- **tidigare:** OSM-relation 935447 (ODbL) användes 2026-09-19–2026-09-23 som interim. Verktyget och `data/derived/LICENSE-ODbL` är borttagna sedan Lantmäteriets polygon är i drift; inget i `data/derived/` är längre ODbL (JK-03).
 
 ### ortnamn — sökindex för ortnamn (JSON, EPSG:3006)
 

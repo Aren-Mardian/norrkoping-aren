@@ -281,7 +281,7 @@ Dokumentet skrivs för tre läsare samtidigt: utvecklaren själv (som implementa
 
 <a id="jk-03"></a>
 **JK-03 (M) — ODbL-efterlevnad för OpenStreetMap-härledda data.** Data som härleds från OSM och publiceras som fil ska publiceras under ODbL med tydlig källangivelse; produced works (t.ex. renderade bilder) attribueras enligt OSM:s riktlinjer.
-*Acceptanskriterium:* `data/derived/` innehåller `LICENSE-ODbL` och varje härledd fil har `"license": "ODbL-1.0"` i sina metadata.
+*Acceptanskriterium:* `data/derived/` innehåller `LICENSE-ODbL` och varje härledd fil har `"license": "ODbL-1.0"` i sina metadata. *(Uppfyllt tomt sedan 2026-09-23: ingen härledd fil är längre ODbL — kommungränsen kommer från Lantmäteriet under CC BY 4.0, se ADR-16.)*
 
 <a id="jk-04"></a>
 **JK-04 (M) — Ingen förväxling med kommunen.** Tjänsten får inte använda Norrköpings kommuns logotyp, kommunvapen eller grafiska profil, och får inte utformas så att den kan uppfattas som officiell.
