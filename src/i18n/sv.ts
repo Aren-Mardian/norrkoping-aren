@@ -3,11 +3,8 @@ export const sv = {
   'site.name': 'Norrköpingskartan',
   'a11y.skipToContent': 'Hoppa till innehåll',
   'nav.label': 'Huvudmeny',
-  'nav.beaches': 'Badplatser',
-  'nav.tools': 'Origo',
+  'nav.map': 'Karta',
   'nav.about': 'Om',
-  'nav.lang': 'English',
-  'nav.langAria': 'Switch language to English',
   'map.heading': 'Karta över Norrköpings kommun',
   'map.ariaLabel':
     'Interaktiv karta över Norrköpings kommun. Panorera med piltangenterna, zooma med plus och minus.',
@@ -20,8 +17,6 @@ export const sv = {
   'map.basemap.groupLabel': 'Bakgrundskarta',
   'map.resetView': 'Återställ vy',
   'map.layer.kommungrans': 'Kommungräns',
-  'map.layer.orto60': 'Flygbild 1960',
-  'map.layer.orto75': 'Flygbild 1975',
   'map.status.fallback':
     'Lantmäteriets bakgrundskarta kunde inte hämtas just nu. Visar OpenStreetMap i stället.',
   'dev.noToken':
@@ -66,9 +61,12 @@ export const sv = {
   'footer.about': 'Om projektet',
   'footer.sources': 'Källor och licenser',
   'footer.privacy': 'Integritet',
-  'a11y.skipToMap': 'Hoppa till kartan',
-  // ── Origo-sidan (Kärnfunktion C) ──
-  'origo.tagline': 'Origo · verktyg: mät, rita, höjd, koordinater, dela, skriv ut',
+  // ── Verktygsläget: Origo i samma karta (Kärnfunktion C, ADR-15) ──
+  'tools.open': 'Verktyg',
+  'tools.close': 'Stäng verktyg',
+  'tools.hint': 'Mät, rita, läs koordinater, skriv ut och dela — öppnas i samma karta',
+  'tools.loading': 'Laddar verktygen …',
+  'tools.failed': 'Verktygen kunde inte laddas. Kontrollera anslutningen och försök igen.',
   'origo.hojd.title': 'Höjd och höjdprofil',
   'origo.hojd.button': 'Höjd',
   'origo.hojd.hint': 'Klicka i kartan för markhöjd. Klicka flera gånger för en höjdprofil, dubbelklicka för att avsluta.',
@@ -77,17 +75,10 @@ export const sv = {
   'origo.hojd.missing': 'Höjddata saknas för punkten.',
   'origo.hojd.failed': 'Höjddata kunde inte hämtas.',
   'origo.hojd.profile': 'Profil: {points} punkter · lägst {min} m · högst {max} m · stigning {gain} m · längd {length}',
-  'origo.hojd.clear': 'Rensa höjdmätningen',
   'origo.hojd.source': 'Källa: Lantmäteriet, Markhöjd Direkt (CC BY 4.0)',
-  'origo.ariaLabel': 'Origo verktygsläge: mät, rita, läs koordinater, skriv ut och dela kartan över Norrköpings kommun.',
-  'origo.status.loadFailed': 'Origo kunde inte laddas. Kontrollera anslutningen och ladda om sidan.',
-  'origo.status.noBasemap': 'Bakgrundskartan kunde inte hämtas. Verktygen fungerar, men kartan är tom.',
-  'origo.footer':
-    'Origo 2.10.0 och OpenLayers (BSD 2-clause), självhostade · Bakgrundskarta och flygbild: Lantmäteriet (CC BY 4.0) · Höjd: Markhöjd Direkt · Ortnamn och kommungräns: Lantmäteriet · Koordinater i SWEREF 99 TM, mätning geodetiskt',
   // ── Sök och plats (FK-32, IK-08) ──
   'sok.label': 'Sök plats i Norrköpings kommun',
   'sok.placeholder': 'Sök plats, sjö eller by …',
-  'sok.placeholderOrigo': 'Sök plats att mäta vid …',
   'sok.clear': 'Rensa sökningen',
   'sok.noHits': 'Ingen plats med det namnet i kommunen.',
   'sok.failed': 'Sökregistret kunde inte hämtas just nu.',
@@ -101,6 +92,7 @@ export const sv = {
   // ── Badplatser (Kärnfunktion B) ──
   'panel.title': 'Badplatser',
   'panel.handleExpand': 'Visa badplatser',
+  'panel.collapse': 'Fäll in badplatspanelen',
   'panel.handleCollapse': 'Fäll ihop panelen',
   'bad.count': '{n} av {total} badplatser',
   'bad.filter.alla': 'Alla',

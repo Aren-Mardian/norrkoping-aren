@@ -10,6 +10,8 @@ interface OrigoTileSource {
   setAttributions(attributions: string): void;
   on(type: string, listener: () => void): unknown;
   refresh(): void;
+  /** Bumpar revisionen så att lagret ritas om även om inget annat ändrats. */
+  changed(): void;
 }
 
 interface OrigoLayer {

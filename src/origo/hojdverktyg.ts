@@ -163,6 +163,8 @@ export function createHojdVerktyg(ol: OlNamespace, map: OlMapLike, panel: HTMLEl
   status.className = 'hojd__status';
   status.setAttribute('role', 'status');
   status.textContent = t('origo.hojd.hint');
+  // Syns först när verktyget slås på — annars ligger den och skymmer kartan i onödan.
+  status.hidden = true;
   panel.appendChild(status);
 
   function say(message: string): void {
@@ -243,6 +245,7 @@ export function createHojdVerktyg(ol: OlNamespace, map: OlMapLike, panel: HTMLEl
         abort?.abort();
         source.clear();
       }
+      status.hidden = !active;
       say(t('origo.hojd.hint'));
     },
     isActive: () => active,

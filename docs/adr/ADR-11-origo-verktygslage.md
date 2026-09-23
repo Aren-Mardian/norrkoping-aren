@@ -1,7 +1,9 @@
 # ADR-11 — Origo som verktygsläge på egen sida
 
-**Status:** Beslutad 2026-09-19. Realiserar ADR-02 (hybrid: eget skal + Origo på egen route) och
-kravspec Kärnfunktion C (FK-22–FK-31).
+**Status:** Beslutad 2026-09-19. Realiserar kravspec Kärnfunktion C (FK-22–FK-31).
+**Delvis ersatt av [ADR-15](ADR-15-en-karta-en-sida.md) (2026-09-23):** Origo har ingen egen sida
+längre utan laddas in i samma karta på begäran. Punkt 1 och 4–7 nedan gäller oförändrat; punkt 2–3
+(egen HTML-sida, egen Vite-entry, förhämtning från menyn) är ersatta.
 
 ## Kontext
 

@@ -46,10 +46,10 @@ gjorde att de tyst visade landningsvyn under fel adress.
 5. **Om projektet, Källor och licenser, Integritet länkar till arenm.se** (portfolion), på
    uttrycklig begäran. Sajten har inga egna sidor utöver `/` och `/origo/`; Topp 3-metoden
    förklaras på plats i ett `<details>` i stället för på `/metod`.
-6. **Riktiga 404.** SPA-fallbacken är borttagen. `/sv/*` och `/en/*` leder fortfarande till
-   landningsvyn (språkprefix, FK-34); allt annat okänt ger `404.html` med status 404.
-7. **Språkväxlare i topbaren.** Länken pekar på samma sida med `?lang=` för det andra språket
-   (URL-buret, ingen lagring — NFK-21) och interna menylänkar får med sig ett uttryckligt val.
+6. **Riktiga 404.** SPA-fallbacken är borttagen; okända adresser ger `404.html` med status 404.
+   *(Språkprefixen `/sv/*` och `/en/*` togs bort i [ADR-15](ADR-15-en-karta-en-sida.md).)*
+7. ~~Språkväxlare i topbaren.~~ **Upphävd av [ADR-15](ADR-15-en-karta-en-sida.md):** sajten är
+   enspråkigt svensk och menyn har bara *Karta* och *Om*.
 
 ## Konsekvenser
 

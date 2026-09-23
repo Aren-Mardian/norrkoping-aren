@@ -1,44 +1,11 @@
 /**
- * Sidans ram: språkväxlare i topbaren och sidfotens placering (ADR-13).
- *
- * Språket bärs av URL:en (`?lang=`), aldrig av lagring (NFK-21). Växlaren pekar på samma sida
- * med det andra språket, och interna länkar i menyn får med sig valet så att det inte tappas
- * mellan landningsvyn och verktygsläget.
+ * Sidans ram: sidfotens placering och de uppgifter som bara är kända vid bygge (ADR-13).
+ * Språkväxlaren togs bort 2026-09-23 — sajten är enspråkigt svensk (ADR-15).
  */
-import { BASE, LM_ENABLED } from '../config/site.ts';
-import { getLang, t, type Lang } from '../i18n/index.ts';
+import { LM_ENABLED } from '../config/site.ts';
+import { t } from '../i18n/index.ts';
 
 const DESKTOP = '(min-width: 900px)';
-
-function withLang(href: string, lang: Lang): string {
-  const url = new URL(href, window.location.href);
-  url.searchParams.set('lang', lang);
-  return `${url.pathname}${url.search}${url.hash}`;
-}
-
-/** Sätter upp språkväxlaren (#nav-lang) och för valt språk vidare till menyns interna länkar. */
-export function initLangToggle(): void {
-  const current = getLang();
-  const other: Lang = current === 'sv' ? 'en' : 'sv';
-
-  const toggle = document.getElementById('nav-lang');
-  if (toggle instanceof HTMLAnchorElement) {
-    toggle.href = withLang(window.location.href, other);
-    toggle.hreflang = other;
-    toggle.lang = other;
-    toggle.textContent = t('nav.lang');
-    toggle.setAttribute('aria-label', t('nav.langAria'));
-  }
-
-  // Bara när besökaren uttryckligen valt språk i URL:en — annars styr webbläsarens språk som vanligt.
-  const explicit = new URLSearchParams(window.location.search).get('lang');
-  if (explicit !== 'sv' && explicit !== 'en') return;
-  for (const a of document.querySelectorAll<HTMLAnchorElement>('.topnav a[href], .brand[href]')) {
-    if (a.id === 'nav-lang') continue;
-    const href = a.getAttribute('href') ?? '';
-    if (href.startsWith(BASE)) a.href = withLang(href, explicit);
-  }
-}
 
 /**
  * Sidfoten (#site-footer) är en list under kartan på desktop och sista blocket i panelens

@@ -158,8 +158,10 @@ function cspMeta(): Plugin {
   return {
     name: 'norrkoping-csp-meta',
     apply: 'build',
-    transformIndexHtml(_html, ctx) {
-      const content = ctx.path.startsWith('/origo/') ? CSP_TOOLS : CSP_STRICT;
+    transformIndexHtml() {
+      // Sidan kan ladda in Origo, som bygger paneler med style-attribut och sätter <base>.
+      // Policyn måste därför tillåta det redan från start (ADR-15).
+      const content = CSP_TOOLS;
       return [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content }, injectTo: 'head-prepend' }];
     },
   };
@@ -183,11 +185,8 @@ export default defineConfig({
     // Bara moderna webbläsare stöds; polyfillen för modulepreload är dött vikt.
     modulePreload: { polyfill: false },
     rollupOptions: {
-      // Två sidor: landningsvyn och verktygsläget. Origo laddas bara av den senare (TK-05, ADR-02).
-      input: {
-        main: resolve(ROOT, 'index.html'),
-        origo: resolve(ROOT, 'origo/index.html'),
-      },
+      // En sida. Origo lever i en egen chunk som hämtas först när verktygen öppnas (ADR-15).
+      input: { main: resolve(ROOT, 'index.html') },
       output: {
         // Kartkärnan i egna chunkar: byts sällan → cachas länge (NFK-04).
         manualChunks(id) {

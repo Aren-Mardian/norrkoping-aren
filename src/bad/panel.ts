@@ -8,7 +8,7 @@
  */
 import { type StatusLevel, STALE_AFTER_HOURS } from '../../shared/bad/status.ts';
 import { VADER_URL } from '../config/site.ts';
-import { getLang, t } from '../i18n/index.ts';
+import { LOCALE, t } from '../i18n/index.ts';
 import { fetchJson } from '../net/fetchJson.ts';
 import { type BadData, type Badplats, type Filter, applyFilter, isBathingSeason, sortSites } from './model.ts';
 
@@ -45,11 +45,11 @@ function fmtAge(hours: number): string {
 function fmtDate(iso: string | null | undefined): string {
   if (!iso) return '–';
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(getLang() === 'en' ? 'en-GB' : 'sv-SE', { day: 'numeric', month: 'short', year: 'numeric' });
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 function fmtTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString(getLang() === 'en' ? 'en-GB' : 'sv-SE', { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' });
 }
 
 function pill(level: StatusLevel, label: string): HTMLElement {
@@ -68,7 +68,6 @@ function levelText(site: Badplats): string {
 }
 
 export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
-  const lang = getLang();
   let data: BadData | null = null;
   let filter: Filter = 'alla';
   let selectedId: string | null = null;
@@ -123,14 +122,14 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
     const head = el('div', 'beach__head');
     if (site.props.isTop3) head.appendChild(el('span', 'beach__rank', String(site.props.top3Rank)));
     const names = el('div', 'beach__names');
-    names.appendChild(el('span', 'beach__name', site.props.name[lang]));
+    names.appendChild(el('span', 'beach__name', site.props.name.sv));
     names.appendChild(el('span', 'beach__water', `${site.props.waterBody ? `${site.props.waterBody} · ` : ''}${t(`bad.type.${site.props.type}`)}`));
     head.appendChild(names);
     btn.appendChild(head);
     const row = el('div', 'beach__row');
     row.appendChild(pill(site.level, levelText(site)));
     if (site.status?.waterTemperatureC !== null && site.status?.waterTemperatureC !== undefined) {
-      row.appendChild(el('span', 'beach__temp', `${site.status.waterTemperatureC.toLocaleString(lang === 'en' ? 'en-GB' : 'sv-SE')} °C`));
+      row.appendChild(el('span', 'beach__temp', `${site.status.waterTemperatureC.toLocaleString(LOCALE)} °C`));
     }
     btn.appendChild(row);
     if (site.status?.advisory) {
@@ -200,7 +199,7 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
     back.type = 'button';
     back.addEventListener('click', () => handlers.onSelect(null));
     detail.appendChild(back);
-    const h = el('h3', 'detail__title', site.props.name[lang]);
+    const h = el('h3', 'detail__title', site.props.name.sv);
     detail.appendChild(h);
     detail.appendChild(el('p', 'detail__sub', `${site.props.waterBody ?? ''}${site.props.waterBody ? ' · ' : ''}${t(`bad.type.${site.props.type}`)}${site.props.isTop3 ? ` · ${t('bad.top3.badge').replace('{n}', String(site.props.top3Rank))}` : ''}`));
 
@@ -226,13 +225,13 @@ export function createPanel(root: HTMLElement, handlers: PanelHandlers): Panel {
     fact(t('bad.detail.classification'), s ? `${s.classification}${s.classificationSeason ? ` (${s.classificationSeason})` : ''}` : '–');
     fact(t('bad.detail.algae'), s ? t(`bad.algae.${s.algae.status}`) : '–');
     if (s?.waterTemperatureC !== null && s?.waterTemperatureC !== undefined) {
-      fact(t('bad.detail.waterTemp'), `${s.waterTemperatureC.toLocaleString(lang === 'en' ? 'en-GB' : 'sv-SE')} °C · ${fmtDate(s.waterTemperatureAt)}`);
+      fact(t('bad.detail.waterTemp'), `${s.waterTemperatureC.toLocaleString(LOCALE)} °C · ${fmtDate(s.waterTemperatureAt)}`);
     }
     fact(t('bad.detail.accuracy'), `±${site.props.provenance.positionAccuracyM} m`);
     detail.appendChild(dl);
 
     if (site.props.isTop3 && site.props.top3Rationale) {
-      detail.appendChild(el('p', 'detail__rationale', site.props.top3Rationale[lang]));
+      detail.appendChild(el('p', 'detail__rationale', site.props.top3Rationale.sv));
     }
 
     // Väder (FK-18): hämtas först här — inte för alla 19 på en gång.

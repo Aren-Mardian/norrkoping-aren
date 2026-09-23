@@ -862,3 +862,138 @@ button {
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Verktygsläget i samma kartruta (ADR-15) ──────────────────────────────── */
+
+/* Origo monteras här. Den ligger i samma flexrad som kartan och ärver dess yta. */
+.map--tools {
+  color-scheme: light;
+  color: #1d2126;
+}
+
+.map--tools[hidden],
+.map[hidden] {
+  display: none;
+}
+
+/* Knapparna för verktyg och höjd: uppe till höger, utanför Origos egna kontroller. */
+.maptools {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  z-index: 11;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.maptools__btn {
+  min-height: var(--tap);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  background: var(--c-surface-glass);
+  color: var(--c-text);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-1);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.maptools__btn:hover {
+  background: var(--c-surface-2);
+}
+
+.maptools__btn[aria-pressed='true'] {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: var(--c-accent-contrast);
+}
+
+.maptools__btn[hidden] {
+  display: none;
+}
+
+/* Statusrad för verktygen (laddar/fel) och höjdmätningens resultat. */
+.tools-status,
+.hojd__status {
+  position: absolute;
+  top: calc(var(--space-3) + var(--tap) + var(--space-2));
+  right: var(--space-3);
+  z-index: 11;
+  width: min(320px, calc(100% - 2 * var(--space-3)));
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-1);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--c-text);
+}
+
+.tools-status[hidden],
+.hojd__status[hidden] {
+  display: none;
+}
+
+/* Origos egen meny sitter i kartans övre högra hörn (ca 34 px bred + marginal).
+   Våra knappar flyttas till vänster om den i stället för att hamna under. */
+.tools-active .maptools {
+  right: calc(var(--space-3) + 52px);
+}
+
+.tools-active .tools-status,
+.tools-active .hojd__status {
+  right: calc(var(--space-3) + 52px);
+}
+
+/* Utskriftslogotypen är vår favicon, inte Origos. */
+.o-print-logo {
+  height: 32px;
+  width: 32px;
+}
+
+/* Mobil: knappraden delar översta raden med sökrutan. Nedre halvan av kartan är upptagen av
+   zoomkontroller, skalstock, attribution och bottom sheeten — där finns ingen plats kvar. */
+@media (max-width: 899px) {
+  .sok-host {
+    width: calc(100% - 2 * var(--space-3) - 101px);
+  }
+
+  .tools-active .sok-host {
+    width: calc(100% - var(--space-3) - 52px - var(--space-3) - 178px);
+  }
+
+  .tools-status,
+  .hojd__status {
+    top: calc(var(--space-3) + var(--tap) + var(--space-2));
+    left: var(--space-3);
+    right: var(--space-3);
+    width: auto;
+  }
+
+  .platskort {
+    width: calc(100% - 2 * var(--space-3));
+  }
+}
+
+/* Origos egna kontroller ligger längs vänsterkanten — flytta undan sökrutan när de finns. */
+.tools-active .sok-host {
+  left: calc(var(--space-3) + 52px);
+  width: min(360px, calc(100% - 2 * var(--space-3) - 52px));
+}
+
+.tools-active .platskort {
+  left: calc(var(--space-3) + 52px);
+  width: min(360px, calc(100% - 2 * var(--space-3) - 52px));
+}
+
+@media (max-width: 599px) {
+  .tools-active .sok-host,
+  .tools-active .platskort {
+    left: calc(var(--space-2) + 48px);
+    width: calc(100% - var(--space-2) - 52px - var(--space-2));
+  }
+}

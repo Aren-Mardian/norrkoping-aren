@@ -1,8 +1,8 @@
 /**
- * Sökrutan över kartan (FK-32). Används av både landningsvyn och Origo-sidan.
+ * Sökrutan över kartan (FK-32). Styr den kartmotor som är aktiv (ADR-15).
  *
  * Det här skalet är litet och ligger i kritiska vägen; själva sökmotorn och indexet
- * (~91 kB gzip) hämtas med `import()` först när användaren visar avsikt att söka —
+ * (~87 kB gzip) hämtas med `import()` först när användaren visar avsikt att söka —
  * fokus eller första tangenttrycket (TK-05, NFK-34).
  *
  * Tangentbord: piltangenter bläddrar, Enter väljer, Escape stänger (FK-09, WCAG 2.2).
@@ -14,8 +14,6 @@ import type { Traff } from './index.ts';
 export interface SokOptions {
   /** Anropas när en träff väljs: koordinat i EPSG:3006. */
   onPick(traff: Traff): void;
-  /** Placeholder-nyckel, så att Origo-sidan kan säga något annat än landningsvyn. */
-  placeholderKey?: string;
 }
 
 const DEBOUNCE_MS = 140;
@@ -40,7 +38,7 @@ export function createSok(container: HTMLElement, opts: SokOptions): { focus(): 
   input.type = 'search';
   input.className = 'sok__input';
   input.autocomplete = 'off';
-  input.placeholder = t(opts.placeholderKey ?? 'sok.placeholder');
+  input.placeholder = t('sok.placeholder');
   input.setAttribute('role', 'combobox');
   input.setAttribute('aria-expanded', 'false');
   input.setAttribute('aria-controls', 'sok-lista');

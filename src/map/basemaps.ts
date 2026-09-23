@@ -50,14 +50,19 @@ export interface Basemaps {
 /** Efter så många misslyckade rutor utan en enda lyckad byter vi till fallback. */
 const FAILURES_BEFORE_FALLBACK = 4;
 
-function lmTileGrid(): TileGrid {
+/** `levels` = antal nivåer i rutnätet. Slutar rutnätet vid tjänstens sista nivå skalar
+ *  OpenLayers upp den sista rutan i stället för att visa tomt när man zoomar vidare. */
+function lmTileGrid(levels = LM_3006_RESOLUTIONS.length): TileGrid {
   return new TileGrid({
     extent: [...LM_3006_EXTENT],
     origin: [...LM_3006_ORIGIN],
-    resolutions: [...LM_3006_RESOLUTIONS],
+    resolutions: LM_3006_RESOLUTIONS.slice(0, levels),
     tileSize: LM_TILE_SIZE,
   });
 }
+
+/** Sista zoomnivå Lantmäteriets ortofoto-WMS levererar. */
+const ORTO_MAX_ZOOM = 13;
 
 /** Flygbild: Lantmäteriets historiska ortofoton via proxyn, som gör WMS GetMap per ruta. */
 function ortoLayer(year: OrtoYear): TileLayer<XYZ> {
@@ -66,9 +71,10 @@ function ortoLayer(year: OrtoYear): TileLayer<XYZ> {
     source: new XYZ({
       url: `${API_BASE}/tiles/${ORTO_LAYER_ID[year]}/{z}/{y}/{x}.jpg`,
       projection: EPSG_3006,
-      tileGrid: lmTileGrid(),
+      // Rutnätet slutar på tjänstens sista nivå. Utan det försvann flygbilden helt så fort man
+      // zoomade förbi nivå 13 — nu skalas nivå 13 upp i stället (verifierat 2026-09-23).
+      tileGrid: lmTileGrid(ORTO_MAX_ZOOM + 1),
       attributions: t('attribution.lantmateriet.orto').replace('{year}', String(year)),
-      maxZoom: 13,
       transition: 0,
     }),
   });

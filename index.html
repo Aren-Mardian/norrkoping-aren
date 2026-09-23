@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Norrköpingskartan — badplatser med aktuell badvattenstatus i Norrköpings kommun</title>
+    <title>Norrköpingskartan — karta över Norrköpings kommun med badplatser och mätverktyg</title>
     <meta
       name="description"
-      content="Öppen, snabb och tillgänglig karta över Norrköpings kommun: badplatser med aktuell badvattenstatus från Havs- och vattenmyndigheten, väder från SMHI och Lantmäteriets karta i SWEREF 99 TM. Ett oberoende projekt av Aren Mardian."
+      content="Öppen, snabb och tillgänglig karta över Norrköpings kommun: badplatser med aktuell badvattenstatus från Havs- och vattenmyndigheten, väder från SMHI, flygbilder från Lantmäteriet och verktyg för att mäta, rita och läsa koordinater i SWEREF 99 TM."
     />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
@@ -30,11 +30,9 @@
         <span class="brand__name" data-i18n="site.name">Norrköpingskartan</span>
       </a>
       <nav class="topnav" aria-label="Huvudmeny" data-i18n-aria="nav.label">
-        <a href="%BASE_URL%" aria-current="page" data-i18n="nav.beaches">Badplatser</a>
-        <a href="%BASE_URL%origo/" id="nav-origo" data-i18n="nav.tools" title="Origo · verktyg: mät, rita, koordinater, dela, skriv ut" data-i18n-title="origo.tagline">Origo</a>
+        <a href="%BASE_URL%" aria-current="page" data-i18n="nav.map">Karta</a>
         <!-- Om projektet, källor och integritet ligger på arenm.se (portfolion), inte här. -->
         <a href="https://arenm.se/" data-i18n="nav.about">Om</a>
-        <a id="nav-lang" class="topnav__lang" href="?lang=en" hreflang="en" lang="en" data-i18n="nav.lang">English</a>
       </nav>
     </header>
 
@@ -51,9 +49,28 @@
         >
           <div class="map-skeleton" aria-hidden="true"></div>
         </div>
+        <!-- Verktygsläget (Origo) monteras här och tar över kartytan när användaren slår på det (ADR-15). -->
+        <div id="origo-mount" class="map map--tools" hidden></div>
+
+        <p id="map-status" class="map-status" role="status" aria-live="polite" hidden></p>
+
         <!-- Sökrutan och platskortet ligger ovanpå kartan; fylls av src/sok/panel.ts (FK-32). -->
         <div id="sok-host" class="sok-host"></div>
-        <p id="map-status" class="map-status" role="status" aria-live="polite" hidden></p>
+
+        <div class="maptools">
+          <button
+            id="verktyg-toggle"
+            class="maptools__btn"
+            type="button"
+            aria-pressed="false"
+            data-i18n="tools.open"
+            data-i18n-title="tools.hint"
+          >
+            Verktyg
+          </button>
+          <button id="hojd-toggle" class="maptools__btn" type="button" aria-pressed="false" data-i18n="origo.hojd.button" hidden>Höjd</button>
+        </div>
+        <p id="tools-status" class="tools-status" role="status" aria-live="polite" hidden></p>
       </section>
 
       <aside id="panel" class="panel" data-sheet="peek" aria-labelledby="panel-title">
@@ -73,6 +90,17 @@
           <div class="panel__titles">
             <h2 id="panel-title" data-i18n="panel.title">Badplatser</h2>
             <span id="bad-count" class="panel__count"></span>
+            <!-- Fäller in hela panelen på desktop så att kartan får hela bredden (UX-01). -->
+            <button
+              id="panel-collapse"
+              class="panel__collapse"
+              type="button"
+              aria-controls="panel"
+              aria-expanded="true"
+              data-i18n-aria="panel.collapse"
+            >
+              <span aria-hidden="true">›</span>
+            </button>
           </div>
           <p id="bad-meta" class="panel__meta"></p>
           <div id="bad-filter" class="chips" role="group" aria-label="Filtrera badplatser" data-i18n-aria="bad.filter.label"></div>
@@ -84,6 +112,12 @@
           <!-- På mobil flyttas sidfoten hit (slutet av panelens scrollyta) av src/main.ts. -->
         </div>
       </aside>
+
+      <!-- Syns bara när panelen är infälld: vägen tillbaka. -->
+      <button id="panel-expand" class="panel-expand" type="button" aria-controls="panel" aria-expanded="false" hidden>
+        <span aria-hidden="true">‹</span>
+        <span data-i18n="panel.title">Badplatser</span>
+      </button>
     </main>
 
     <!--

@@ -14,7 +14,7 @@ Målplattform: `https://arenm.se/projekt/norrkoping`
 | 0 | Grund — repo, Vite+TS, CI, tile-proxy, CSP/headers, dev-läge utan token | **Klar lokalt** — väntar på Netlify-sajt (användaren) |
 | 1 | Karta står — LM-bakgrund, växlare, kommungräns, startextent, skalstock | **Klar** — Lantmäteriets topografiska karta självhostad som PMTiles (ADR-09/10), **kommungräns från Lantmäteriet** (CC BY 4.0), växlare inkl. mörkt läge och **flygbild 1960/1975** (ADR-14), startextent, skalstock |
 | 3 | Badplatser — HaV-integration, status, Topp 3, varningar, filter, SMHI | **Klar (första version)** — 19 badplatser, `/api/bad/status` (IK-02) med stale-cache, `/api/vader` (IK-03, SMHI snow1g), Topp 3 med viktningen förklarad på plats, avrådan som inte kan filtreras bort (DK-07), panel/bottom sheet i app-skal (UX-03, ADR-13), språkväxlare. Återstår: faciliteter (kuratering), badindex (FK-19), tillgänglighetsfilter (FK-20) |
-| 4 | Origo-sidan — verktygsläge på egen route: mät, rita, koordinater, dela, utskrift, lager | **Klar** (ADR-11/12) — `/origo/` (hette `/verktyg/` t.o.m. 2026-09-20, 301 finns), Origo 2.10.0 vendorerad, PMTiles-bakgrund, CSP per sida. Återstår: höjdmätning (Markhöjd Direkt) |
+| 4 | Verktygsläge — mät, rita, koordinater, höjd, dela, utskrift, lager | **Klar** (ADR-11/12/15) — Origo laddas in i **samma karta** med knappen "Verktyg"; ingen egen sida längre. Gamla `/origo/`- och `/verktyg/`-länkar ger 301 till kartan |
 | — | Lantmäteriets API:er — flygbild, höjd, ortnamn, kommungräns | **Klar** (ADR-14) — `/api/hojd` (Markhöjd Direkt), ortnamnssök på båda sidorna, höjdprofil i Origo. Återstår: OGC-Features (appkontot saknar behörighet) |
 | 2, 5–7 | Se kravspec §12 | Ej påbörjad. Om/Källor/Integritet är beslutade att ligga på arenm.se (ADR-13), inte som egna sidor här |
 
@@ -77,13 +77,15 @@ reproducerbart och dokumenterat i filens `top3Method`. Dynamisk status: `/api/ba
 (normaliserad i `netlify/lib/hav.ts`, cachad 1 h, stale-svar vid uppströmsfel). Väder:
 `/api/vader?lat&lon` (SMHI snow1g, koordinater avrundade till 2 decimaler).
 
-### Origo-sidan (verktygsläget)
+### Verktygsläget (Origo i samma karta)
 
-<http://localhost:5173/projekt/norrkoping/origo/> — en egen sida som laddar
-[Origo](https://github.com/origo-map/origo) 2.10.0 (BSD 2-clause) från `public/vendor/origo-2.10.0/`.
+Knappen **Verktyg** över kartan laddar
+[Origo](https://github.com/origo-map/origo) 2.10.0 (BSD 2-clause) från `public/vendor/origo-2.10.0/`
+och monterar den i samma kartruta, med samma vy och samma badplatser (ADR-15).
 Origo finns inte på npm; bundlen byggs reproducerbart med `node tools/build-origo.mjs` och checkas in
-(2,7 MB, med `VERSION.json`). Landningsvyn laddar aldrig Origo — `npm run check:budget` bevakar det
-(TK-05). Detaljer i [ADR-11](docs/adr/ADR-11-origo-verktygslage.md).
+(2,7 MB, med `VERSION.json`). Sidans kritiska väg laddar aldrig Origo — den hämtas först vid klick,
+och `npm run check:budget` bevakar båda delarna (TK-05). Detaljer i
+[ADR-11](docs/adr/ADR-11-origo-verktygslage.md) och [ADR-15](docs/adr/ADR-15-en-karta-en-sida.md).
 
 ### Layout och sidfot (ADR-13)
 
@@ -92,7 +94,8 @@ scrollar aldrig — bara panelens innehåll. På mobil är panelen en bottom she
 och sidfoten flyttas in sist i sheeten. Sidfoten anger för varje uppgift **varifrån** den kommer,
 **hur** den hämtas (självhostad fil, statisk fil eller live via `/api/...` genom proxyn) och
 **hur färsk** den är; kartutsnittets datum injiceras från `data/derived/manifest.json` vid bygge.
-`Om`, `Källor och licenser` och `Integritet` länkar till arenm.se. Okända adresser ger 404.
+Menyn har två poster: **Karta** och **Om** (arenm.se). `Källor och licenser` och `Integritet` i
+sidfoten går också till arenm.se. Okända adresser ger 404.
 
 **Driftnotis (2026-09-20):** live-servern skickade fortfarande HTTP-headers och redirects från
 allra första deployen (bl.a. en strikt `Content-Security-Policy`-header som slog ut sidans egen
@@ -126,19 +129,18 @@ repot: `.env` är git-ignorerad, appkonton ligger bara i Netlifys miljövariable
 ## Struktur
 
 ```
-index.html              Landningsvyns skal (UX-01, JK-04)
-origo/index.html        Origo-sidan, verktygsläget (FK-22) — egen Vite-entry, laddar Origo
+index.html              Sidans skal: karta, panel, sidfot (UX-01, JK-04, ADR-15)
 src/                    Klient (Vite + TypeScript, vanilla)
   config/site.ts        BASE, API_BASE, LM_ENABLED — allt publikt
   geo/olProjections.ts  Registrerar EPSG:3006/3010 i OpenLayers
-  i18n/                 sv/en-kataloger utan runtime-bibliotek (FK-34)
+  i18n/                 Svensk textkatalog utan runtime-bibliotek (ADR-15)
   bad/                  Badplatser: datamodell, kartlager, panel (Kärnfunktion B)
   lm/                   Lantmäteriets tjänster i klienten (höjd via /api/hojd)
   sok/                  Ortnamnssök: sökruta (kritisk väg) + motor och index (lazy, FK-32)
   map/                  Kartkärna, bakgrundskartor med fallback, PMTiles-läsare/-källa, egna kontroller
   net/                  fetch med timeout/omförsök (IK-06, IK-07)
-  origo/                Origo-konfiguration och bootstrap för Origo-sidan (ADR-11)
-  ui/                   Banners, bottom sheet, språkväxlare och sidfotens placering (ADR-13)
+  origo/                Origo-konfiguration, lazy bootstrap och höjdverktyg (ADR-11/15)
+  ui/                   Banners, bottom sheet, panelens in-/utfällning, verktygsväxlaren (ADR-13/15)
 shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
   geo/crs.ts            EPSG-koder, proj4-strängar, utbredning (ren data, inga beroenden)
   geo/projDefs.ts       proj4-registrering och transformationer (Bilaga B.5)
@@ -156,18 +158,19 @@ netlify/lib/            Testbar logik för funktionerna (hav.ts, smhi.ts, tilesG
 vite/                   Vite-plugin som kör edge-funktionerna i dev
 data/                   Kuraterad geodata (GeoJSON, EPSG:4326), SOURCES.md, derived/ (PMTiles, ej i git)
 public/vendor/          Vendorerade bibliotek (Origo, versionerad sökväg)
-docs/                   Kravspec, referenssystem, villkor, ADR-09–14, deploy/ (IIS-mall)
+docs/                   Kravspec, referenssystem, villkor, ADR-09–15, deploy/ (IIS-mall)
 scripts/                Byggkontroller, hämtning av kartdata
 tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval; Origo-bygge
 ```
 
 ## Arkitektur i korthet
 
-Statisk sajt + edge-funktioner (ADR-01). Kartan renderas av OpenLayers i **EPSG:3006** (ADR-03).
+Statisk sajt + edge-funktioner (ADR-01). **En sida med en karta** (ADR-15), renderad av OpenLayers i
+**EPSG:3006** (ADR-03). Gränssnittet är enspråkigt svenskt.
 Bakgrundskartan är ett självhostat PMTiles-utsnitt av Lantmäteriets topografiska webbkarta (ADR-09) —
 inga anrop till Lantmäteriet från besökaren. Flygbild och live-tjänster går via en tile-proxy med
 Origin-lås, zoom- och bbox-spärr (ADR-04, NFK-18). Verktygsläget (Origo) är en egen sida under
-`/origo/` (ADR-02, ADR-11) och hamnar aldrig i landningsvyns kritiska väg — `npm run check:budget`
+i samma kartruta på begäran (ADR-15) och hamnar aldrig i sidans kritiska väg — `npm run check:budget`
 bevakar det (TK-05).
 
 Se [docs/referenssystem.md](docs/referenssystem.md) för geodetiken och

@@ -7,6 +7,7 @@
  */
 import Map from 'ol/Map';
 import View from 'ol/View';
+import { defaults as defaultInteractions } from 'ol/interaction';
 import Attribution from 'ol/control/Attribution';
 import ScaleLine from 'ol/control/ScaleLine';
 import Zoom from 'ol/control/Zoom';
@@ -28,6 +29,10 @@ export interface AppMap {
    * centreras i den synliga delen.
    */
   zoomTo(center: number[], zoom: number, bottomInsetPx?: number): void;
+  /** Aktuell vy — lämnas över till verktygsläget vid växling (ADR-15). */
+  getView(): { center: number[]; zoom: number };
+  /** Tar tillbaka en vy från verktygsläget utan animering. */
+  setView(center: number[], zoom: number): void;
 }
 
 /** Startextent = kommunens bbox med 5 % marginal (FK-03). */
@@ -77,6 +82,10 @@ export function createMap(target: HTMLElement): AppMap {
   const map = new Map({
     target,
     view,
+    // Rullhjulet zoomar direkt, utan Ctrl: kartan fyller sin egen yta och sidan bakom scrollar
+    // aldrig (ADR-13), så det finns inget att av misstag zooma i stället för att skrolla.
+    // Tvåfingerkrav på pekskärm (pinch) är oförändrat — där är det OL:s standard.
+    interactions: defaultInteractions({ onFocusOnly: false }),
     layers: [...basemaps.layers, kommungrans],
     controls: [
       new Zoom(),
@@ -130,5 +139,20 @@ export function createMap(target: HTMLElement): AppMap {
     });
   };
 
-  return { map, basemaps, resetView, zoomTo };
+  return {
+    map,
+    basemaps,
+    resetView,
+    zoomTo,
+    getView: () => ({
+      center: view.getCenter() ?? [0, 0],
+      zoom: view.getZoom() ?? 5,
+    }),
+    setView(center, zoom) {
+      userHasInteracted = true;
+      view.setCenter([center[0] ?? 0, center[1] ?? 0]);
+      view.setZoom(zoom);
+      map.updateSize();
+    },
+  };
 }

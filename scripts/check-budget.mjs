@@ -6,12 +6,14 @@
  * Läser de byggda sidorna, plockar ut det som laddas i den kritiska vägen (module-script,
  * modulepreload, stylesheet, preload av script) och mäter gzip-storlek.
  */
-import { readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { join, sep } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 const DIST = join(process.cwd(), 'dist', 'projekt', 'norrkoping');
 const BASE = '/projekt/norrkoping/';
+/** Måste följa ORIGO_VERSION i src/origo/origoConfig.ts. */
+const ORIGO_VERSION = '2.10.0';
 
 /** Budget i byte (gzip). Kravspec §8.1, NFK-02. */
 const BUDGET = {
@@ -88,9 +90,28 @@ analyse('', 'Landningsvy', {
   totalBudget: BUDGET.firstViewTotal,
   forbidOrigo: true,
 });
-analyse('origo', 'Origo-sidan (lazy, egen sida)', {
-  jsBudget: BUDGET.origoChunk,
-});
+/**
+ * Origo har ingen egen sida längre (ADR-15) — den laddas som en lazy chunk i samma karta.
+ * Budgeten gäller därför det som hämtas *när verktygen öppnas*: Origos bundle plus vår
+ * verktygsmodul. Att den inte ligger i kritiska vägen bevakas av forbidOrigo ovan.
+ */
+function analyseToolsChunk() {
+  const vendor = join('vendor', `origo-${ORIGO_VERSION}`, 'js', 'origo.min.js');
+  const chunk = readdirSync(join(DIST, 'assets')).filter((f) => /^tools-.*\.js$/.test(f));
+  console.log(`
+Verktygsläget (hämtas först vid klick) — gzip:`);
+  let total = gzipBytes(`${BASE}${vendor.split(sep).join('/')}`, '');
+  console.log(`  js   ${vendor.split(sep).join('/').padEnd(60)} ${kb(total).padStart(10)}`);
+  for (const f of chunk) {
+    const size = gzipBytes(`${BASE}assets/${f}`, '');
+    total += size;
+    console.log(`  js   ${`assets/${f}`.padEnd(60)} ${kb(size).padStart(10)}`);
+  }
+  console.log();
+  check('Verktygschunk (NFK-02)', total, BUDGET.origoChunk);
+}
+
+analyseToolsChunk();
 
 if (failed) {
   console.error('\nBundlebudget överskriden — bygget underkänns (NFK-02).');

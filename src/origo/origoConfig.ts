@@ -10,11 +10,11 @@ import { KOMMUN_VIEW_BBOX_3006, PAN_LIMIT_3006 } from '../../shared/geo/kommun.t
 import { LM_3006_EXTENT, LM_3006_ORIGIN, LM_3006_RESOLUTIONS, LM_TILE_SIZE } from '../../shared/geo/lmTileGrid.ts';
 import { DEF_3006, DEF_3010, EXTENT_3006 } from '../../shared/geo/crs.ts';
 import { API_BASE, BASE, KOMMUNGRANS_URL } from '../config/site.ts';
-import type { Lang } from '../i18n/index.ts';
 
 export const ORIGO_VERSION = '2.10.0';
 export const ORIGO_DIR = `${BASE}vendor/origo-${ORIGO_VERSION}/`;
 export const ORIGO_SCRIPT = `${ORIGO_DIR}js/origo.min.js`;
+export const ORIGO_CSS = `${ORIGO_DIR}css/style.css`;
 
 /** Lagernamnet i Origo vars källa byts ut mot PMTiles-läsaren efter init. */
 export const TOPO_LAYER_NAME = 'topowebb';
@@ -25,92 +25,51 @@ export const ORTO_LAYERS = [
   { name: 'orto1975', layerId: 'histortho75', year: 1975, titleKey: 'ortoTitle75' },
 ] as const;
 
-const TEXT = {
-  sv: {
-    background: 'Bakgrundskartor',
-    topoTitle: 'Topografisk webbkarta',
-    topoAbstract:
-      '<p><b>Källa:</b> Topografisk webbkarta Nedladdning, raster — © Lantmäteriet, CC BY 4.0. ' +
-      'Informationen har bearbetats: utsnitt över Norrköpings kommun, ompaketerad till PMTiles.</p>' +
-      '<p><b>Referenssystem:</b> SWEREF 99 TM (EPSG:3006). <b>Aktualitet:</b> Lantmäteriets fil 2026-06-22, utsnitt 2026-09-19.</p>',
-    boundaryTitle: 'Kommungräns',
-    boundaryAbstract:
-      '<p><b>Källa:</b> Kommun, län och rike — © Lantmäteriet, CC BY 4.0, hämtad via STAC-API:et 2026-09-23. ' +
-      'Kommunkod 0581, administrativ gräns i SWEREF 99 TM.</p>',
-    ortoTitle60: 'Flygbild 1960',
-    ortoTitle75: 'Flygbild 1975',
-    ortoAbstract:
-      '<p><b>Källa:</b> Ortofoto historiska Visning (WMS) — © Lantmäteriet, CC0. Rikstäckande ortofotomosaik med ' +
-      'referensår {year}, upplösning 0,5 m, svartvit.</p>' +
-      '<p>Hämtas ruta för ruta genom sajtens egen proxy (/api/tiles) — din webbläsare anropar aldrig Lantmäteriet ' +
-      'direkt och ingen hemlighet finns i klienten. <b>Referenssystem:</b> SWEREF 99 TM (EPSG:3006), ' +
-      'Lantmäteriets tile-matris t.o.m. nivå 13.</p>',
-    aboutButton: 'Om verktygen',
-    aboutTitle: 'Om verktygsläget',
-    aboutContent:
-      '<p>Verktygsläget är byggt med <a href="https://github.com/origo-map/origo" target="_blank" rel="noopener">Origo</a> ' +
-      `(version ${ORIGO_VERSION}, BSD 2-clause) — det öppna kartramverk som svenska kommuner använder — ovanpå OpenLayers.</p>` +
-      '<p>Kartan visas och mäts i <b>SWEREF 99 TM (EPSG:3006)</b>. Längd och area beräknas geodetiskt, aldrig planärt i Web Mercator. ' +
-      'Koordinater kan läsas av i SWEREF 99 TM, SWEREF 99 16 30 och WGS 84.</p>' +
-      '<p>Ritade objekt exporteras som GeoJSON i WGS 84 (RFC 7946). Filer du släpper på kartan läses enbart lokalt i webbläsaren och laddas aldrig upp.</p>' +
-      '<p><b>Höjd:</b> markhöjd och höjdprofil hämtas från Lantmäteriets <i>Markhöjd Direkt</i> i RH 2000, ' +
-      'via sajtens egen proxy. Profilen mäts längs den ritade linjen med jämnt fördelade punkter.</p>' +
-      '<p><b>Datakällor:</b> Topografisk webbkarta Nedladdning, raster och Ortofoto historiska Visning © Lantmäteriet ' +
-      '(CC BY 4.0, bearbetad). Kommungräns ur Kommun, län och rike © Lantmäteriet. Ortnamn © Lantmäteriet. ' +
-      'Markhöjd Direkt © Lantmäteriet.</p>' +
-      '<p><i>Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.</i></p>',
-    positionTitle: 'SWEREF 99 TM',
-    backLink: 'Till Norrköpingskartan',
-    printTitle: 'Norrköpingskartan',
-    dropGroup: 'Egna filer',
-  },
-  en: {
-    background: 'Base maps',
-    topoTitle: 'Topographic web map',
-    topoAbstract:
-      '<p><b>Source:</b> Topografisk webbkarta Nedladdning, raster — © Lantmäteriet, CC BY 4.0. ' +
-      'The data has been processed: extract over Norrköping Municipality, repackaged as PMTiles.</p>' +
-      '<p><b>Reference system:</b> SWEREF 99 TM (EPSG:3006). <b>Currency:</b> Lantmäteriet file 2026-06-22, extract 2026-09-19.</p>',
-    boundaryTitle: 'Municipal boundary',
-    boundaryAbstract:
-      '<p><b>Source:</b> Kommun, län och rike — © Lantmäteriet, CC BY 4.0, retrieved via the STAC API 2026-09-23. ' +
-      'Municipality code 0581, administrative boundary in SWEREF 99 TM.</p>',
-    ortoTitle60: 'Aerial 1960',
-    ortoTitle75: 'Aerial 1975',
-    ortoAbstract:
-      '<p><b>Source:</b> Ortofoto historiska Visning (WMS) — © Lantmäteriet, CC0. National orthophoto mosaic with ' +
-      'reference year {year}, 0.5 m resolution, black and white.</p>' +
-      '<p>Fetched tile by tile through the site’s own proxy (/api/tiles) — your browser never calls Lantmäteriet ' +
-      'directly and no secret exists in the client. <b>Reference system:</b> SWEREF 99 TM (EPSG:3006), ' +
-      'Lantmäteriet tile matrix up to level 13.</p>',
-    aboutButton: 'About the tools',
-    aboutTitle: 'About the tool mode',
-    aboutContent:
-      '<p>The tool mode is built with <a href="https://github.com/origo-map/origo" target="_blank" rel="noopener">Origo</a> ' +
-      `(version ${ORIGO_VERSION}, BSD 2-clause) — the open map framework used by Swedish municipalities — on top of OpenLayers.</p>` +
-      '<p>The map is displayed and measured in <b>SWEREF 99 TM (EPSG:3006)</b>. Length and area are computed geodetically, never planar in Web Mercator. ' +
-      'Coordinates can be read in SWEREF 99 TM, SWEREF 99 16 30 and WGS 84.</p>' +
-      '<p>Drawings export as GeoJSON in WGS 84 (RFC 7946). Files you drop on the map are read locally in your browser only and never uploaded.</p>' +
-      '<p><b>Elevation:</b> ground elevation and elevation profiles come from Lantmäteriet’s <i>Markhöjd Direkt</i> ' +
-      'in RH 2000, through the site’s own proxy. The profile is sampled at evenly spaced points along the drawn line.</p>' +
-      '<p><b>Data sources:</b> Topografisk webbkarta Nedladdning, raster and Ortofoto historiska Visning © Lantmäteriet ' +
-      '(CC BY 4.0, processed). Municipal boundary from Kommun, län och rike © Lantmäteriet. Place names © Lantmäteriet. ' +
-      'Markhöjd Direkt © Lantmäteriet.</p>' +
-      '<p><i>An independent project by Aren Mardian. Not an official service of Norrköping Municipality.</i></p>',
-    positionTitle: 'SWEREF 99 TM',
-    backLink: 'Back to the Norrköping map',
-    printTitle: 'Norrköping map',
-    dropGroup: 'Your files',
-  },
+const t = {
+  background: 'Bakgrundskartor',
+  topoTitle: 'Topografisk webbkarta',
+  topoAbstract:
+    '<p><b>Källa:</b> Topografisk webbkarta Nedladdning, raster — © Lantmäteriet, CC BY 4.0. ' +
+    'Informationen har bearbetats: utsnitt över Norrköpings kommun, ompaketerad till PMTiles.</p>' +
+    '<p><b>Referenssystem:</b> SWEREF 99 TM (EPSG:3006). <b>Aktualitet:</b> Lantmäteriets fil 2026-06-22, utsnitt 2026-09-19.</p>',
+  boundaryTitle: 'Kommungräns',
+  boundaryAbstract:
+    '<p><b>Källa:</b> Kommun, län och rike — © Lantmäteriet, CC BY 4.0, hämtad via STAC-API:et 2026-09-23. ' +
+    'Kommunkod 0581, administrativ gräns i SWEREF 99 TM.</p>',
+  ortoTitle60: 'Flygbild 1960',
+  ortoTitle75: 'Flygbild 1975',
+  ortoAbstract:
+    '<p><b>Källa:</b> Ortofoto historiska Visning (WMS) — © Lantmäteriet, CC0. Rikstäckande ortofotomosaik med ' +
+    'referensår {year}, upplösning 0,5 m, svartvit.</p>' +
+    '<p>Hämtas ruta för ruta genom sajtens egen proxy (/api/tiles) — din webbläsare anropar aldrig Lantmäteriet ' +
+    'direkt och ingen hemlighet finns i klienten. <b>Referenssystem:</b> SWEREF 99 TM (EPSG:3006), ' +
+    'Lantmäteriets tile-matris t.o.m. nivå 13.</p>',
+  aboutButton: 'Om verktygen',
+  aboutTitle: 'Om verktygsläget',
+  aboutContent:
+    '<p>Verktygsläget är byggt med <a href="https://github.com/origo-map/origo" target="_blank" rel="noopener">Origo</a> ' +
+    `(version ${ORIGO_VERSION}, BSD 2-clause) — det öppna kartramverk som svenska kommuner använder — ovanpå OpenLayers.</p>` +
+    '<p>Kartan visas och mäts i <b>SWEREF 99 TM (EPSG:3006)</b>. Längd och area beräknas geodetiskt, aldrig planärt i Web Mercator. ' +
+    'Koordinater kan läsas av i SWEREF 99 TM, SWEREF 99 16 30 och WGS 84.</p>' +
+    '<p>Ritade objekt exporteras som GeoJSON i WGS 84 (RFC 7946). Filer du släpper på kartan läses enbart lokalt i webbläsaren och laddas aldrig upp.</p>' +
+    '<p><b>Höjd:</b> markhöjd och höjdprofil hämtas från Lantmäteriets <i>Markhöjd Direkt</i> i RH 2000, ' +
+    'via sajtens egen proxy. Profilen mäts längs den ritade linjen med jämnt fördelade punkter.</p>' +
+    '<p><b>Datakällor:</b> Topografisk webbkarta Nedladdning, raster och Ortofoto historiska Visning © Lantmäteriet ' +
+    '(CC BY 4.0, bearbetad). Kommungräns ur Kommun, län och rike © Lantmäteriet. Ortnamn © Lantmäteriet. ' +
+    'Markhöjd Direkt © Lantmäteriet.</p>' +
+    '<p><i>Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.</i></p>',
+  positionTitle: 'SWEREF 99 TM',
+  backLink: 'Till Norrköpingskartan',
+  printTitle: 'Norrköpingskartan',
+  dropGroup: 'Egna filer',
 } as const;
 
 /** Origo tar ett konfigobjekt (loadresources.js: typeof mapOptions === 'object'). */
-export function buildOrigoConfig(lang: Lang): Record<string, unknown> {
-  const t = TEXT[lang];
-  const localeId = lang === 'en' ? 'en-US' : 'sv-SE';
+export function buildOrigoConfig(targetId: string, view: { center: number[]; zoom: number }): Record<string, unknown> {
+  const localeId = 'sv-SE';
 
   return {
-    target: '#app-wrapper',
+    target: `#${targetId}`,
     svgSpritePath: `${ORIGO_DIR}css/svg/`,
     // Origo lägger sina standardkontroller UTÖVER listan nedan (och dubblerar dem); vi listar allt själva.
     defaultControls: [],
@@ -124,11 +83,9 @@ export function buildOrigoConfig(lang: Lang): Record<string, unknown> {
     ],
     // Panorering begränsad till kommunen + 25 km (FK-04); zoomsteg = Lantmäteriets matris.
     extent: [...PAN_LIMIT_3006],
-    center: [
-      (KOMMUN_VIEW_BBOX_3006[0] + KOMMUN_VIEW_BBOX_3006[2]) / 2,
-      (KOMMUN_VIEW_BBOX_3006[1] + KOMMUN_VIEW_BBOX_3006[3]) / 2,
-    ],
-    zoom: 5,
+    // Vyn ärvs från kartan användaren redan tittade på (ADR-15) — inget hopp när verktygen slås på.
+    center: [...view.center],
+    zoom: view.zoom,
     resolutions: [...LM_3006_RESOLUTIONS],
     constrainResolution: false,
 
@@ -137,7 +94,7 @@ export function buildOrigoConfig(lang: Lang): Record<string, unknown> {
     // ── Kontroller (FK-23–FK-31) ────────────────────────────────────────────
     controls: [
       { name: 'localization', options: { localeId, fallbackLocaleId: 'sv-SE', showLocMenu: false } },
-      { name: 'home', options: { extent: [...KOMMUN_VIEW_BBOX_3006], zoomOnStart: true } },
+      { name: 'home', options: { extent: [...KOMMUN_VIEW_BBOX_3006], zoomOnStart: false } },
       { name: 'mapmenu', options: { isActive: false } },
       { name: 'zoom' },
       { name: 'rotate' },
@@ -198,7 +155,6 @@ export function buildOrigoConfig(lang: Lang): Record<string, unknown> {
       // FK-06 i verktygsläget: min position, bara på användarens begäran.
       { name: 'geoposition' },
       { name: 'about', options: { buttonText: t.aboutButton, title: t.aboutTitle, content: t.aboutContent } },
-      { name: 'link', options: { title: t.backLink, url: BASE, target: '_self', icon: '#ic_arrow_back_24px' } },
     ],
 
     // Origos sidfot hyser positionskontrollen (FK-26); friskrivningen (JK-04) står i vår egen sidfot.
