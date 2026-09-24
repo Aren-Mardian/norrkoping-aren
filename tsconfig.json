@@ -21,5 +21,5 @@
     "noUnusedParameters": true,
     "exactOptionalPropertyTypes": true
   },
-  "include": ["src", "shared", "vite", "netlify/rules.ts", "vite.config.ts", "vitest.config.ts"]
+  "include": ["src", "shared", "vite", "netlify/rules.ts", "netlify/rules.test.ts", "vite.config.ts", "vitest.config.ts"]
 }

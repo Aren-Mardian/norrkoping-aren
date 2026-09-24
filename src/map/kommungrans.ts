@@ -1,8 +1,8 @@
 /**
  * Kommungränsen som eget lager (FK-05): synlig i alla bakgrundslägen, kan tändas/släckas.
  *
- * Data: data/derived/kommungrans.geojson (EPSG:4326, OpenStreetMap/ODbL tills Lantmäteriets
- * polygon finns). Laddas efter första ramen — den ligger inte i kritisk väg (A4).
+ * Data: data/derived/kommungrans.geojson (EPSG:4326) — Lantmäteriets *Kommun, län och rike*,
+ * CC BY 4.0, lägesosäkerhet ~2 m. Laddas efter första ramen — den ligger inte i kritisk väg (A4).
  * Färgerna hämtas från designtokens så att ljust/mörkt läge följer med (UX-05).
  */
 import GeoJSON from 'ol/format/GeoJSON';
@@ -30,7 +30,10 @@ export function createKommungransLayer(): VectorLayer<VectorSource> {
   const source = new VectorSource({
     url: KOMMUNGRANS_URL,
     format: new GeoJSON({ dataProjection: 'EPSG:4326', featureProjection: EPSG_3006 }),
-    attributions: t('attribution.osm'),
+    // Egen produkt hos Lantmäteriet, inte samma som bakgrundskartan: egen attributionsrad (JK-02).
+    // Låg tidigare kvar på OpenStreetMap från tiden då gränsen kom därifrån — kartan krediterade
+    // då fel upphovsman för Lantmäteriets data (JK-01/JK-03).
+    attributions: t('attribution.lantmateriet.kommun'),
   });
   const layer = new VectorLayer({
     source,

@@ -11,11 +11,11 @@ Målplattform: `https://arenm.se/projekt/norrkoping`
 
 | Sprint | Milstolpe | Läge |
 |---|---|---|
-| 0 | Grund — repo, Vite+TS, CI, tile-proxy, CSP/headers, dev-läge utan token | **Klar lokalt** — väntar på Netlify-sajt (användaren) |
+| 0 | Grund — repo, Vite+TS, CI, tile-proxy, CSP/headers, dev-läge utan token | **Klar** — i drift på Netlify. Headerledet är dock inte i mål, se driftnotisen nedan |
 | 1 | Karta står — LM-bakgrund, växlare, kommungräns, startextent, skalstock | **Klar** — Lantmäteriets topografiska karta självhostad som PMTiles (ADR-09/10), **kommungräns från Lantmäteriet** (CC BY 4.0), växlare inkl. mörkt läge och **flygbild 1960/1975** (ADR-14), startextent, skalstock |
-| 3 | Badplatser — HaV-integration, status, Topp 3, varningar, filter, SMHI | **Klar (första version)** — 19 badplatser, `/api/bad/status` (IK-02) med stale-cache, `/api/vader` (IK-03, SMHI snow1g), Topp 3 med viktningen förklarad på plats, avrådan som inte kan filtreras bort (DK-07), panel/bottom sheet i app-skal (UX-03, ADR-13), språkväxlare. Återstår: faciliteter (kuratering), badindex (FK-19), tillgänglighetsfilter (FK-20) |
+| 3 | Badplatser — HaV-integration, status, Topp 3, varningar, filter, SMHI | **Klar (första version)** — 19 badplatser, `/api/bad/status` (IK-02) med stale-cache, `/api/vader` (IK-03, SMHI snow1g), Topp 3 med viktningen förklarad på plats, avrådan som inte kan filtreras bort (DK-07), panel/bottom sheet i app-skal (UX-03, ADR-13). Återstår: faciliteter (kuratering), badindex (FK-19), tillgänglighetsfilter (FK-20) |
 | 4 | Verktygsläge — mät, rita, koordinater, höjd, dela, utskrift, lager | **Klar** (ADR-11/12/15) — Origo laddas in i **samma karta** med knappen "Verktyg"; ingen egen sida längre. Gamla `/origo/`- och `/verktyg/`-länkar ger 301 till kartan |
-| — | Lantmäteriets API:er — flygbild, höjd, ortnamn, kommungräns | **Klar** (ADR-14) — `/api/hojd` (Markhöjd Direkt), ortnamnssök på båda sidorna, höjdprofil i Origo. Återstår: OGC-Features (appkontot saknar behörighet) |
+| — | Lantmäteriets API:er — flygbild, höjd, ortnamn, kommungräns | **Klar** (ADR-14) — `/api/hojd` (Markhöjd Direkt), ortnamnssök, höjd som punktmätning i verktygsläget (ADR-16). Återstår: OGC-Features (appkontot saknar behörighet) |
 | 2, 5–7 | Se kravspec §12 | Ej påbörjad. Om/Källor/Integritet är beslutade att ligga på arenm.se (ADR-13), inte som egna sidor här |
 
 ## Kom igång (under 10 minuter)
@@ -47,8 +47,10 @@ Vites dev-server via [vite/devFunctions.ts](vite/devFunctions.ts) — ingen `net
 ### Med Lantmäteriets appkonto (flygbild, kommungräns, ortnamn)
 
 1. Kopiera `.env.example` till `.env` och fyll i `LM_USER`/`LM_PASSWORD` (appkonto från Geotorget)
-   samt `VITE_LM_ENABLED=true`. `.env` är git-ignorerad och får aldrig checkas in. Samma värden läggs
-   som miljövariabler i Netlify (Site configuration → Environment variables).
+   samt `VITE_LM_ENABLED=true`. `.env` är git-ignorerad och får aldrig checkas in.
+   `LM_USER`/`LM_PASSWORD` läggs dessutom som miljövariabler i Netlify (Site configuration →
+   Environment variables). `VITE_LM_ENABLED` behövs **bara lokalt**: i produktion finns proxyn
+   alltid, och flygbilden avgörs vid körning i stället för vid bygget (ADR-16).
 2. Flygbild = Lantmäteriets *Ortofoto historiska* (WMS, CC0) via proxyn `/api/tiles/histortho/…`.
    Lagernamnet (`LM_HISTORTHO_LAYER`) verifieras mot GetCapabilities, se `.env.example`.
 3. `tools/.venv/Scripts/python tools/lm_stac.py` hämtar Lantmäteriets kommungräns och ortnamn via
@@ -98,16 +100,40 @@ och sidfoten flyttas in sist i sheeten. Sidfoten anger för varje uppgift **vari
 Menyn har två poster: **Karta** och **Om** (arenm.se). `Källor och licenser` och `Integritet` i
 sidfoten går också till arenm.se. Okända adresser ger 404.
 
-**Driftnotis (2026-09-23):** Netlify tillämpar en gammal version av byggkonfigurationen. Deployen
-för `f7a1965` rapporterade 2 redirect- och 3 headerregler — exakt vad repots *första* commit hade —
-medan repot hade 8 respektive 4, och koden uppdaterades normalt. Omdirigeringar och headers ligger
-därför numera i `netlify/rules.ts` och skrivs som `_redirects`/`_headers` i publiceringsmappen vid
-bygget ([ADR-17](docs/adr/ADR-17-regler-som-filer.md)); omdirigeringarna slår då igenom direkt.
-Headerna gör det inte förrän den gamla konfigurationen släpper, eftersom `netlify.toml` vinner över
-`_headers` vid konflikt. Kontrollera i Netlify att deployens sammanfattning rapporterar **10
-redirect- och 4 headerregler**; gör den inte det, kör "Clear cache and deploy site", och hjälper
-inte det heller: skapa om sajten från repot. Sajten fungerar under tiden (ADR-16) — det som syns är
-att Origos paneler ritas ostylade.
+**Driftnotis (uppdaterad 2026-09-24):** Netlify svarar fortfarande med headers från repots
+*allra första* commit. Mätt mot den publicerade sajten:
+
+| | `_headers` säger | Sajten svarar |
+|---|---|---|
+| `/assets/<hash>.js` | `max-age=31536000, immutable` | `no-cache` |
+| `data/…pmtiles` (665 MB) | `max-age=86400, stale-while-revalidate` | `no-cache` |
+| CSP | `frame-ancestors 'none'` | hela första commitens policy, ordagrant |
+
+Omdirigeringarna från `_redirects` slår däremot igenom (`/verktyg` → 301, okänd adress → 404), så
+det är bara headerledet som är fast. Konsekvensen är inte bara cache: webbläsaren tillämpar
+**snittet** av header-CSP:n och sidans meta-CSP, och den gamla headern har `style-src 'self'`.
+Sidans egen policy tillåter `'unsafe-inline'` för att Origo bygger paneler med style-attribut — i
+snittet faller det bort, och verktygsläget ger **403 konsolfel** av typen *"Applying inline style
+violates ... 'style-src 'self''"*. Det är också grundorsaken till att Origos sprite-behållare tappar
+sin `display:none` och lägger sig som tomma rutor över kartan; `markSprites()` i
+[src/origo/tools.ts](src/origo/tools.ts) är en motåtgärd, inte en lösning.
+
+Sedan 2026-09-24 ligger headerreglerna därför i **både** `netlify.toml` och `_headers` (netlify.toml
+vinner vid konflikt, så läses den nya filen vinner rätt värden), och `netlify.toml` bär markören
+`X-Config-Source: toml-2026-09-24`. Efter nästa deploy:
+
+```bash
+curl -sI https://norrkoping.netlify.app/projekt/norrkoping/assets/ | grep -iE "x-config-source|cache-control"
+```
+
+- **Markören syns + `immutable`** → löst. Ta bort markören ur `netlify.toml` och notera det här.
+- **Markören syns inte** → konfigurationen är fastfrusen. Kör "Clear cache and deploy site" i
+  Netlify; hjälper inte det heller, skapa om sajten från repot (och lägg tillbaka `LM_USER` och
+  `LM_PASSWORD`). Kontrollera samtidigt att deployens sammanfattning rapporterar **10 redirect- och
+  4 headerregler**.
+
+Sajten fungerar under tiden (ADR-16). `netlify/rules.test.ts` ser till att de två
+uppsättningarna inte glider isär.
 
 ## Kommandon
 
@@ -137,7 +163,7 @@ repot: `.env` är git-ignorerad, appkonton ligger bara i Netlifys miljövariable
 index.html              Sidans skal: karta, panel, sidfot (UX-01, JK-04, ADR-15)
 src/                    Klient (Vite + TypeScript, vanilla)
   config/site.ts        BASE, API_BASE, LM_ENABLED — allt publikt
-  geo/olProjections.ts  Registrerar EPSG:3006/3010 i OpenLayers
+  geo/olProjections.ts  Registrerar EPSG:3006 i OpenLayers
   i18n/                 Svensk textkatalog utan runtime-bibliotek (ADR-15)
   bad/                  Badplatser: datamodell, kartlager, panel (Kärnfunktion B)
   lm/                   Lantmäteriets tjänster i klienten (höjd via /api/hojd)
@@ -147,18 +173,18 @@ src/                    Klient (Vite + TypeScript, vanilla)
   origo/                Origo-konfiguration, lazy bootstrap och höjdverktyg (ADR-11/15)
   ui/                   Banners, bottom sheet, panelens in-/utfällning, verktygsväxlaren (ADR-13/15)
 shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
-  geo/crs.ts            EPSG-koder, proj4-strängar, utbredning (ren data, inga beroenden)
+  geo/crs.ts            SWEREF 99 TM-definitionen och utbredningen (ren data, inga beroenden);
+                        WGS 84 och 3857 finns bara som dataformat respektive spärr (ADR-18)
   geo/projDefs.ts       proj4-registrering och transformationer (Bilaga B.5)
   geo/lmTileGrid.ts     Lantmäteriets 3006-matris
   geo/planar.ts         Planär längd + vitlistan över mätbara projektioner (utan beroenden)
-  geo/crs.ts            SWEREF 99 TM-definitionen; WGS 84/3857 bara som dataformat respektive spärr
-  geo/measure.ts        Längdmätning: 3006/3010/geodetiskt, aldrig 3857 (NFK-12)
+  geo/measure.ts        Längdmätning planärt i 3006 eller geodetiskt, aldrig 3857 (NFK-12)
   geo/kommun.ts         Kommunkod, bbox, panoreringsbuffert (5 km)
   geo/kommunPolygon.ts  Kommungränsen som förenklad polygon + pointInKommun (genererad)
   api/errors.ts         Enhetlig felmodell (IK-04)
 netlify/functions/      Edge-funktioner (Netlify Functions 2.0)
   tiles.mts             IK-01 tile-proxy (flygbild 1960/1975 via WMS, OSM-fallback)
-  hojd.mts              IK-08 markhöjd (Markhöjd Direkt, punkt + profil)
+  hojd.mts              IK-08 markhöjd (Markhöjd Direkt, en punkt per anrop)
   bad-status.mts        IK-02 badvattenstatus (HaV)
   vader.mts             IK-03 väder (SMHI)
 netlify/rules.ts        Omdirigeringar och headers — skrivs som _redirects/_headers vid bygget (ADR-17)
@@ -178,14 +204,14 @@ Statisk sajt + edge-funktioner (ADR-01). **En sida med en karta** (ADR-15), rend
 WGS 84 förekommer bara som dataformat (GeoJSON in och ut, SMHI:s API) och visas aldrig.
 Bakgrundskartan är ett självhostat PMTiles-utsnitt av Lantmäteriets topografiska webbkarta (ADR-09) —
 inga anrop till Lantmäteriet från besökaren. Flygbild och live-tjänster går via en tile-proxy med
-Origin-lås, zoom- och bbox-spärr (ADR-04, NFK-18). Verktygsläget (Origo) är en egen sida under
-i samma kartruta på begäran (ADR-15) och hamnar aldrig i sidans kritiska väg — `npm run check:budget`
-bevakar det (TK-05).
+Origin-lås, zoom- och bbox-spärr (ADR-04, NFK-18). Verktygsläget (Origo) laddas in i samma kartruta
+på begäran (ADR-15) och hamnar aldrig i sidans kritiska väg — `npm run check:budget` bevakar det (TK-05).
 
 Se [docs/referenssystem.md](docs/referenssystem.md) för geodetiken och
 [data/SOURCES.md](data/SOURCES.md) för datakällor, licenser och villkor.
 
 ## Licens
 
-Kod: MIT (se `LICENSE`, läggs till vid publicering — FV-04). Data har egna licenser per källa, se
-`data/SOURCES.md`. Kuraterat innehåll och rankning © Aren Mardian.
+Kod: MIT, se [LICENSE](LICENSE). Vendorerad Origo under `public/vendor/origo-2.10.0/` är BSD 2-clause.
+Data har egna licenser per källa, se [data/SOURCES.md](data/SOURCES.md). Kuraterat innehåll och
+rankning © Aren Mardian. Hur man bidrar: [CONTRIBUTING.md](CONTRIBUTING.md).

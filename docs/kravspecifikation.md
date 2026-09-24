@@ -195,7 +195,7 @@ Dokumentet skrivs för tre läsare samtidigt: utvecklaren själv (som implementa
 │  │  ~150–250 kB gzip     │        │  ~lazy-chunk, egen route     │  │
 │  └───────────┬───────────┘        └──────────────┬───────────────┘  │
 │              └──────────── OpenLayers-kärna ─────┘                  │
-│                            proj4js: EPSG:3006 / 3010                │
+│                            proj4js: EPSG:3006 — endast SWEREF 99 TM │
 │  ┌───────────────────────────────────────────────────────────────┐  │
 │  │  Service Worker: tile-cache (kommunens bbox), statusdata SWR  │  │
 │  └───────────────────────────────────────────────────────────────┘  │
@@ -230,7 +230,7 @@ Dokumentet skrivs för tre läsare samtidigt: utvecklaren själv (som implementa
 | Byggverktyg | Vite + TypeScript | Samma kedja som `arenm.se`, snabb HMR, bra code splitting och `build.rollupOptions` för manuella chunkar |
 | Kartkärna | OpenLayers (via Origo) | Origo bygger på OpenLayers; en delad kärna undviker två kartbibliotek i samma bundle |
 | Verktygsläge | Origo (BSD 2-clause) | Ger mät-, rit-, dela-, utskrifts- och lagerkontroller som kommunal standard utan egenutveckling |
-| Projektionsstöd | proj4js | EPSG:3006 och EPSG:3010 är inte inbyggda i OpenLayers och måste definieras explicit |
+| Projektionsstöd | proj4js | EPSG:3006 är inte inbyggt i OpenLayers och måste definieras explicit. EPSG:3010 utgick 2026-09-23 (ADR-18) |
 | Vektorlagring | Statisk GeoJSON (små lager) + PMTiles (stora lager) | PMTiles kräver ingen tile-server — en fil på CDN med Range-requests |
 | Edge-funktioner | Serverless-funktioner på hostingplattformens fria nivå | Enda platsen där Lantmäteriet-token får finnas |
 | i18n | Egna JSON-kataloger, ingen tung i18n-runtime | Två språk motiverar inte 40 kB bibliotek |
@@ -326,7 +326,7 @@ Google Maps Platform Service Specific Terms innehåller två klausuler som är o
 | Användning | Referenssystem | EPSG |
 |---|---|---|
 | Kartvisning och tile-matrix | SWEREF 99 TM | 3006 |
-| Lokalt kommunalt system (visning/inmatning) | SWEREF 99 16 30 | 3010 |
+| ~~Lokalt kommunalt system (visning/inmatning)~~ *utgick 2026-09-23, ADR-18* | ~~SWEREF 99 16 30~~ | ~~3010~~ |
 | Lagring i GeoJSON-filer | WGS 84 | 4326 |
 | **Längd- och areamätning** | SWEREF 99 TM, med geodetisk kontrollberäkning | 3006 |
 | Höjd | RH 2000 | — |
@@ -640,7 +640,7 @@ Dynamiskt statusobjekt (normaliserat av edge-funktionen):
 *Acceptanskriterium:* `npm run dev` utan `.env` startar med fallback-bakgrund och en synlig utvecklingsbanner; inga konsolfel.
 
 <a id="fk-34"></a>
-**FK-34 (M) — Tvåspråkighet.** Hela gränssnittet och allt kuraterat innehåll finns på svenska och engelska.
+**FK-34 (M) — Tvåspråkighet.** Hela gränssnittet och allt kuraterat innehåll finns på svenska och engelska. *(Struket 2026-09-23 på beställarens begäran, ADR-15: gränssnittet är **enspråkigt svenskt**. `src/i18n/en.ts` och språkväxlaren är borttagna, `<html lang="sv">` är fast. Kravet kan återupptas — textkatalogen är kvar som nyckel/värde utan runtime-bibliotek, så en andra katalog räcker.)*
 *Acceptanskriterium:* Språkval styrs av URL-prefix (`/sv/`, `/en/`), respekterar `Accept-Language` vid första besök, och `<html lang>` sätts korrekt. Inga hårdkodade strängar i komponenter.
 
 <a id="fk-35"></a>
@@ -795,7 +795,7 @@ Dynamiskt statusobjekt (normaliserat av edge-funktionen):
 *Acceptanskriterium:* Nätverkspanelen visar enbart anrop till egen origin. Proxyn vidarebefordrar inte `X-Forwarded-For`.
 
 <a id="nfk-24"></a>
-**NFK-24 (M) — Integritetspolicy på båda språken.**
+**NFK-24 (M) — Integritetspolicy på båda språken.** *(Ändrat 2026-09-23, ADR-13/ADR-15: policyn ligger på `arenm.se` och bara på svenska. **Ej uppfylld 2026-09-24** — sidfotens länk `Integritet` pekar ännu på `https://arenm.se/`, inte på en policysida. Sajten använder positionsdata (FK-06), så kravet kvarstår som Must.)*
 *Acceptanskriterium:* `/integritet` beskriver vilka data som behandlas (i praktiken: serverloggar hos hostingleverantören, aggregerad statistik), rättslig grund, lagringstid och kontaktuppgift.
 
 ### 8.6 Drift, robusthet och övervakning
@@ -869,6 +869,13 @@ Dynamiskt statusobjekt (normaliserat av edge-funktionen):
   ├── /om                            Om projektet + friskrivning
   └── /integritet                    Integritetspolicy
 ```
+
+> **Ersatt 2026-09-23 (ADR-13, ADR-15).** Sajten är **en enda sida med en enda karta**. Topp 10 och
+> badplatserna delar samma kartruta och panel, verktygsläget (Origo) laddas in i samma karta på
+> begäran i stället för på `/verktyg`, och `/om`, `/kallor` och `/integritet` ligger på `arenm.se`
+> i stället för här. Kvarvarande adresser under `/projekt/norrkoping/` ger 404; `/origo` och
+> `/verktyg` ger 301 till kartan. Djuplänkning per objekt (FK-11) och förrenderade objektsidor
+> (NFK-32) är därmed inte lösta — de behöver en ny form inom ensidesarkitekturen.
 
 <a id="ux-01"></a>
 **UX-01 (M) — Kartan syns direkt.** Landningsvyn visar karta utan att användaren behöver scrolla eller klicka.
@@ -984,7 +991,7 @@ Dynamiskt statusobjekt (normaliserat av edge-funktionen):
 
 <a id="tk-02"></a>
 **TK-02 (M) — Transformationstest.**
-*Acceptanskriterium:* Kända kontrollpunkter transformeras mellan EPSG:4326, 3006 och 3010 med avvikelse ≤ 0,01 m mot referensvärden i [Bilaga B](#bilaga-b--geodetiska-parametrar).
+*Acceptanskriterium:* Kända kontrollpunkter transformeras mellan EPSG:4326 och 3006 med avvikelse ≤ 0,01 m mot referensvärden i [Bilaga B](#bilaga-b--geodetiska-parametrar). *(3010 utgick 2026-09-23, ADR-18 — de nio testerna för det systemet är borttagna.)*
 
 <a id="tk-03"></a>
 **TK-03 (M) — Mätkontroll mot känd sträcka.**
@@ -1106,7 +1113,7 @@ Uppskattning för en person på deltid. Sprintlängd två veckor.
 | System | EPSG | Central­meridian | Skalfaktor | Användning |
 |---|---|---|---|---|
 | SWEREF 99 TM | 3006 | 15° Ö | 0,9996 | Nationell standard, kartvisning, mätning |
-| SWEREF 99 16 30 | 3010 | 16° 30′ Ö | 1,0 | Norrköpings kommunala system |
+| ~~SWEREF 99 16 30~~ | ~~3010~~ | 16° 30′ Ö | 1,0 | *Utgick 2026-09-23 (ADR-18) — erbjuds inte längre* |
 | WGS 84 | 4326 | — | — | Datalagring (GeoJSON) |
 | Web Mercator | 3857 | 0° | varierar | **Får inte användas för mätning** |
 | RH 2000 | — | — | — | Höjdsystem |
@@ -1118,7 +1125,7 @@ Referenspunkt, Norrköping centrum: **58,58734° N, 16,18590° Ö** (WGS 84)
 | System | Ost/X | Nord/Y |
 |---|---|---|
 | SWEREF 99 TM (3006) | 568 944 m | 6 494 713 m |
-| SWEREF 99 16 30 (3010) | 131 732 m | 6 496 745 m |
+| ~~SWEREF 99 16 30 (3010)~~ *utgått, ADR-18* | 131 732 m | 6 496 745 m |
 
 ### B.3 Kommunidentitet och bounding box
 
@@ -1153,9 +1160,12 @@ Detta är grunden för [NFK-12](#nfk-12) och testfallet i [TK-03](#tk-03).
 
 ```
 EPSG:3006  +proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
-EPSG:3010  +proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0
-           +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs
 ```
+
+*Sedan 2026-09-23 registreras bara EPSG:3006 (ADR-18). Samma sträng används av klienten och av Origos
+inbyggda proj4, så koordinater kan inte skilja sig åt mellan kartan och verktygen. Definitionen för
+EPSG:3010 (`+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 …`) är borttagen
+ur koden och står här bara som historik.*
 
 *Definitionerna ska verifieras mot Lantmäteriets officiella parametrar innan produktion ([NFK-13](#nfk-13)).*
 

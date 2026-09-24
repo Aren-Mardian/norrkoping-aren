@@ -174,6 +174,7 @@ export const sv = {
   'bad.weather.symbol.27': 'Kraftigt snöfall',
   'attribution.lantmateriet': '© Lantmäteriet',
   'attribution.lantmateriet.orto': '© Lantmäteriet, historiska ortofoton {year}',
+  'attribution.lantmateriet.kommun': '© Lantmäteriet, Kommun, län och rike',
   'attribution.osm': '© OpenStreetMap-bidragsgivare',
 } as const;
 

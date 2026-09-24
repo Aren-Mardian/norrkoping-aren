@@ -4,6 +4,9 @@
 **Delvis ersatt av [ADR-15](ADR-15-en-karta-en-sida.md) (2026-09-23):** Origo har ingen egen sida
 längre utan laddas in i samma karta på begäran. Punkt 1 och 4–7 nedan gäller oförändrat; punkt 2–3
 (egen HTML-sida, egen Vite-entry, förhämtning från menyn) är ersatta.
+**Även ersatt av [ADR-18](ADR-18-full-upplosning-och-endast-sweref.md) (2026-09-23):** omnämnandena
+av EPSG:3010 nedan gäller inte längre. Sajten har ett enda referenssystem, SWEREF 99 TM, och
+positionskontrollen visar bara det. Texten står kvar som den skrevs — ADR:er skrivs inte om.
 
 ## Kontext
 

@@ -205,7 +205,10 @@ export default defineConfig({
     outDir: `dist${BASE}`,
     emptyOutDir: true,
     target: 'es2022',
-    sourcemap: true,
+    // Inga källkartor i publiceringen. `dist/` laddas upp som den är, så source maps hade
+    // legat publikt hämtbara — ol.js.map ensam är 2,1 MB, totalt 2,9 MB per deploy.
+    // Behövs de vid felsökning: `npm run build -- --sourcemap` (flaggan slår över det här).
+    sourcemap: false,
     // Bara moderna webbläsare stöds; polyfillen för modulepreload är dött vikt.
     modulePreload: { polyfill: false },
     rollupOptions: {

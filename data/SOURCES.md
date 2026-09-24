@@ -106,7 +106,9 @@ Två källor under övergångsperioden:
 
 - **license:** CC BY 4.0 — filen bär `"license": "CC-BY-4.0"` i sina egenskaper (JK-03)
 - **licenseUrl:** <https://creativecommons.org/licenses/by/4.0/>
-- **attribution:** `© Lantmäteriet` (visas i kartan när lagret är tänt)
+- **attribution:** `© Lantmäteriet, Kommun, län och rike` — egen rad i attributionskontrollen, skild
+  från bakgrundskartans, eftersom det är en annan produkt. Fram till 2026-09-24 krediterade lagret
+  av misstag OpenStreetMap, kvar sedan gränsen hämtades därifrån (rättat, JK-01/JK-02/JK-03).
 - **retrieved:** 2026-09-23 ur *Kommun, län och rike* via STAC-vektor (item `aktuell`), kommunkod 0581, förenklad ~2 m, 1 115 hörn, 25 kB
 - **terms:** Används till kommungränslagret (FK-05), panoreringsspärr (FK-04), datavalidering (DK-01) och till klippning av kartutsnittet. Lägesosäkerhet ~2 m. Reproduceras med `tools/lm_stac.py kommun`.
 - **tidigare:** OSM-relation 935447 (ODbL) användes 2026-09-19–2026-09-23 som interim. Verktyget och `data/derived/LICENSE-ODbL` är borttagna sedan Lantmäteriets polygon är i drift; inget i `data/derived/` är längre ODbL (JK-03).
@@ -122,8 +124,9 @@ Två källor under övergångsperioden:
 
 - **license:** CC BY 4.0
 - **attribution:** `© Lantmäteriet, Markhöjd Direkt`
-- **retrieved:** live via `/api/hojd` (punkt cachas 7 dygn på kanten, profil cachas inte)
-- **terms:** Höjdsystem RH 2000. Endast punkter inom kommunens buffrade bbox, högst 200 per anrop (NFK-18).
+- **retrieved:** live via `/api/hojd` (svaret cachas 1 dygn hos besökaren, 7 dygn på kanten)
+- **terms:** Höjdsystem RH 2000. En punkt per anrop (GET), och bara punkter innanför kommungränsen —
+  batchläget försvann med höjdprofilen (ADR-16). Klick utanför gränsen ger inget anrop alls (NFK-18).
 
 ### osm — OpenStreetMap standard tiles (fallback, EPSG:3857)
 
