@@ -31,8 +31,9 @@
       </a>
       <nav class="topnav" aria-label="Huvudmeny" data-i18n-aria="nav.label">
         <a href="%BASE_URL%" aria-current="page" data-i18n="nav.map">Karta</a>
-        <!-- Om projektet, källor och integritet ligger på arenm.se (portfolion), inte här. -->
-        <a href="https://arenm.se/" data-i18n="nav.about">Om</a>
+        <!-- Informationssidorna öppnas som dialog i samma sida (ADR-15); innehållet och
+             renderaren hämtas med import() först vid klick. Adresserna går att dela. -->
+        <a href="#om" data-sida="om" data-i18n="nav.about">Om</a>
       </nav>
     </header>
 
@@ -205,9 +206,9 @@
           Ett oberoende projekt av Aren Mardian. Inte en officiell tjänst från Norrköpings kommun.
         </p>
         <nav class="footer__links" aria-label="Om projektet" data-i18n-aria="footer.linksLabel">
-          <a href="https://arenm.se/" data-i18n="footer.about">Om projektet</a>
-          <a href="https://arenm.se/" data-i18n="footer.sources">Källor och licenser</a>
-          <a href="https://arenm.se/" data-i18n="footer.privacy">Integritet</a>
+          <a href="#om" data-sida="om" data-i18n="footer.about">Om projektet</a>
+          <a href="#kallor" data-sida="kallor" data-i18n="footer.sources">Källor och licenser</a>
+          <a href="#integritet" data-sida="integritet" data-i18n="footer.privacy">Integritet</a>
         </nav>
         <p class="footer__meta" data-i18n="footer.curated">Kuraterat innehåll och rankning © Aren Mardian.</p>
       </div>

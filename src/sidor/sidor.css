@@ -1,0 +1,235 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Om projektet, Källor och licenser, Integritet (ADR-15).
+
+   Filen importeras av sidor/dialog.ts, som i sin tur hämtas med import(). Vite lägger
+   därför de här reglerna i en egen stilfil som laddas först när någon öppnar en sida —
+   landningsvyns kritiska CSS är opåverkad (NFK-02).
+
+   Alla färger kommer ur designsystemets tokens i style.css (UX-05).
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.sida {
+  /* Bredare än ren brödtext eftersom källsidan har en fyrkolumnstabell; prosan hålls
+     tillbaka separat nedan så radlängden ändå stannar läsbar (UX-07). */
+  width: min(84ch, calc(100vw - 2 * var(--space-4)));
+  max-height: min(85dvh, 60rem);
+  padding: 0;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-l);
+  background: var(--c-surface);
+  color: var(--c-text);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.sida::backdrop {
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.sida__inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+}
+
+/* Stängknappen ligger kvar medan innehållet rullar — den ska aldrig behöva letas upp. */
+.sida__close {
+  position: absolute;
+  inset-block-start: var(--space-3);
+  inset-inline-end: var(--space-3);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: var(--c-surface-glass);
+  color: var(--c-text-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sida__close:hover {
+  border-color: var(--c-border);
+  color: var(--c-text);
+}
+
+.sida__title {
+  margin: 0;
+  padding: var(--space-6) calc(var(--tap) + var(--space-4)) var(--space-3) var(--space-6);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.sida__body {
+  padding: 0 var(--space-6) var(--space-6);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sida__lead {
+  margin: 0 0 var(--space-6);
+  color: var(--c-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+.sida__body h3 {
+  margin: var(--space-8) 0 var(--space-2);
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--c-border);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+}
+
+.sida__body h3:first-child {
+  margin-block-start: 0;
+  padding-block-start: 0;
+  border-block-start: 0;
+}
+
+.sida__body p {
+  margin: 0 0 var(--space-4);
+  max-width: 68ch;
+  text-wrap: pretty;
+}
+
+.sida__body a {
+  color: var(--c-accent);
+  text-underline-offset: 0.2em;
+}
+
+/* Faktaruta: används för friskrivningar och avgränsningar som inte får läsas förbi. */
+.sida__note {
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: 3px solid var(--c-warn-border);
+  border-radius: var(--radius-s);
+  background: var(--c-warn-bg);
+  color: var(--c-warn-text);
+}
+
+.sida__note a {
+  color: inherit;
+}
+
+.sida__list {
+  max-width: 68ch;
+  margin: 0 0 var(--space-4);
+  padding-inline-start: 1.1rem;
+}
+
+.sida__list li {
+  margin-block-end: var(--space-2);
+  text-wrap: pretty;
+}
+
+.sida__dl {
+  display: grid;
+  max-width: 76ch;
+  grid-template-columns: minmax(8rem, 14rem) 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0 0 var(--space-4);
+}
+
+.sida__dl dt {
+  font-weight: 600;
+}
+
+.sida__dl dd {
+  margin: 0;
+  color: var(--c-text-muted);
+  text-wrap: pretty;
+}
+
+.sida__tablewrap {
+  margin: 0 0 var(--space-4);
+  overflow-x: auto;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-m);
+}
+
+.sida__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.sida__table caption {
+  padding: var(--space-2) var(--space-3);
+  color: var(--c-text-muted);
+  text-align: start;
+}
+
+.sida__table th,
+.sida__table td {
+  padding: var(--space-2) var(--space-3);
+  text-align: start;
+  vertical-align: top;
+  border-block-start: 1px solid var(--c-border);
+}
+
+.sida__table thead th {
+  position: sticky;
+  inset-block-start: 0;
+  border-block-start: 0;
+  background: var(--c-surface-2);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+}
+
+.sida__table tbody th {
+  font-weight: 600;
+  color: var(--c-text);
+}
+
+.sida__table td {
+  color: var(--c-text-muted);
+}
+
+.sida__updated {
+  margin: var(--space-6) 0 0;
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--c-border);
+  font-size: 0.85rem;
+  color: var(--c-text-muted);
+}
+
+/* ── Mobil ──────────────────────────────────────────────────────────────────
+   Nästan helskärm, men aldrig ända ut: kanten visar att kartan ligger kvar bakom. */
+@media (max-width: 34rem) {
+  .sida {
+    width: calc(100vw - var(--space-4));
+    max-height: 90dvh;
+    border-radius: var(--radius-m);
+  }
+
+  .sida__title {
+    padding: var(--space-4) calc(var(--tap) + var(--space-2)) var(--space-2) var(--space-4);
+    font-size: 1.25rem;
+  }
+
+  .sida__body {
+    padding: 0 var(--space-4) var(--space-4);
+  }
+
+  /* Två smala kolumner blir oläsliga — lägg beskrivningen under termen i stället. */
+  .sida__dl {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .sida__dl dt {
+    margin-block-start: var(--space-3);
+  }
+}

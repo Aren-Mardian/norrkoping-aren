@@ -20,11 +20,14 @@ import { fillFooterFacts, placeFooter } from './ui/chrome.ts';
 import { showDevBanner, showMapStatus } from './ui/notices.ts';
 import { createPanelCollapse } from './ui/panelCollapse.ts';
 import { createSheet } from './ui/sheet.ts';
+import { initSidor } from './ui/sidor.ts';
 import { createToolsController } from './ui/toolsToggle.ts';
 
 initI18n();
 fillFooterFacts();
 placeFooter(document.getElementById('panel-body'));
+// Om projektet, Källor och licenser, Integritet — texterna hämtas först vid klick (ADR-15).
+initSidor();
 
 const target = document.getElementById('map');
 if (!target) throw new Error('Kartcontainern #map saknas i dokumentet');

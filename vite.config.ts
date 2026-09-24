@@ -47,7 +47,9 @@ function kommunRetrieved(): string {
 function ortnamnFacts(): { date: string; count: string } {
   try {
     const index = JSON.parse(readFileSync(join(DATA_DIR, 'sok', 'ortnamn.json'), 'utf8')) as { retrieved?: string; items?: unknown[] };
-    return { date: index.retrieved ?? '', count: String(index.items?.length ?? 0) };
+    // Formatera här, inte i varje text som använder siffran: sidfoten och källsidan
+    // ska säga "7 865", inte "7865".
+    return { date: index.retrieved ?? '', count: (index.items?.length ?? 0).toLocaleString('sv-SE') };
   } catch {
     return { date: '', count: '' };
   }

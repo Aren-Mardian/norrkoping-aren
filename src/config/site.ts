@@ -35,7 +35,7 @@ export const BADPLATSER_URL = `${BASE}data/bad/badplatser.geojson`;
 export const BAD_STATUS_URL = `${API_BASE}/bad/status`;
 export const VADER_URL = `${API_BASE}/vader`;
 
-/** Markhöjd via Lantmäteriets Markhöjd Direkt (IK-08) — punkt och profil. */
+/** Markhöjd via Lantmäteriets Markhöjd Direkt (IK-08) — en punkt per anrop (ADR-16). */
 export const HOJD_URL = `${API_BASE}/hojd`;
 
 /** Ortnamnsindex för sök (FK-32), härlett av tools/ortnamn_index.py. Laddas först vid sökning. */

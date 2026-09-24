@@ -77,6 +77,10 @@ Topografisk_webbkarta_raster/
   Centrala Norrköping (Industrilandskapet) är 9 blad ≈ 0,56 GB. Välj med `tools/lm_ftp_ekonomiska.py`.
 - `Bladindelningskartor/` innehåller index-PDF:er.
 
+> Samma uppgifter visas för besökaren under **Källor och licenser** i sajten (`#kallor`, ADR-19):
+> källa, licens, hur den hämtas och hur färsk den är, plus attributionsmatrisen. Den här filen är
+> den fullständiga versionen med villkorstexter och reproduktionssteg.
+
 ## Lager i lagerkonfigurationen
 
 Fält enligt JK-01: `license`, `licenseUrl`, `attribution`, `retrieved`, `terms`.

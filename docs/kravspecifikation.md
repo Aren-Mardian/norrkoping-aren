@@ -795,7 +795,7 @@ Dynamiskt statusobjekt (normaliserat av edge-funktionen):
 *Acceptanskriterium:* Nätverkspanelen visar enbart anrop till egen origin. Proxyn vidarebefordrar inte `X-Forwarded-For`.
 
 <a id="nfk-24"></a>
-**NFK-24 (M) — Integritetspolicy på båda språken.** *(Ändrat 2026-09-23, ADR-13/ADR-15: policyn ligger på `arenm.se` och bara på svenska. **Ej uppfylld 2026-09-24** — sidfotens länk `Integritet` pekar ännu på `https://arenm.se/`, inte på en policysida. Sajten använder positionsdata (FK-06), så kravet kvarstår som Must.)*
+**NFK-24 (M) — Integritetspolicy.** *(Ändrat 2026-09-24, ADR-19: policyn ligger **i appen** under `#integritet` och bara på svenska, eftersom gränssnittet är enspråkigt sedan ADR-15. Beslutet i ADR-13 att lägga den på `arenm.se` genomfördes aldrig — länken pekade på portfolions rot. **Uppfylld 2026-09-24.**)*
 *Acceptanskriterium:* `/integritet` beskriver vilka data som behandlas (i praktiken: serverloggar hos hostingleverantören, aggregerad statistik), rättslig grund, lagringstid och kontaktuppgift.
 
 ### 8.6 Drift, robusthet och övervakning
@@ -874,8 +874,13 @@ Dynamiskt statusobjekt (normaliserat av edge-funktionen):
 > badplatserna delar samma kartruta och panel, verktygsläget (Origo) laddas in i samma karta på
 > begäran i stället för på `/verktyg`, och `/om`, `/kallor` och `/integritet` ligger på `arenm.se`
 > i stället för här. Kvarvarande adresser under `/projekt/norrkoping/` ger 404; `/origo` och
-> `/verktyg` ger 301 till kartan. Djuplänkning per objekt (FK-11) och förrenderade objektsidor
-> (NFK-32) är därmed inte lösta — de behöver en ny form inom ensidesarkitekturen.
+> `/verktyg` ger 301 till kartan.
+>
+> **Rättat 2026-09-24 (ADR-19).** `/om`, `/kallor` och `/integritet` blev aldrig sidor på `arenm.se` —
+> länkarna pekade på portfolions rot. De tre finns nu i appen som `#om`, `#kallor` och `#integritet`,
+> öppnade som modal dialog över kartan och delbara som adresser. Djuplänkning per objekt (FK-11) och
+> förrenderade objektsidor (NFK-32) är fortfarande olösta — de behöver en egen form inom
+> ensidesarkitekturen.
 
 <a id="ux-01"></a>
 **UX-01 (M) — Kartan syns direkt.** Landningsvyn visar karta utan att användaren behöver scrolla eller klicka.

@@ -16,7 +16,7 @@ Målplattform: `https://arenm.se/projekt/norrkoping`
 | 3 | Badplatser — HaV-integration, status, Topp 3, varningar, filter, SMHI | **Klar (första version)** — 19 badplatser, `/api/bad/status` (IK-02) med stale-cache, `/api/vader` (IK-03, SMHI snow1g), Topp 3 med viktningen förklarad på plats, avrådan som inte kan filtreras bort (DK-07), panel/bottom sheet i app-skal (UX-03, ADR-13). Återstår: faciliteter (kuratering), badindex (FK-19), tillgänglighetsfilter (FK-20) |
 | 4 | Verktygsläge — mät, rita, koordinater, höjd, dela, utskrift, lager | **Klar** (ADR-11/12/15) — Origo laddas in i **samma karta** med knappen "Verktyg"; ingen egen sida längre. Gamla `/origo/`- och `/verktyg/`-länkar ger 301 till kartan |
 | — | Lantmäteriets API:er — flygbild, höjd, ortnamn, kommungräns | **Klar** (ADR-14) — `/api/hojd` (Markhöjd Direkt), ortnamnssök, höjd som punktmätning i verktygsläget (ADR-16). Återstår: OGC-Features (appkontot saknar behörighet) |
-| 2, 5–7 | Se kravspec §12 | Ej påbörjad. Om/Källor/Integritet är beslutade att ligga på arenm.se (ADR-13), inte som egna sidor här |
+| 2, 5–7 | Se kravspec §12 | Delvis. **Om projektet, Källor och licenser och Integritet finns i appen** (ADR-19) — NFK-24 uppfylld. Kvar: Topp 10 (sprint 2), PWA (FK-35), statussida (FK-37), SEO och OG-bilder (NFK-32/33) |
 
 ## Kom igång (under 10 minuter)
 
@@ -97,8 +97,12 @@ scrollar aldrig — bara panelens innehåll. På mobil är panelen en bottom she
 och sidfoten flyttas in sist i sheeten. Sidfoten anger för varje uppgift **varifrån** den kommer,
 **hur** den hämtas (självhostad fil, statisk fil eller live via `/api/...` genom proxyn) och
 **hur färsk** den är; kartutsnittets datum injiceras från `data/derived/manifest.json` vid bygge.
-Menyn har två poster: **Karta** och **Om** (arenm.se). `Källor och licenser` och `Integritet` i
-sidfoten går också till arenm.se. Okända adresser ger 404.
+Menyn har två poster: **Karta** och **Om**. `Om projektet`, `Källor och licenser` och `Integritet`
+öppnas som en modal dialog över kartan ([ADR-19](docs/adr/ADR-19-informationssidor-i-appen.md)) —
+innehållet ligger som data i `src/sidor/innehall.ts`, renderas som DOM-noder utan `innerHTML`, och
+hämtas med `import()` först vid klick (5,7 kB JS + 1,0 kB CSS i egen chunk). Adresserna `#om`,
+`#kallor` och `#integritet` går att dela. Siffrorna i texterna kommer ur datafilerna vid bygget,
+precis som sidfotens. Okända adresser ger 404.
 
 **Driftnotis (uppdaterad 2026-09-24):** Netlify svarar fortfarande med headers från repots
 *allra första* commit. Mätt mot den publicerade sajten:
@@ -167,11 +171,12 @@ src/                    Klient (Vite + TypeScript, vanilla)
   i18n/                 Svensk textkatalog utan runtime-bibliotek (ADR-15)
   bad/                  Badplatser: datamodell, kartlager, panel (Kärnfunktion B)
   lm/                   Lantmäteriets tjänster i klienten (höjd via /api/hojd)
+  sidor/                Om projektet, Källor och licenser, Integritet — innehåll som data (lazy, ADR-19)
   sok/                  Ortnamnssök: sökruta (kritisk väg) + motor och index (lazy, FK-32)
   map/                  Kartkärna, bakgrundskartor med fallback, PMTiles-läsare/-källa, egna kontroller
   net/                  fetch med timeout/omförsök (IK-06, IK-07)
   origo/                Origo-konfiguration, lazy bootstrap och höjdverktyg (ADR-11/15)
-  ui/                   Banners, bottom sheet, panelens in-/utfällning, verktygsväxlaren (ADR-13/15)
+  ui/                   Banners, bottom sheet, panelens in-/utfällning, verktygsväxlaren, sidlänkarna (ADR-13/15/19)
 shared/                 Ren logik utan DOM/OL — delas av klient, edge och test
   geo/crs.ts            SWEREF 99 TM-definitionen och utbredningen (ren data, inga beroenden);
                         WGS 84 och 3857 finns bara som dataformat respektive spärr (ADR-18)
@@ -192,7 +197,7 @@ netlify/lib/            Testbar logik för funktionerna (hav.ts, smhi.ts, tilesG
 vite/                   Vite-plugin som kör edge-funktionerna i dev
 data/                   Kuraterad geodata (GeoJSON, EPSG:4326), SOURCES.md, derived/ (PMTiles, ej i git)
 public/vendor/          Vendorerade bibliotek (Origo, versionerad sökväg)
-docs/                   Kravspec, referenssystem, villkor, ADR-09–18, deploy/ (IIS-mall)
+docs/                   Kravspec, referenssystem, villkor, ADR-09–19, deploy/ (IIS-mall)
 scripts/                Byggkontroller, hämtning av kartdata
 tools/                  Offline-bearbetning (Python): GeoPackage → PMTiles, FTP-urval; Origo-bygge
 ```
